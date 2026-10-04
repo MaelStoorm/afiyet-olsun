@@ -1,14 +1,56 @@
 package com.afiyetolsun.oyun;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
+import android.content.Context;
+import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Vibrator;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 public class MainActivity extends Activity {
+    private static final String NOTIF_PERMISSION = "android.permission.POST_NOTIFICATIONS";
     private WebView web;
+
+    /** Oyunun JavaScript tarafından çağrılır (window.AfiyetAndroid). */
+    public class Bridge {
+        @JavascriptInterface
+        public void setReminder(String title, String messages) {
+            getSharedPreferences(ReminderReceiver.PREFS, MODE_PRIVATE).edit()
+                .putString("title", title).putString("messages", messages).apply();
+        }
+
+        @JavascriptInterface
+        public void setReminderOn(boolean on) {
+            getSharedPreferences(ReminderReceiver.PREFS, MODE_PRIVATE).edit().putBoolean("off", !on).apply();
+        }
+
+        @JavascriptInterface
+        public void vibrate(int ms) {
+            try {
+                Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                if (v != null && v.hasVibrator()) v.vibrate(Math.max(5, Math.min(ms, 300)));
+            } catch (Exception e) { }
+        }
+
+        @JavascriptInterface
+        public void setOrientation(final String mode) {
+            runOnUiThread(new Runnable() {
+                public void run() {
+                    int o = ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR;
+                    if ("portrait".equals(mode)) o = ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT;
+                    else if ("landscape".equals(mode)) o = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE;
+                    setRequestedOrientation(o);
+                }
+            });
+        }
+    }
 
     @Override
     protected void onCreate(Bundle state) {
@@ -24,9 +66,20 @@ public class MainActivity extends Activity {
         s.setMediaPlaybackRequiresUserGesture(false);
         s.setTextZoom(100);
         web.setWebViewClient(new WebViewClient());
+        web.addJavascriptInterface(new Bridge(), "AfiyetAndroid");
         setContentView(web);
         if (state != null) web.restoreState(state);
         else web.loadUrl("file:///android_asset/index.html");
+        askNotificationPermission();
+    }
+
+    private void askNotificationPermission() {
+        if (Build.VERSION.SDK_INT < 33) return;
+        if (checkSelfPermission(NOTIF_PERMISSION) == PackageManager.PERMISSION_GRANTED) return;
+        SharedPreferences p = getSharedPreferences(ReminderReceiver.PREFS, MODE_PRIVATE);
+        if (p.getBoolean("asked", false)) return;
+        p.edit().putBoolean("asked", true).apply();
+        requestPermissions(new String[] { NOTIF_PERMISSION }, 1);
     }
 
     @Override
@@ -39,6 +92,7 @@ public class MainActivity extends Activity {
     protected void onPause() {
         web.onPause();
         web.pauseTimers();
+        ReminderReceiver.schedule(this, true);
         super.onPause();
     }
 
@@ -47,6 +101,7 @@ public class MainActivity extends Activity {
         super.onResume();
         web.resumeTimers();
         web.onResume();
+        ReminderReceiver.cancel(this);
     }
 
     @Override

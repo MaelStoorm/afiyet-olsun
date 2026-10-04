@@ -196,6 +196,39 @@ button:focus-visible{outline:3px solid var(--cini);outline-offset:2px}
 .coach p{margin:0 0 8px;font-weight:800;line-height:1.35}
 .coach .row{display:flex;gap:8px;justify-content:flex-end}
 .coach .btn{font-size:14px;padding:8px 12px}
+.ovl{position:fixed;inset:0;z-index:22;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(58,34,22,.6)}
+.ovl-card{background:var(--paper);border:4px solid var(--wood-dark);border-radius:20px;max-width:520px;width:100%;max-height:90vh;overflow:auto;padding:20px;display:flex;flex-direction:column;gap:12px;text-align:center}
+.ovl-card h2{font-family:var(--display);font-size:30px;line-height:1;margin:0;color:var(--tomato-dark)}
+.ovl-card p{margin:0;font-weight:700;color:var(--ink-soft)}
+.drinks{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+@media (max-width:420px){.drinks{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.drink{background:#e8f1f2;border:3px solid #8f9ba0;border-radius:12px;padding:6px 4px 8px;font-weight:800;display:flex;flex-direction:column;align-items:center;gap:2px}
+.drink canvas{width:100%;height:auto;aspect-ratio:112/72}
+.streak{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.streak div{border:2px dashed var(--line);border-radius:10px;padding:6px 2px;font-weight:800;font-size:12px;color:var(--ink-soft);display:flex;flex-direction:column;gap:2px}
+.streak div b{font-family:var(--display);font-size:14px;color:var(--ink);white-space:nowrap}
+@media (max-width:420px){.streak{gap:3px}.streak div{font-size:10px;padding:5px 1px}.streak div b{font-size:12px}}
+.streak div.got{background:#eef7ee;border:2px solid var(--good);color:var(--good)}
+.streak div.now{background:#fff3cf;border:3px solid var(--gold);transform:scale(1.08)}
+.badges{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;text-align:left}
+.badge{border:2px solid var(--line);border-radius:12px;padding:8px 10px;display:flex;gap:8px;align-items:flex-start;background:#fffdf6}
+.badge i{font-style:normal;font-size:26px;line-height:1}
+.badge b{display:block;font-family:var(--display);font-size:15px;line-height:1.1}
+.badge span{font-size:12px;font-weight:700;color:var(--ink-soft)}
+.badge.locked{opacity:.45;filter:grayscale(1)}
+.store-sec{text-align:left;display:flex;flex-direction:column;gap:8px}
+.store-sec h3{font-family:var(--display);font-size:20px;margin:6px 0 0}
+.store-item{display:flex;align-items:center;gap:10px;border:2px solid var(--line);border-radius:12px;padding:10px 12px;background:#fffdf6}
+.store-item i{font-style:normal;font-size:28px}
+.store-item div{flex:1;min-width:0}
+.store-item b{display:block;font-family:var(--display);font-size:17px;line-height:1.1}
+.store-item span{font-size:13px;font-weight:700;color:var(--ink-soft)}
+.store-item .btn{font-size:14px;padding:8px 12px;white-space:nowrap}
+.ad-box{background:#2f4a3a;color:#f6efe0;border-radius:14px;padding:26px 16px;display:flex;flex-direction:column;gap:8px;align-items:center}
+.ad-box b{font-family:var(--display);font-size:24px}
+.ad-count{font-family:var(--display);font-size:42px;color:var(--gold)}
+.goal-line{margin:0;font-weight:800;color:var(--cini);background:var(--cini-soft);border-radius:12px;padding:8px 14px}
+.title-row{display:flex;gap:8px}.title-row .btn{flex:1;font-size:15px;padding:10px 8px}
 .book{position:fixed;inset:0;background:rgba(58,34,22,.55);display:flex;align-items:center;justify-content:center;padding:16px;z-index:10}
 .book-card{background:var(--paper);border:4px solid var(--wood-dark);border-radius:18px;max-width:560px;width:100%;max-height:85vh;overflow:auto;padding:18px 20px;display:flex;flex-direction:column;gap:10px}
 .book-card h2{font-family:var(--display);font-size:30px;line-height:1;margin:0;color:var(--tomato-dark)}
@@ -219,6 +252,94 @@ button:focus-visible{outline:3px solid var(--cini);outline-offset:2px}
   .brand h1{font-size:24px}
   .btn{font-size:16px;padding:11px 16px}
   .btn.big{font-size:19px}
+}
+
+/* Giriş ekranı */
+.title-screen{background:var(--bg);background-image:radial-gradient(circle at 20px 20px, rgba(22,128,127,.10) 3px, transparent 4px);background-size:40px 40px;backdrop-filter:none;overflow:hidden}
+.title-screen.over{background-color:rgba(58,34,22,.6);background-image:none;backdrop-filter:blur(3px)}
+.title-screen.over .awning,.title-screen.over .floaty{display:none}
+.awning{position:absolute;top:0;left:0;right:0;height:46px;background:repeating-linear-gradient(90deg,var(--tomato) 0 40px,#fff8ec 40px 80px);box-shadow:0 3px 0 rgba(58,34,22,.15)}
+.awning::after{content:"";position:absolute;left:0;right:0;top:100%;height:18px;background:radial-gradient(circle at 20px 0,var(--tomato) 19px,transparent 20px) 0 0/80px 20px repeat-x,radial-gradient(circle at 60px 0,#fff8ec 19px,transparent 20px) 0 0/80px 20px repeat-x}
+.floaty span{position:absolute;bottom:-60px;font-size:34px;opacity:.55;animation:floatUp 14s linear infinite}
+@keyframes floatUp{from{transform:translateY(0) rotate(0)}to{transform:translateY(-120vh) rotate(40deg)}}
+@keyframes bob{50%{transform:translateY(-6px) rotate(-6deg)}}
+@keyframes cardIn{from{transform:translateY(24px) scale(.96);opacity:0}to{transform:none;opacity:1}}
+.title-card{position:relative;animation:cardIn .45s cubic-bezier(.2,1.3,.4,1)}
+.title-card svg{animation:bob 2.6s ease-in-out infinite}
+.tc-head,.tc-body{display:flex;flex-direction:column;gap:12px}
+/* Ayarlar */
+.set-list{display:flex;flex-direction:column;gap:8px;text-align:left}
+.set-row{display:flex;align-items:center;justify-content:space-between;gap:12px;border:2px solid var(--line);border-radius:12px;padding:10px 12px;background:#fffdf6}
+.set-row.col{flex-wrap:wrap}
+.set-row>span{display:flex;flex-direction:column;min-width:0}
+.set-row b{font-family:var(--display);font-size:17px;line-height:1.15}
+.set-row small{font-size:12px;font-weight:700;color:var(--ink-soft)}
+.set-row input[type=range]{flex:0 1 180px;min-width:110px;accent-color:var(--tomato);height:28px}
+.tog{flex:none;width:58px;height:32px;border-radius:99px;border:3px solid var(--ink);background:#ead7bd;position:relative;padding:0}
+.tog::after{content:"";position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;background:#fff8ec;border:2px solid var(--ink);transition:left .15s}
+.tog[aria-checked="true"]{background:var(--good)}
+.tog[aria-checked="true"]::after{left:26px}
+.seg{display:flex;border:3px solid var(--ink);border-radius:12px;overflow:hidden;flex:1 1 220px}
+.seg button{flex:1;border:0;background:#fffdf6;padding:8px 6px;font-weight:800;font-size:14px}
+.seg button+button{border-left:2px solid var(--ink)}
+.seg button[aria-pressed="true"]{background:var(--tomato);color:#fff8ec}
+.set-ver{font-size:12px}
+/* Yatay telefon ekranı: her şey tek ekrana sığsın, sayfa kaymasın */
+@media (orientation:landscape) and (max-height:600px){
+  body{padding:max(6px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) 6px max(12px,env(safe-area-inset-left))}
+  .game{max-width:none;gap:6px}
+  .hud{flex-wrap:nowrap;gap:8px}
+  .brand{gap:6px}
+  .brand svg{width:26px;height:26px}
+  .brand h1{font-size:19px;white-space:nowrap}
+  .brand small{display:none}
+  .stats{flex-wrap:nowrap;gap:5px}
+  .chip{padding:2px 9px;font-size:14px}
+  .chip span{font-size:10px}
+  .pat-bar{width:50px}
+  #shop:not([hidden]),#oven:not([hidden]){display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:start}
+  #shop .stage,#oven .stage{width:min(calc((100dvh - 62px) * 16 / 9),calc(100vw - 300px));border-width:3px}
+  #shop .panel,#oven .panel{margin-top:0!important;flex-direction:column;flex-wrap:nowrap;align-items:stretch;gap:8px;padding:10px 12px;max-height:calc(100dvh - 62px);overflow:auto}
+  .panel p,.gauge-wrap,.notes{flex:none}
+  .result{flex-direction:column;align-items:flex-start;gap:6px}
+  .stars{font-size:24px}
+  .kitchen{grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto;grid-template-areas:"board ticket" "board picker" "board actions";height:calc(100dvh - 58px);gap:6px 12px;align-items:stretch}
+  .board-wrap{grid-row:1/4;gap:2px;justify-content:center;width:min(calc(100dvh - 104px),44vw)}
+  #board,#cutC{width:100%;max-width:none}
+  .ticket .recipe-note{font-size:13px;line-height:1.25;margin:0}
+  .picker h3{display:none}
+  .picker #bins,.picker #doughRow{margin-top:0!important}
+  .book-btn{padding:6px 12px;font-size:14px;align-self:flex-start}
+  .actions .btn{white-space:nowrap;padding:9px 10px}
+  .picker{overflow:auto;min-height:0;gap:6px;padding:2px}
+  .ticket{transform:none;padding:6px 10px 8px;border-top-width:6px}
+  .ticket-dish{font-size:19px;margin:0 0 2px}
+  .ticket ul{flex-direction:row;flex-wrap:wrap;gap:2px 12px}
+  .ticket li{border:0;gap:6px;padding:0}
+  .bins{grid-template-columns:repeat(auto-fill,minmax(66px,1fr));gap:5px}
+  .bin,.dough{font-size:11px;padding:3px 3px 4px;border-width:2px}
+  .btn{font-size:15px;padding:9px 14px}
+  .btn.big{font-size:18px;padding:11px 18px}
+  .actions{gap:6px;flex-wrap:nowrap}
+  .hint{font-size:13px;min-height:1.2em;line-height:1.2}
+  .bubble{padding:8px 12px;top:8%}
+  .bubble p{font-size:15px}
+  .title-screen,.ovl{padding:10px}
+  .title-card{max-width:780px;display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:10px 22px;align-items:center;padding:16px 20px;max-height:calc(100dvh - 20px)}
+  .tc-head,.tc-body{gap:8px}
+  .title-card h1{font-size:40px}
+  .title-card svg{width:60px;height:60px}
+  .title-card .btn.big{font-size:19px;padding:11px 18px}
+  .awning{height:26px}
+  .ovl-card{max-height:calc(100dvh - 20px);padding:14px;gap:8px}
+  .set-list{display:grid;grid-template-columns:1fr 1fr}
+  .set-row.col{grid-column:span 1}
+  .coach{width:min(400px,46vw);padding:10px 12px}
+  .coach p{font-size:14px;margin-bottom:6px}
+  .coach .who{width:34px;height:34px;font-size:18px}
+  .dayend{padding:16px}
+  .day-banner b{font-size:56px}
+  .toast{top:52px;bottom:auto}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -326,6 +447,8 @@ button:focus-visible{outline:3px solid var(--cini);outline-offset:2px}
         <div class="rep-legend"><span>Sen</span><span>Kebapçı Kâmil</span></div>
         <p id="deRival"></p>
       </div>
+      <p class="goal-line" id="deGoal" hidden></p>
+      <button class="btn" id="deAdBtn" type="button" hidden>📺 Reklam izle, bugünkü kârı 2 katına çıkar</button>
       <p class="unlock" id="deUnlock" hidden></p>
       <div class="shop-list">
         <h3>Dükkanı geliştir</h3>
@@ -343,18 +466,23 @@ button:focus-visible{outline:3px solid var(--cini);outline-offset:2px}
 </div>
 
 <div class="title-screen" id="titleScr" hidden>
+  <div class="awning" aria-hidden="true"></div>
+  <div class="floaty" aria-hidden="true"><span style="left:6%;animation-delay:-2s">🥙</span><span style="left:22%;animation-delay:-9s">🍲</span><span style="left:41%;animation-delay:-5s">🫖</span><span style="left:63%;animation-delay:-12s">🥟</span><span style="left:80%;animation-delay:-1s">🍮</span><span style="left:92%;animation-delay:-7s">🧅</span></div>
   <div class="title-card" role="dialog" aria-labelledby="ttl">
+  <div class="tc-head">
     <svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18" fill="#1d4fa0"/><circle cx="20" cy="20" r="12.5" fill="#fff"/><circle cx="20" cy="20" r="8" fill="#5fb3e6"/><circle cx="20" cy="20" r="4" fill="#1a1a1a"/></svg>
     <h1 id="ttl">Afiyet Olsun</h1>
     <p class="tag">Türk mutfağı lokanta oyunu</p>
     <p class="save-info" id="saveInfo" hidden></p>
+  </div><div class="tc-body">
     <button class="btn go big" id="contBtn" type="button">Devam et</button>
     <button class="btn primary big" id="newBtn" type="button">Yeni oyun</button>
     <div class="confirm" id="newConfirm" hidden>
       Kayıtlı oyunun silinip 1. günden başlanacak. Emin misin?
       <div><button class="btn" id="newNo" type="button">Vazgeç</button><button class="btn primary" id="newYes" type="button">Evet, sıfırla</button></div>
     </div>
-    <button class="btn" id="helpBtn" type="button">Nasıl oynanır?</button>
+    <div class="title-row"><button class="btn" id="badgeBtn" type="button">🏅 Rozetler</button><button class="btn" id="storeBtn" type="button">🛒 Mağaza</button></div>
+    <div class="title-row"><button class="btn" id="setBtn" type="button">⚙️ Ayarlar</button><button class="btn" id="helpBtn" type="button">❓ Nasıl oynanır?</button></div>
     <div id="helpBox" hidden>
       <ol class="help">
         <li><b>Siparişi dinle.</b> Müşteri ne isterse fişte yazar.</li>
@@ -367,7 +495,7 @@ button:focus-visible{outline:3px solid var(--cini);outline-offset:2px}
       </ol>
       <button class="btn" id="tutAgainBtn" type="button" style="margin-top:10px;width:100%">Öğreticiyi tekrar oyna</button>
     </div>
-  </div>
+  </div></div>
 </div>
 <div class="coach-ring" id="coachRing" hidden></div>
 <div class="coach" id="coach" hidden role="status">
@@ -375,6 +503,43 @@ button:focus-visible{outline:3px solid var(--cini);outline-offset:2px}
   <div><p id="coachText"></p><div class="row"><button class="btn" id="coachSkip" type="button">Öğreticiyi geç</button><button class="btn go" id="coachOk" type="button" hidden>Anladım, başlayalım!</button></div></div>
 </div>
 <div class="toast" id="toast" hidden></div>
+<div class="ovl" id="drinkScr" hidden><div class="ovl-card" role="dialog" aria-labelledby="drinkTtl">
+  <h2 id="drinkTtl">Yanına içecek</h2><p id="drinkQ"></p><div class="drinks" id="drinkRow"></div>
+</div></div>
+<div class="ovl" id="setScr" hidden><div class="ovl-card" role="dialog" aria-labelledby="setTtl">
+  <h2 id="setTtl">Ayarlar</h2>
+  <div class="set-list">
+    <label class="set-row"><span><b>🔔 Ses efektleri</b><small id="sSfxV"></small></span><input type="range" id="sSfx" min="0" max="100" step="5"></label>
+    <label class="set-row"><span><b>🎵 Müzik</b><small id="sMusV"></small></span><input type="range" id="sMus" min="0" max="100" step="5"></label>
+    <div class="set-row" id="sVibRow"><span><b>📳 Titreşim</b><small>Kasa, hata ve kesme anlarında</small></span><button class="tog" id="sVib" type="button" role="switch" aria-label="Titreşim"></button></div>
+    <div class="set-row" id="sNotifRow"><span><b>⏰ Hatırlatmalar</b><small>Oynamadığında akşam bildirim gelsin</small></span><button class="tog" id="sNotif" type="button" role="switch" aria-label="Hatırlatmalar"></button></div>
+    <div class="set-row col"><span><b>🎯 Zorluk</b><small id="sDiffNote"></small></span><div class="seg" id="sDiff"><button type="button" data-v="easy">Rahat</button><button type="button" data-v="normal">Normal</button><button type="button" data-v="hard">Usta</button></div></div>
+    <div class="set-row col" id="sOriRow"><span><b>📱 Ekran yönü</b><small>Telefonu çevirince ne olsun</small></span><div class="seg" id="sOri"><button type="button" data-v="auto">Otomatik</button><button type="button" data-v="portrait">Dikey</button><button type="button" data-v="landscape">Yatay</button></div></div>
+  </div>
+  <div class="title-row"><button class="btn" id="sTut" type="button">🎓 Öğreticiyi tekrar oyna</button><button class="btn" id="sReset" type="button">🗑️ Kaydı sil</button></div>
+  <div class="confirm" id="sResetConfirm" hidden>Bütün ilerlemen silinip 1. günden başlanacak. Emin misin?<div><button class="btn" id="sResetNo" type="button">Vazgeç</button><button class="btn primary" id="sResetYes" type="button">Evet, sil</button></div></div>
+  <p class="set-ver">Afiyet Olsun · sürüm 1.2</p>
+  <button class="btn go" id="setClose" type="button">Tamam</button>
+</div></div>
+<div class="ovl" id="rewardScr" hidden><div class="ovl-card" role="dialog" aria-labelledby="rwTtl">
+  <h2 id="rwTtl">Günlük ödül</h2><p id="rwText"></p><div class="streak" id="rwStreak"></div>
+  <button class="btn go big" id="rwTake" type="button">Al</button>
+  <button class="btn" id="rwAd" type="button">📺 Reklam izle, 2 katını al</button>
+</div></div>
+<div class="ovl" id="badgeScr" hidden><div class="ovl-card" role="dialog" aria-labelledby="bgTtl">
+  <h2 id="bgTtl">Rozetler</h2><p id="bgStats"></p><div class="badges" id="bgList"></div>
+  <button class="btn" id="bgClose" type="button">Kapat</button>
+</div></div>
+<div class="ovl" id="storeScr" hidden><div class="ovl-card" role="dialog" aria-labelledby="stTtl">
+  <h2 id="stTtl">Mağaza</h2><p>Kasa: <b id="stMoney">0₺</b></p><div id="stBody"></div>
+  <button class="btn" id="stClose" type="button">Kapat</button>
+</div></div>
+<div class="ovl" id="adScr" hidden><div class="ovl-card" role="dialog" aria-labelledby="adTtl">
+  <h2 id="adTtl">Reklam</h2>
+  <div class="ad-box"><b>Reklam alanı</b><span>Oyun Google Play'e çıkınca burada gerçek bir reklam oynayacak.</span><div class="ad-count" id="adCount">5</div></div>
+  <button class="btn go big" id="adDone" type="button" disabled>Ödülü al</button>
+  <button class="btn" id="adSkip" type="button">Kapat (ödül yok)</button>
+</div></div>
 <div class="day-banner" id="dayBanner" hidden><b id="dbDay"></b><span id="dbText"></span></div>
 
 <div class="book" id="book" hidden>
@@ -510,6 +675,32 @@ DISH.manti = { kind: 'manti', name: 'Mantı', base: 'Mantı iç harcı', price: 
   gauge: ['Su kaynıyor…', 'Mantılar haşlanıyor…', 'Pişti, süzgece al!', 'Fazla haşlanıyor!', 'Mantılar dağılıyor!'], labels: ['Diri', 'Dağıldı'],
   how: 'İç harcı karıştır, hamur karelerine koyup kapat, kaynar suda haşla. Üstüne sarımsaklı yoğurt, tereyağı ve pul biber.',
   variants: [{ id: 'klasik', label: '', req: ['kiyma', 'sogan', 'karabiber', 'yogurt', 'sarimsak', 'tereyagi', 'pulbiber'], day: 1 }], optional: ['nane', 'salca'] };
+Object.assign(ING, {
+  kadayif: { name: 'Tel kadayıf', style: 'shreds', colors: ['#f0d58a', '#e2bf68', '#f7e3a8'], cost: 2, main: true, mix: [235, 200, 120] },
+  serbet:  { name: 'Şerbet', style: 'liquid', colors: ['rgba(240,180,60,.75)'], cost: .5 },
+  antep:   { name: 'Antep fıstığı', style: 'dice', colors: ['#6f9f35', '#93c04f'], cost: 2, small: true },
+});
+DISH.kunefe = { kind: 'tray', noCut: true, name: 'Künefe', base: 'Künefe tepsisi', price: 120, cost: 3, day: 5,
+  phrase: () => 'bir porsiyon künefe', unit: '1 porsiyon',
+  texts: ['Peyniri hiç erimemiş, künefe çiğ!', 'Biraz daha kızarsaydı.', 'Biraz fazla kızarmış.', 'Künefe yanmış!'],
+  how: 'Tel kadayıfı tereyağıyla tepsiye ser, ortasına peynir koy, fırında kızart. Üstüne şerbet dök, Antep fıstığı serp.',
+  variants: [{ id: 'klasik', label: '', req: ['kadayif', 'peynir', 'tereyagi', 'serbet', 'antep'], day: 1 }], optional: [],
+  pool: ['kadayif', 'yufka', 'peynir', 'tereyagi', 'serbet', 'antep', 'fistik', 'ceviz', 'seker', 'tarcin', 'su'] };
+DISH.menemen = { kind: 'jam', look: 'pan', name: 'Menemen', base: 'Menemen sahanı', price: 70, cost: 2, day: 6,
+  phrase: (o, V) => V.label ? `${V.label} bir menemen` : 'bir menemen', unit: '1 sahan', labels: ['Sulu', 'Kurudu'],
+  gauge: ['Tereyağı eriyor…', 'Domatesler pişiyor…', 'Yumurtalar tam kıvamında, ocaktan al!', 'Yumurtalar kuruyor!', 'Dibi tutuyor!'],
+  texts: ['Menemen sulu kalmış!', 'Yumurtalar biraz çiğ.', 'Yumurtalar kurumuş.', 'Menemenin dibi tutmuş!'],
+  how: 'Sahanda tereyağını erit, sivri biberi ve domatesi pişir, yumurtaları kır. Soğanlı mı soğansız mı, müşteri ne derse!',
+  variants: [{ id: 'sogansiz', label: 'soğansız', req: ['domates', 'biber', 'yumurta', 'tereyagi'], day: 1 },
+             { id: 'soganli', label: 'soğanlı', req: ['domates', 'biber', 'yumurta', 'tereyagi', 'sogan'], day: 1 }],
+  optional: ['pulbiber', 'karabiber', 'peynir'],
+  pool: ['domates', 'biber', 'yumurta', 'tereyagi', 'sogan', 'pulbiber', 'karabiber', 'peynir', 'salca', 'patates', 'sut', 'maydanoz'] };
+const DRINKS = {
+  ayran:    { name: 'Ayran', price: 15, ask: ['Yanında bir ayran da alayım.', 'Yanına köpüklü, beyaz, serin bir şey ver.'] },
+  salgam:   { name: 'Şalgam', price: 15, ask: ['Yanında acılı bir şalgam olsun!', 'Yanına mor renkli, ekşi ve acı bir şey ver.'] },
+  cay:      { name: 'Çay', price: 10, ask: ['Bir de çay alırım, ince belli bardakta.', 'Yanına tavşan kanı, demli bir şey ver.'] },
+  limonata: { name: 'Limonata', price: 15, ask: ['Bir de limonata!', 'Yanına sarı, ekşi tatlı, buzlu bir şey ver.'] },
+};
 POOL.garnish = ['yogurt', 'sarimsak', 'tereyagi', 'pulbiber', 'nane', 'salca', 'sut', 'limon', 'seker'];
 POOL.sweet = ['un', 'tereyagi', 'seker', 'yumurta', 'sut', 'elma', 'portakal', 'tarcin', 'ceviz', 'pudra', 'su', 'limon', 'salca'];
 
@@ -543,7 +734,7 @@ let hadSave = false;
 try { const s = JSON.parse(localStorage.getItem(STORE) || 'null'); if (s) { Object.assign(S, s); hadSave = true; } } catch (e) {}
 if (hadSave && S.tut === undefined && (S.day > 1 || S.dayServed > 0)) S.tut = true;
 if (!S.upg) S.upg = {};
-for (const [k, v] of [['regulars', []], ['learned', {}], ['ev', {}], ['decor', {}]]) if (!S[k]) S[k] = v;
+for (const [k, v] of [['regulars', []], ['learned', {}], ['ev', {}], ['decor', {}], ['badges', {}], ['mastered', {}], ['stats', { served: 0, five: 0, drinks: 0 }], ['boost', {}], ['ads', {}]]) if (!S[k]) S[k] = v;
 if (typeof S.rep !== 'number') S.rep = 50;
 if (typeof S.time !== 'number') S.time = OPEN;
 function save() { try { localStorage.setItem(STORE, JSON.stringify(S)); } catch (e) {} }
@@ -559,11 +750,28 @@ let cust = null, order = null, result = null, plate = null;
 let K = null;              // hazırlanan yemek: {dough, toppings, spread, portions, stage, stir, rolls, bake, cuts}
 let sel = null, baking = false, muted = false;
 
+// ---------- ayarlar ----------
+const SETKEY = 'afiyet-olsun-set';
+const SET = { sfx: 1, mus: 1, vib: true, diff: 'normal', notif: true, orient: 'auto' };
+try { Object.assign(SET, JSON.parse(localStorage.getItem(SETKEY) || '{}')); } catch (e) {}
+const saveSet = () => { try { localStorage.setItem(SETKEY, JSON.stringify(SET)); } catch (e) {} };
+const AND = () => window.AfiyetAndroid || null;
+const DIFF = {
+  easy: { pat: 1.4, tip: 1, note: 'Müşteriler çok daha sabırlı bekler.' },
+  normal: { pat: 1, tip: 1, note: 'Oyunun asıl dengesi.' },
+  hard: { pat: .75, tip: 1.3, note: 'Müşteriler aceleci, ama bahşiş %30 fazla.' },
+};
+function buzz(ms) {
+  if (!SET.vib) return;
+  try { const a = AND(); if (a && a.vibrate) a.vibrate(ms); else if (navigator.vibrate) navigator.vibrate(ms); } catch (e) {}
+}
+
 // ---------- audio ----------
 let AC = null, NB = null;
 const ac = () => (AC = AC || new (window.AudioContext || window.webkitAudioContext)());
 function noise(d, ftype, freq, v, q = 1, delay = 0) {
-  if (muted) return;
+  if (muted || !SET.sfx) return;
+  v *= SET.sfx;
   try {
     ac();
     if (!NB) { NB = AC.createBuffer(1, AC.sampleRate, AC.sampleRate); const ch = NB.getChannelData(0); for (let i = 0; i < ch.length; i++) ch[i] = Math.random() * 2 - 1; }
@@ -574,7 +782,8 @@ function noise(d, ftype, freq, v, q = 1, delay = 0) {
   } catch (e) {}
 }
 function tone(f, d = 0.08, type = 'sine', v = 0.05) {
-  if (muted) return;
+  if (muted || !SET.sfx) return;
+  v *= SET.sfx;
   try {
     AC = AC || new (window.AudioContext || window.webkitAudioContext)();
     const o = AC.createOscillator(), g = AC.createGain();
@@ -598,6 +807,7 @@ const sfx = {
   bad: () => tone(150, .3, 'sawtooth', .03),
   whoosh: () => tone(220, .2, 'sine', .04),
 };
+[['coin', 25], ['bad', 70], ['knife', 12], ['grumble', 40]].forEach(([k, ms]) => { const f = sfx[k]; sfx[k] = () => { f(); buzz(ms); }; });
 
 // ---------- music: hafif bir Hicaz ezgisi ----------
 let musicOn = true;
@@ -644,13 +854,14 @@ const Music = (() => {
     }
   }
   return {
+    setVol() { if (timer && bus) try { bus.gain.setTargetAtTime(Math.max(.0002, .32 * SET.mus), AC.currentTime, .1); } catch (e) {} },
     start() {
-      if (timer || muted || !musicOn) return;
+      if (timer || muted || !musicOn || !SET.mus) return;
       try {
         ac(); if (AC.state === 'suspended') AC.resume();
         if (!NB) noise(.01, 'lowpass', 100, .0001);
         bus = AC.createGain(); bus.gain.value = .0001; bus.connect(AC.destination);
-        bus.gain.exponentialRampToValueAtTime(.32, AC.currentTime + 1.5);
+        bus.gain.exponentialRampToValueAtTime(Math.max(.0002, .32 * SET.mus), AC.currentTime + 1.5);
         nextT = AC.currentTime + .1; timer = setInterval(tick, 60); tick();
       } catch (e) {}
     },
@@ -1055,6 +1266,8 @@ function drawShop(ctx, t) {
     ctx.save(); ctx.translate(520, 292); ctx.scale(.36, .16); ctx.translate(-250, -250); renderPlate(ctx, plate); ctx.restore();
     if (plate.dough === 'recel') drawJar(ctx, 520, 252, plate.bake, .42);
     if (plate.dough === 'mercimek') drawSoupBowl(ctx, 520, 280, plate.bake, .6);
+    if (plate.dough === 'menemen') drawSahan(ctx, 520, 286, plate.bake, .55);
+    if (plate.drink) drawDrink(ctx, plate.drink, 632, 262, .9);
   }
 }
 
@@ -1225,6 +1438,10 @@ function drawPortion(ctx, type, x, y, seed) {
       ctx.fillStyle = '#6b3a7c'; ellipse(ctx, -10, -12, 18, 4, -.2); ctx.fill();
       ctx.fillStyle = '#4f7d33'; ctx.beginPath(); ctx.moveTo(-44, -10); ctx.lineTo(-60, 0); ctx.lineTo(-44, 10); ctx.closePath(); ctx.fill();
       break;
+    case 'shreds':
+      ctx.lineCap = 'round'; ctx.lineWidth = 1.6;
+      for (let i = 0; i < 46; i++) { ctx.strokeStyle = cols[i % cols.length]; const a = r() * 6.283, d = Math.sqrt(r()) * 34, x0 = Math.cos(a) * d, y0 = Math.sin(a) * d; ctx.beginPath(); ctx.moveTo(x0, y0); ctx.bezierCurveTo(x0 + (r() - .5) * 20, y0 + (r() - .5) * 20, x0 + (r() - .5) * 26, y0 + (r() - .5) * 26, x0 + (r() - .5) * 30, y0 + (r() - .5) * 30); ctx.stroke(); }
+      break;
     case 'sheet':
       for (let i = 0; i < 3; i++) { ctx.fillStyle = i % 2 ? '#efdcb0' : '#f6e8c6'; roundRect(ctx, -36 + i * 3, -24 + i * 6, 72, 34, 8); ctx.fill(); ctx.strokeStyle = 'rgba(180,140,80,.5)'; ctx.lineWidth = 1.5; ctx.stroke(); }
       break;
@@ -1388,6 +1605,36 @@ function renderMantiPlate(ctx, d) {
   }
   for (const p of g) if (!['yogurt', 'tereyagi'].includes(p.type)) drawPortion(ctx, p.type, p.x, p.y, p.seed);
 }
+function drawSahan(ctx, x, y, b, s = 1, t = 0) {
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+  ctx.fillStyle = '#8a4520'; roundRect(ctx, -150, -10, 40, 18, 8); ctx.fill(); roundRect(ctx, 110, -10, 40, 18, 8); ctx.fill();
+  ctx.fillStyle = '#b8622e'; ellipse(ctx, 0, 6, 128, 46); ctx.fill();
+  ctx.fillStyle = '#d07a40'; ellipse(ctx, 0, 0, 124, 42); ctx.fill();
+  const sauce = new Path2D(); sauce.ellipse(0, 0, 110, 34, 0, 0, Math.PI * 2);
+  ctx.fillStyle = rgb(mix([214, 70, 42], [140, 50, 25], clamp(b, 0, 1))); ctx.fill(sauce);
+  ctx.save(); ctx.clip(sauce);
+  const r = mulberry(7);
+  for (let i = 0; i < 9; i++) { ctx.fillStyle = 'rgba(255,240,205,.95)'; ellipse(ctx, (r() - .5) * 170, (r() - .5) * 46, 16 + r() * 8, 7 + r() * 3, r() * 3); ctx.fill(); ctx.fillStyle = rgb(mix([248, 190, 40], [230, 160, 30], b)); circle(ctx, (r() - .5) * 150, (r() - .5) * 40, 6); ctx.fill(); }
+  ctx.fillStyle = '#4f9a3a'; for (let i = 0; i < 14; i++) { ellipse(ctx, (r() - .5) * 190, (r() - .5) * 52, 6, 3, r() * 3); ctx.fill(); }
+  if (t) { ctx.fillStyle = 'rgba(255,255,255,.35)'; for (let i = 0; i < 6; i++) { const k = (t * 1.4 + i * .3) % 1; circle(ctx, -80 + i * 32, 4 - k * 10, 2 + k * 3); ctx.fill(); } }
+  ctx.restore(); ctx.restore();
+}
+function drawDrink(ctx, type, x, y, s = 1) {
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+  if (type === 'cay') {
+    ctx.fillStyle = '#f2ece0'; ellipse(ctx, 0, 30, 30, 7); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,.7)'; ctx.beginPath(); ctx.moveTo(-15, -30); ctx.quadraticCurveTo(-6, -4, -13, 26); ctx.lineTo(13, 26); ctx.quadraticCurveTo(6, -4, 15, -30); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#b5441a'; ctx.beginPath(); ctx.moveTo(-12, -20); ctx.quadraticCurveTo(-5, -2, -12, 24); ctx.lineTo(12, 24); ctx.quadraticCurveTo(5, -2, 12, -20); ctx.closePath(); ctx.fill();
+  } else {
+    const col = { ayran: '#fbfaf3', salgam: '#7a1f4a', limonata: '#f6dd5a' }[type];
+    ctx.fillStyle = 'rgba(255,255,255,.65)'; ctx.beginPath(); ctx.moveTo(-18, -34); ctx.lineTo(18, -34); ctx.lineTo(14, 30); ctx.lineTo(-14, 30); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(-16, -22); ctx.lineTo(16, -22); ctx.lineTo(13, 28); ctx.lineTo(-13, 28); ctx.closePath(); ctx.fill();
+    if (type === 'ayran') { ctx.fillStyle = '#ffffff'; for (let i = 0; i < 6; i++) { circle(ctx, -12 + i * 5, -24 + (i % 2) * 2, 4); ctx.fill(); } ctx.strokeStyle = 'rgba(180,170,150,.5)'; ctx.lineWidth = 1.5; ctx.strokeRect(-16, -22, 32, 50); }
+    if (type === 'salgam') { ctx.fillStyle = '#f07a1a'; ctx.save(); ctx.translate(14, -30); ctx.rotate(.4); ctx.fillRect(-3, -14, 6, 26); ctx.restore(); }
+    if (type === 'limonata') { ctx.fillStyle = 'rgba(255,255,255,.75)'; roundRect(ctx, -10, -14, 10, 10, 2); ctx.fill(); roundRect(ctx, 2, -6, 10, 10, 2); ctx.fill(); ctx.fillStyle = '#f5d23a'; circle(ctx, 16, -32, 9); ctx.fill(); ctx.fillStyle = '#fbeea0'; circle(ctx, 16, -32, 6); ctx.fill(); }
+  }
+  ctx.restore();
+}
 function drawSoupBowl(ctx, x, y, b, s = 1) {
   ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
   ctx.fillStyle = '#16807f'; ctx.beginPath(); ctx.moveTo(-80, -10); ctx.quadraticCurveTo(-76, 60, 0, 64); ctx.quadraticCurveTo(76, 60, 80, -10); ctx.closePath(); ctx.fill();
@@ -1427,6 +1674,7 @@ function drawPot(ctx, t) {
     ctx.fillStyle = '#3b7bd9'; flame(ctx, fx, 360, 8, h); ctx.fillStyle = '#9fd0ff'; flame(ctx, fx, 360, 4, h * .55);
   }
   const b = K ? K.bake : 0;
+  if (K && K.dough && DISH[K.dough].look === 'pan') { drawSahan(ctx, 400, 300, b, 1.7, t); return; }
   ctx.fillStyle = '#b8622e'; roundRect(ctx, 220, 172, 360, 180, 46); ctx.fill();
   ctx.fillStyle = '#d07a40'; ctx.fillRect(220, 214, 360, 10); ctx.fillRect(220, 300, 360, 8);
   ctx.fillStyle = '#8a4520'; roundRect(ctx, 186, 206, 40, 20, 8); ctx.fill(); roundRect(ctx, 574, 206, 40, 20, 8); ctx.fill();
@@ -1603,7 +1851,8 @@ function orderExtras(o) {
   if (o.slices && o.slices !== DISH[o.dish].slices) parts.push(o.slices + ' dilim');
   if (o.wellDone) parts.push('iyi pişmiş');
   if (DISH[o.dish].kind === 'manti' && o.count !== DISH[o.dish].count) parts.push(o.count + ' tane');
-  return parts.length ? ` ${cap(parts.join(' ve '))} olsun.` : '';
+  const drink = o.drink ? ' ' + DRINKS[o.drink].ask[o.drinkRiddle && !o.asked ? 1 : 0] : '';
+  return (parts.length ? ` ${cap(parts.join(' ve '))} olsun.` : '') + drink;
 }
 const GREET = [
   p => `Merhaba usta! ${cap(p)} alabilir miyim?`,
@@ -1622,8 +1871,9 @@ function ticketHTML() {
   else body = `<ul>${o.items.map(i => `<li><span>${ING[i.type].label || ING[i.type].name}</span><em class="${i.bol ? 'bol' : ''}">${i.bol ? 'bol' : 'normal'}</em></li>`).join('')}</ul>`;
   const tag = D.kind === 'sarma' || D.kind === 'cookie' || D.kind === 'manti' ? `${o.count} tane` : D.unit ? D.unit : D.kind === 'jam' ? '1 kavanoz' : D.kind === 'bowl' ? '1 porsiyon' : slicesText(o.slices) + (o.wellDone ? ' · iyi pişmiş' : '');
   const title = o.riddle && !o.asked ? D.name : dishTitle(o);
+  const drink = o.drink ? `<span class="tag" style="margin-left:10px">+ İçecek: ${o.drinkRiddle && !o.asked ? '?' : DRINKS[o.drink].name}</span>` : '';
   return `<div class="ticket-head"><span>Sipariş</span><span>${cust.name}</span></div>
-    <div class="ticket-dish">${title}</div>${body}<span class="tag">${tag}</span>`;
+    <div class="ticket-dish">${title}</div>${body}<span class="tag">${tag}</span>${drink}`;
 }
 function bookHTML() {
   return Object.keys(DISH).filter(dishOpen).map(k => {
@@ -1659,10 +1909,16 @@ function finish(o, total, issues, ok, d) {
   }
   total = clamp(total, 0, 1);
   issues.sort((a, c) => c.w - a.w);
+  let dprice = 0, drinkOk = false;
+  if (o.drink) {
+    if (d && d.drink === o.drink) { total += .03; dprice = DRINKS[o.drink].price; drinkOk = true; }
+    else { total -= .15; issues.push({ w: .5, t: d && d.drink ? `Ben ${lower(DRINKS[o.drink].name)} istemiştim, ${lower(DRINKS[d.drink].name)} gelmiş!` : `${DRINKS[o.drink].name} unutulmuş!` }); }
+  }
   const price = DISH[o.dish].price, refund = !ok || total < .3;
-  const pay = refund ? 0 : round5(price * total);
-  const tip = !refund && total >= .85 ? round5(price * .25 * (has('masa') ? 1.6 : 1)) : 0;
-  return { total, refund, stars: Math.max(1, Math.round(total * 5)), issues: issues.filter(i => i.w > .12), pay, tip, cost: dishCost(d) };
+  const pay = refund ? 0 : round5(price * clamp(total, 0, 1)) + dprice;
+  const tip = !refund && total >= .85 ? round5(price * .25 * (has('masa') ? 1.6 : 1) * (DIFF[SET.diff] || DIFF.normal).tip) : 0;
+  total = clamp(total, 0, 1);
+  return { total, refund, stars: Math.max(1, Math.round(total * 5)), issues: issues.filter(i => i.w > .12), pay, tip, cost: dishCost(d) + (d && d.drink ? 2 : 0), drinkOk };
 }
 function evaluate(o, d) { return DISH[o.dish].variants ? evalRecipe(o, d) : evalFlat(o, d); }
 function evalRecipe(o, d) {
@@ -1812,6 +2068,8 @@ function patienceSeconds() {
   if (has('cay')) s += 12;
   if (cust.regular) s += 10;
   if (cust.special === 'rival2') s *= .85;
+  if (S.boost.patience > 0) s *= 1.5;
+  s *= (DIFF[SET.diff] || DIFF.normal).pat;
   return s;
 }
 function updatePatience(dt) {
@@ -1852,8 +2110,12 @@ function nextCustomer() {
   if (!S.tut && !ev) {
     order = { dish: 'lahmacun', items: [{ type: 'kiyma', bol: false }, { type: 'maydanoz', bol: false }], slices: 2, tutorial: true };
     tutStep = 0;
-  } else
+  } else {
   order = makeOrder(cust.regular && Math.random() < .5 && dishOpen(cust.regular.fav) ? cust.regular.fav : null);
+  if (!order.tutorial && S.day >= 2 && cust.special !== 'rival2' && Math.random() < .3) {
+    order.drink = pick(Object.keys(DRINKS)); order.drinkRiddle = S.day >= 3 && Math.random() < .5;
+  }
+  }
   enterCustomer(() => {
     phase = 'order'; sfx.bell();
     cust.pat = 1; cust.patT = patienceSeconds();
@@ -1865,7 +2127,7 @@ function nextCustomer() {
 }
 
 function renderPanel() {
-  if (phase === 'enter') { panel.innerHTML = `<p>Kapı çaldı, biri geliyor…</p>`; return; }
+  if (phase === 'enter') { panel.innerHTML = `<p>Kapı çaldı, biri geliyor…${S.goal && S.goal.day === S.day ? `<br>🎯 Günün hedefi: ${S.goal.done ? 'tamamlandı ✓' : goalText()}` : ''}</p>`; return; }
   if (phase === 'talk') {
     const E = EVENTS[talk.ev], last = talk.i >= E.lines.length - 1;
     let info = '';
@@ -1882,7 +2144,7 @@ function renderPanel() {
   }
   if (phase === 'order') {
     const first = S.day === 1 && S.dayServed === 0 && !order.tutorial;
-    const canAsk = order.riddle && !order.asked;
+    const canAsk = (order.riddle || order.drinkRiddle) && !order.asked;
     panel.innerHTML = `<p>${first
       ? '<strong>Hoş geldin usta!</strong> Siparişi dinle, mutfakta doğru malzemeleri koy, pişir ve servis et. Tarifini bilmediğin yemek için mutfakta tarif defteri var. Dükkan 19:00\'da kapanıyor.'
       : canAsk ? `<strong>${cust.name}</strong> bilmece gibi konuşuyor. Anlamadıysan sorabilirsin ama memnuniyeti biraz düşer.`
@@ -2091,6 +2353,24 @@ function updateCutInfo() {
 }
 function serve() {
   if (phase !== 'order' || !K || !K.dough) return;
+  if (order.drink && K.drink === undefined) { openDrinks(); return; }
+  serveNow();
+}
+function openDrinks() {
+  const o = order;
+  $('#drinkQ').textContent = o.drinkRiddle && !o.asked ? `${cust.name} ne demişti? “${DRINKS[o.drink].ask[1]}”` : `${cust.name} yanında ne istemişti?`;
+  const row = $('#drinkRow'); row.innerHTML = '';
+  for (const k of Object.keys(DRINKS)) {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'drink';
+    b.appendChild(iconCanvas(x => drawDrink(x, k, 56, 38, .9)));
+    const sp = document.createElement('span'); sp.textContent = DRINKS[k].name; b.appendChild(sp);
+    b.onclick = () => { K.drink = k; $('#drinkScr').hidden = true; sfx.pour(); serveNow(); };
+    row.appendChild(b);
+  }
+  $('#drinkScr').hidden = false; row.firstChild.focus();
+}
+function serveNow() {
+  if (phase !== 'order' || !K || !K.dough) return;
   result = evaluate(order, K);
   plate = K;
   const reg = cust.regular;
@@ -2110,7 +2390,12 @@ function serve() {
   }
   S.rep = clamp(S.rep + (result.stars - 3) * 1.5, 0, 100);
   const earned = result.pay + result.tip;
-  S.money += earned - result.cost; S.dayEarn += earned; S.dayCost += result.cost; S.dayStars += result.stars; S.dayServed++; save();
+  S.money += earned - result.cost; S.dayEarn += earned; S.dayCost += result.cost; S.dayStars += result.stars; S.dayServed++;
+  result.fast = cust.pat == null || cust.pat >= .5;
+  if (S.boost.patience > 0) S.boost.patience--;
+  S.stats.served++; if (result.stars === 5) S.stats.five++; if (result.drinkOk) S.stats.drinks++;
+  if (result.stars >= 4 && order.dish === K.dough) S.mastered[order.dish] = true;
+  progressGoal(result); checkBadges(); save();
   phase = 'serve';
   cust.mood = result.total >= .85 ? 'happy' : result.total >= .55 ? 'meh' : 'angry';
   const issue = result.issues[0] ? ' ' + result.issues[0].t : '';
@@ -2138,8 +2423,14 @@ function endDay() {
   const u = $('#deUnlock'), next = S.day + 1;
   const msg = next === 2 ? 'Yarın mahallede hareketli bir gün: yeni komşular, bilmeceli siparişler, menüde mercimek çorbası, peynirli ve ıspanaklı börek, etli sarma.'
     : next === 3 ? 'Yarın menüye karnıyarık geliyor. "İyi pişmiş" isteyenler ve daha kalabalık siparişler de var.'
-    : next === 4 ? 'Yarın menüye mantı geliyor: harcı karıştır, hamura kapat, haşla, sosunu yap.' : '';
+    : next === 4 ? 'Yarın menüye mantı geliyor: harcı karıştır, hamura kapat, haşla, sosunu yap.'
+    : next === 5 ? 'Yarın menüye künefe geliyor: tel kadayıf, peynir, şerbet ve Antep fıstığı.'
+    : next === 6 ? 'Yarın menüye menemen geliyor. Soğanlı mı soğansız mı? Müşteri ne derse!' : '';
   u.hidden = !msg; u.textContent = msg;
+  const gl = $('#deGoal'); gl.hidden = !(S.goal && S.goal.day === S.day);
+  if (!gl.hidden) gl.textContent = S.goal.done ? `🎯 Günün hedefi tamam: ${goalDef().text(S.goal.need)} (+${goalBonus()}₺)` : `🎯 Hedef tamamlanamadı: ${goalText()}`;
+  $('#deAdBtn').hidden = !(S.dayEarn - S.dayCost > 0) || !!S.ev['x2_' + S.day];
+  checkBadges(); syncReminder();
   save(); toast('Gün kaydedildi ✓');
   renderUpgrades(); renderDecor();
   const rb = $('#deRepBox'); rb.hidden = !S.ev.rival1;
@@ -2184,13 +2475,13 @@ function renderDecor() {
       if (!owned) { if (S.money < d.price) return; S.money -= d.price; S.decor[d.id] = true; sfx.coin(); }
       else tone(660, .08, 'triangle', .04);
       if (d.group === 'boya') S.decor.wall = d.id;
-      save(); renderDecor(); renderUpgrades(); hud();
+      checkBadges(); save(); renderDecor(); renderUpgrades(); hud();
     };
     wrap.appendChild(el);
   }
   drawShop(fit($('#decorPrev'), 800, 450), performance.now() / 1000);
 }
-$('#newDayBtn').onclick = () => { S.day++; S.time = OPEN; S.dayServed = 0; S.dayEarn = 0; S.dayCost = 0; S.dayStars = 0; save(); showDayBanner(); nextCustomer(); };
+$('#newDayBtn').onclick = () => { S.day++; S.time = OPEN; S.dayServed = 0; S.dayEarn = 0; S.dayCost = 0; S.dayStars = 0; ensureGoal(); checkBadges(); save(); syncReminder(); showDayBanner(); nextCustomer(); };
 
 // ---------- kitchen widgets ----------
 function iconCanvas(drawFn) {
@@ -2207,6 +2498,8 @@ function buildDoughButtons() {
       if (k === 'mercimek') { drawSoupBowl(x, 56, 34, .55, .5); return; }
       if (k === 'karniyarik') { drawPortion(x, 'patlican', 56, 38, 3); return; }
       if (k === 'manti') { drawManti(x, 40, 38, 0, 1); drawManti(x, 72, 38, 0, 1); return; }
+      if (k === 'menemen') { drawSahan(x, 56, 38, .55, .36); return; }
+      if (k === 'kunefe') { x.fillStyle = '#c4703a'; ellipse(x, 56, 40, 40, 22); x.fill(); drawPortion(x, 'kadayif', 56, 38, 5); drawPortion(x, 'antep', 56, 38, 3); return; }
       if (D.kind === 'cookie') { x.translate(56, 38); x.scale(.55, .55); drawCookie(x, -32, 0, .45, { tarcin: true }); drawCookie(x, 32, 0, .45, { pudra: true }); return; }
       if (D.kind === 'jam') { drawJar(x, 56, 42, .55, .38); return; }
       x.translate(56, 38); x.scale(.17, .17); x.translate(-250, -250);
@@ -2381,10 +2674,12 @@ function frame(now) {
 
 // ---------- başlangıç ekranı, kayıt, öğretici ----------
 let begun = false, tutStep = -1, tutCovT = 0, tutCovV = 0;
-const paused = () => !$('#titleScr').hidden;
-function toast(msg) {
-  const t = $('#toast'); t.textContent = msg; t.hidden = false; t.style.animation = 'none'; void t.offsetWidth; t.style.animation = '';
-  clearTimeout(toast.h); toast.h = setTimeout(() => { t.hidden = true; }, 1800);
+const paused = () => !$('#titleScr').hidden || !$('#setScr').hidden || !$('#rewardScr').hidden || !$('#storeScr').hidden || !$('#badgeScr').hidden || !$('#adScr').hidden;
+const toastQ = [];
+function toast(msg) { toastQ.push(msg); if (toastQ.length === 1) showToast(); }
+function showToast() {
+  const t = $('#toast'); t.textContent = toastQ[0]; t.hidden = false; t.style.animation = 'none'; void t.offsetWidth; t.style.animation = '';
+  setTimeout(() => { t.hidden = true; toastQ.shift(); if (toastQ.length) setTimeout(showToast, 150); }, 1700);
 }
 function openTitle() {
   const fresh = !hadSave && !begun;
@@ -2395,6 +2690,7 @@ function openTitle() {
   const si = $('#saveInfo'); si.hidden = fresh;
   si.textContent = `Kayıtlı oyun: ${S.day}. gün · ${S.time >= closeTime() ? 'gün sonu' : clockText(S.time)} · Kasa ${S.money}₺`;
   $('#newConfirm').hidden = true; $('#helpBox').hidden = true;
+  $('#titleScr').classList.toggle('over', begun);
   $('#titleScr').hidden = false;
   (fresh ? $('#newBtn') : $('#contBtn')).focus();
 }
@@ -2402,7 +2698,9 @@ function begin() {
   $('#titleScr').hidden = true;
   if (begun) return;
   begun = true; hadSave = true;
+  ensureGoal(); checkBadges(); syncReminder();
   if (S.time >= closeTime()) endDay(); else { showDayBanner(); nextCustomer(); }
+  setTimeout(maybeDailyReward, 2000);
 }
 function newGame() {
   try { localStorage.removeItem(STORE); sessionStorage.setItem('afiyet-autostart', '1'); } catch (e) {}
@@ -2414,6 +2712,7 @@ function showDayBanner() {
   $('#dbText').textContent = S.day === 1 && S.dayServed === 0 ? 'Lokantan açıldı! İlk müşterin yolda.'
     : S.dayServed > 0 ? `Kaldığın yerden devam: saat ${clockText(S.time)}.`
     : fresh.length ? `Günaydın usta! Menüde yeni: ${fresh.join(', ')}.` : 'Günaydın usta! Dükkan açıldı.';
+  if (S.goal && S.goal.day === S.day && !S.goal.done && S.dayServed === 0) $('#dbText').textContent += ` 🎯 Günün hedefi: ${goalText()}`;
   const b = $('#dayBanner'); b.hidden = false; b.style.animation = 'none'; void b.offsetWidth; b.style.animation = '';
   clearTimeout(showDayBanner.h); showDayBanner.h = setTimeout(() => { b.hidden = true; }, 1900);
 }
@@ -2425,6 +2724,144 @@ $('#newNo').onclick = () => { $('#newConfirm').hidden = true; };
 $('#newYes').onclick = newGame;
 $('#helpBtn').onclick = () => { $('#helpBox').hidden = !$('#helpBox').hidden; };
 $('#tutAgainBtn').onclick = () => { S.tut = false; save(); toast('Öğretici sıradaki müşteriyle başlayacak.'); begin(); };
+
+// ---------- günlük hedef ----------
+const GOALS = [
+  { id: 'serve', text: n => `${n} müşteriye servis yap`, need: d => 5 + Math.min(5, d), inc: r => 1 },
+  { id: 'five', text: n => `${n} kez 5 yıldız al`, need: d => Math.min(6, 2 + Math.floor(d / 2)), inc: r => r.stars === 5 ? 1 : 0 },
+  { id: 'tips', text: n => `${n}₺ bahşiş topla`, need: d => 40 + d * 20, inc: r => r.tip },
+  { id: 'drinks', text: n => `${n} içeceği doğru ver`, need: () => 3, inc: r => r.drinkOk ? 1 : 0, min: 2 },
+  { id: 'fast', text: n => `${n} müşteriyi bekletmeden doyur`, need: d => 4 + Math.min(4, d), inc: r => r.fast ? 1 : 0, min: 2 },
+];
+const goalDef = () => S.goal && GOALS.find(g => g.id === S.goal.id);
+const goalText = () => { const g = goalDef(); return g ? `${g.text(S.goal.need)} (${Math.min(S.goal.prog, S.goal.need)}/${S.goal.need})` : ''; };
+const goalBonus = () => 40 + 15 * S.day;
+function ensureGoal() {
+  if (S.goal && S.goal.day === S.day) return;
+  const g = pick(GOALS.filter(g => !g.min || S.day >= g.min));
+  S.goal = { day: S.day, id: g.id, prog: 0, need: g.need(S.day), done: false };
+  save();
+}
+function progressGoal(r) {
+  const g = goalDef(); if (!g || S.goal.done || S.goal.day !== S.day) return;
+  const inc = g.inc(r); if (!inc) return;
+  S.goal.prog += inc;
+  if (S.goal.prog >= S.goal.need) {
+    S.goal.done = true; const bonus = goalBonus(); S.money += bonus; hud();
+    toast(`🎯 Günün hedefi tamam! +${bonus}₺`); setTimeout(() => { tone(784, .12, 'square', .03); setTimeout(() => tone(1046, .25, 'square', .03), 120); }, 200);
+  } else toast(`🎯 Hedef: ${goalText()}`);
+}
+
+// ---------- rozetler ----------
+const BADGES = [
+  { id: 'ilk', icon: '🍽️', name: 'İlk Lokma', desc: 'İlk müşterine servis yap', ok: () => S.stats.served >= 1 },
+  { id: 'yildiz10', icon: '⭐', name: 'Yıldız Usta', desc: '10 kez 5 yıldız al', ok: () => S.stats.five >= 10 },
+  { id: 'yildiz50', icon: '🌟', name: 'Usta-i Âzam', desc: '50 kez 5 yıldız al', ok: () => S.stats.five >= 50 },
+  { id: 'mudavim5', icon: '❤️', name: 'Mahallenin Sevgilisi', desc: '5 müdavim edin', ok: () => S.regulars.length >= 5 },
+  { id: 'zengin', icon: '💰', name: 'Kasa Dolu', desc: 'Kasada 1000₺ biriktir', ok: () => S.money >= 1000 },
+  { id: 'teyze', icon: '👵', name: 'Teyzenin Gözdesi', desc: 'Hayriye Teyze\'nin iki tarifini öğren', ok: () => !!(S.learned.kurabiye && S.learned.recel) },
+  { id: 'kamil', icon: '🏆', name: 'Rakipsiz', desc: 'Kebapçı Kâmil\'i yen', ok: () => !!S.ev.rivalWin },
+  { id: 'icecek', icon: '🥛', name: 'Ayrancı', desc: '10 içeceği doğru ver', ok: () => S.stats.drinks >= 10 },
+  { id: 'susler', icon: '🪴', name: 'Göz Nuru Dükkan', desc: '5 süs satın al', ok: () => decorCount() >= 5 },
+  { id: 'hafta', icon: '📅', name: 'Bir Haftalık Esnaf', desc: '7. güne ulaş', ok: () => S.day >= 7 },
+  { id: 'seri7', icon: '🔥', name: 'Sadık Usta', desc: '7 gün üst üste oyuna gir', ok: () => !!(S.login && S.login.streak >= 7) },
+  { id: 'sef', icon: '👨‍🍳', name: 'Türk Mutfağı Ustası', desc: 'Her yemeği en az bir kez 4+ yıldızla yap', ok: () => Object.keys(DISH).every(k => S.mastered[k]) },
+];
+function checkBadges() {
+  let delay = 0;
+  for (const b of BADGES) if (!S.badges[b.id] && b.ok()) {
+    S.badges[b.id] = Date.now();
+    setTimeout(() => { toast(`🏅 Yeni rozet: ${b.name}`); tone(1318, .12, 'triangle', .04); setTimeout(() => tone(1760, .3, 'triangle', .04), 120); }, delay);
+    delay += 1900;
+  }
+}
+function openBadges() {
+  const got = BADGES.filter(b => S.badges[b.id]).length;
+  $('#bgStats').textContent = `${got}/${BADGES.length} rozet · ${S.stats.served} servis · ${S.stats.five} kez 5 yıldız · ${S.stats.drinks} doğru içecek`;
+  $('#bgList').innerHTML = BADGES.map(b => `<div class="badge ${S.badges[b.id] ? '' : 'locked'}"><i>${b.icon}</i><div><b>${b.name}</b><span>${b.desc}</span></div></div>`).join('');
+  $('#badgeScr').hidden = false; $('#bgClose').focus();
+}
+$('#badgeBtn').onclick = openBadges;
+$('#bgClose').onclick = () => { $('#badgeScr').hidden = true; };
+
+// ---------- reklam (yer tutucu) ----------
+// Android uygulamasında window.AfiyetAndroid.showRewardedAd varsa gerçek reklam oradan oynar; yoksa yer tutucu gösterilir.
+let adCb = null, adTimer = null;
+function watchAd(onReward) {
+  adCb = onReward;
+  let n = 5; const btn = $('#adDone'); btn.disabled = true; $('#adCount').textContent = n;
+  $('#adScr').hidden = false;
+  clearInterval(adTimer);
+  adTimer = setInterval(() => { n--; $('#adCount').textContent = n > 0 ? n : '✓'; if (n <= 0) { clearInterval(adTimer); btn.disabled = false; btn.focus(); } }, 1000);
+}
+$('#adDone').onclick = () => { $('#adScr').hidden = true; const cb = adCb; adCb = null; if (cb) cb(); };
+$('#adSkip').onclick = () => { clearInterval(adTimer); $('#adScr').hidden = true; adCb = null; };
+const todayStr = (off = 0) => { const d = new Date(Date.now() + off * 864e5); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); };
+const adsLeft = () => S.ads.day === todayStr() ? Math.max(0, 3 - S.ads.n) : 3;
+const useAd = () => { if (S.ads.day !== todayStr()) S.ads = { day: todayStr(), n: 0 }; S.ads.n++; };
+
+// ---------- mağaza ----------
+function openStore() {
+  $('#stMoney').textContent = S.money + '₺';
+  const left = adsLeft();
+  const item = (icon, name, desc, btn, id, disabled) => `<div class="store-item"><i>${icon}</i><div><b>${name}</b><span>${desc}</span></div><button class="btn ${disabled ? '' : 'go'}" type="button" data-id="${id}" ${disabled ? 'disabled' : ''}>${btn}</button></div>`;
+  $('#stBody').innerHTML = `<div class="store-sec"><h3>Reklam izle, ödül kazan</h3><p>Bugün ${left} reklam hakkın kaldı.</p>
+    ${item('💰', '+75₺', 'Kısa bir reklam izle, kasana 75₺ girsin.', '📺 İzle', 'cash', !left)}
+    ${item('⏳', 'Sabır şerbeti', `Sıradaki 3 müşteri yarı yarıya daha sabırlı olur.${S.boost.patience ? ` (Kalan: ${S.boost.patience})` : ''}`, '📺 İzle', 'pat', !left)}
+    </div>
+    <div class="store-sec"><h3>Paketler</h3>
+    ${item('🪙', 'Avuç dolusu', 'Kasana 500₺', '19,99 TL', 'p1', true)}
+    ${item('💎', 'Çuval dolusu', 'Kasana 1.500₺ ve tüm boyalar', '49,99 TL', 'p2', true)}
+    ${item('🚫', 'Reklamsız oyun', 'Reklam izlemeden tüm ödüller', '39,99 TL', 'p3', true)}
+    <p>Gerçek parayla satın alma, oyun Google Play'e çıkınca açılacak.</p></div>`;
+  $('#stBody').querySelectorAll('button[data-id]').forEach(b => {
+    b.onclick = () => {
+      const id = b.dataset.id;
+      if (id === 'cash') watchAd(() => { useAd(); S.money += 75; save(); hud(); toast('+75₺ kasaya girdi!'); sfx.coin(); openStore(); renderUpgrades(); });
+      if (id === 'pat') watchAd(() => { useAd(); S.boost.patience = (S.boost.patience || 0) + 3; save(); toast('⏳ Sıradaki 3 müşteri daha sabırlı!'); sfx.coin(); openStore(); });
+    };
+  });
+  $('#storeScr').hidden = false; $('#stClose').focus();
+}
+$('#storeBtn').onclick = openStore;
+$('#stClose').onclick = () => { $('#storeScr').hidden = true; };
+$('#deAdBtn').onclick = () => {
+  const profit = S.dayEarn - S.dayCost;
+  watchAd(() => { S.money += profit; S.ev['x2_' + S.day] = true; save(); hud(); $('#deAdBtn').hidden = true; toast(`Kâr ikiye katlandı! +${profit}₺`); sfx.coin(); renderUpgrades(); renderDecor(); });
+};
+
+// ---------- günlük giriş ödülü ----------
+const STREAK = [30, 40, 50, 60, 80, 100, 200];
+function maybeDailyReward() {
+  if (!S.tut) return;
+  const today = todayStr();
+  S.login = S.login || {};
+  if (S.login.last === today) return;
+  const streak = S.login.last === todayStr(-1) ? Math.min(S.login.streak || 0, 6) + 1 : 1;
+  const amount = STREAK[streak - 1];
+  $('#rwText').textContent = streak === 1 ? 'Hoş geldin usta! Her gün gel, ödülün büyüsün.' : `🔥 ${streak}. gün üst üste geldin! Seriyi bozma.`;
+  $('#rwStreak').innerHTML = STREAK.map((v, i) => `<div class="${i + 1 < streak ? 'got' : i + 1 === streak ? 'now' : ''}">${i + 1}. gün<b>${v}₺</b></div>`).join('');
+  $('#rwTake').textContent = `Al · +${amount}₺`;
+  const give = mult => {
+    S.login = { last: today, streak }; S.money += amount * mult; save(); hud(); checkBadges();
+    $('#rewardScr').hidden = true; toast(`+${amount * mult}₺ günlük ödül!`); sfx.coin();
+  };
+  $('#rwTake').onclick = () => give(1);
+  $('#rwAd').onclick = () => watchAd(() => give(2));
+  $('#rewardScr').hidden = false; $('#rwTake').focus();
+}
+
+// ---------- Android bildirimleri ----------
+function syncReminder() {
+  try {
+    if (!window.AfiyetAndroid || !window.AfiyetAndroid.setReminder) return;
+    if (window.AfiyetAndroid.setReminderOn) window.AfiyetAndroid.setReminderOn(!!SET.notif);
+    const msgs = ['Müşteriler kapıda bekliyor, dükkanı aç usta! 🍽️', 'Günlük ödülün hazır, serini bozma! 🔥', 'Hayriye Teyze uğradı mı acaba? 👵'];
+    if (S.ev.rival1 && !S.ev.rivalWin) msgs.push('Kebapçı Kâmil müşterilerini kapıyor! 😠');
+    if (S.regulars.length) msgs.push(`${S.regulars[S.regulars.length - 1].look.name} yine geldi, seni soruyor! 😊`);
+    window.AfiyetAndroid.setReminder('Afiyet Olsun', msgs.join('|'));
+  } catch (e) {}
+}
 
 const TUT = [
   { el: '#takeBtn', text: 'Hoş geldin usta! Ben Hayriye Teyze, sana dükkanı göstereceğim. Müşterinin ne istediği balonda yazıyor. Başlamak için Siparişi al\'a bas.', done: () => !$('#kitchen').hidden },
@@ -2445,7 +2882,7 @@ function tutCoverage() {
   return tutCovV;
 }
 function endTutorial() {
-  tutStep = -1; S.tut = true; save();
+  tutStep = -1; S.tut = true; save(); setTimeout(maybeDailyReward, 1500);
   $('#coach').hidden = true; $('#coachRing').hidden = true;
 }
 $('#coachSkip').onclick = endTutorial;
@@ -2463,16 +2900,60 @@ function updateCoach() {
     tone(1046, .08, 'sine', .03);
   }
   coach.hidden = false;
-  if (!el || !el.offsetParent) { ring.hidden = true; coach.style.top = ''; coach.style.bottom = '16px'; return; }
+  if (!el || !el.offsetParent) { ring.hidden = true; coach.style.top = ''; coach.style.bottom = '16px'; coach.style.left = ''; return; }
   const r = el.getBoundingClientRect(), pad = 6;
   ring.hidden = false;
   ring.style.left = (r.left - pad) + 'px'; ring.style.top = (r.top - pad) + 'px';
   ring.style.width = (r.width + pad * 2) + 'px'; ring.style.height = (r.height + pad * 2) + 'px';
   const below = r.top + r.height / 2 < innerHeight * .5;
   if (below) { coach.style.top = ''; coach.style.bottom = '16px'; } else { coach.style.bottom = ''; coach.style.top = '16px'; }
+  const land = innerWidth > innerHeight && innerHeight <= 600;
+  coach.style.left = land ? ((r.left + r.width / 2 > innerWidth / 2) ? '26%' : '74%') : '';
+  if (land) { coach.style.top = ''; coach.style.bottom = '10px'; }
 }
 
+// ---------- ayarlar ekranı ----------
+const togUI = (sel, on) => $(sel).setAttribute('aria-checked', on ? 'true' : 'false');
+const segUI = (sel, v) => document.querySelectorAll(sel + ' button').forEach(b => b.setAttribute('aria-pressed', b.dataset.v === v ? 'true' : 'false'));
+const pct = v => v ? `%${Math.round(v * 100)}` : 'Kapalı';
+function applyOrient() { try { const a = AND(); if (a && a.setOrientation) a.setOrientation(SET.orient); } catch (e) {} }
+function setUI() {
+  $('#sSfx').value = Math.round(SET.sfx * 100); $('#sMus').value = Math.round(SET.mus * 100);
+  $('#sSfxV').textContent = pct(SET.sfx); $('#sMusV').textContent = pct(SET.mus);
+  togUI('#sVib', SET.vib); togUI('#sNotif', SET.notif); segUI('#sDiff', SET.diff); segUI('#sOri', SET.orient);
+  $('#sDiffNote').textContent = (DIFF[SET.diff] || DIFF.normal).note;
+}
+function openSettings() {
+  const a = AND();
+  $('#sNotifRow').hidden = !(a && a.setReminderOn);
+  $('#sOriRow').hidden = !(a && a.setOrientation);
+  $('#sVibRow').hidden = !(a && a.vibrate) && !navigator.vibrate;
+  $('#sResetConfirm').hidden = true;
+  setUI(); $('#setScr').hidden = false; $('#setClose').focus();
+}
+$('#setBtn').onclick = openSettings;
+$('#setClose').onclick = () => { $('#setScr').hidden = true; };
+$('#setScr').addEventListener('click', e => { if (e.target.id === 'setScr') $('#setScr').hidden = true; });
+$('#sSfx').oninput = e => { SET.sfx = e.target.value / 100; saveSet(); setUI(); };
+$('#sSfx').onchange = () => sfx.coin();
+$('#sMus').oninput = e => {
+  SET.mus = e.target.value / 100; saveSet(); setUI();
+  if (!SET.mus) { musicOn = false; Music.stop(); }
+  else { if (!musicOn) { musicOn = true; Music.start(); } Music.setVol(); }
+  try { localStorage.setItem('afiyet-olsun-music', musicOn ? '1' : '0'); } catch (e) {}
+  musicUI();
+};
+$('#sVib').onclick = () => { SET.vib = !SET.vib; saveSet(); setUI(); buzz(40); };
+$('#sNotif').onclick = () => { SET.notif = !SET.notif; saveSet(); setUI(); syncReminder(); };
+document.querySelectorAll('#sDiff button').forEach(b => b.onclick = () => { SET.diff = b.dataset.v; saveSet(); setUI(); });
+document.querySelectorAll('#sOri button').forEach(b => b.onclick = () => { SET.orient = b.dataset.v; saveSet(); setUI(); applyOrient(); });
+$('#sTut').onclick = () => { $('#setScr').hidden = true; $('#tutAgainBtn').onclick(); };
+$('#sReset').onclick = () => { $('#sResetConfirm').hidden = false; $('#sResetYes').focus(); };
+$('#sResetNo').onclick = () => { $('#sResetConfirm').hidden = true; };
+$('#sResetYes').onclick = () => { try { localStorage.removeItem(STORE); } catch (e) {} location.reload(); };
+
 function start() {
+  applyOrient();
   hud();
   requestAnimationFrame(frame);
   let auto = false;
