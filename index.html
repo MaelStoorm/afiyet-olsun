@@ -1,0 +1,2324 @@
+<!doctype html>
+<html lang="tr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#6f421d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Afiyet Olsun">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-512.png">
+<title>Afiyet Olsun</title>
+</head><body>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+/* Layout: one shop column. HUD strip on top, the active scene (dükkan, mutfak, fırın) under it, a paper slip panel below the scene. One warm world, same in light and dark. */
+:root{
+  --bg:#f1d7b8;
+  --paper:#fff8ec;
+  --ink:#3a2216;
+  --ink-soft:#7a5843;
+  --tomato:#d6442a;
+  --tomato-dark:#a5301b;
+  --cini:#16807f;
+  --cini-soft:#d6ecea;
+  --wood:#a86a37;
+  --wood-dark:#6f421d;
+  --gold:#f2b134;
+  --good:#2e8a4b;
+  --line:#e6ceae;
+  --display:"Baloo 2","Trebuchet MS",system-ui,sans-serif;
+  --body:"Nunito",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light;
+}
+html,body{min-height:100%}
+[hidden]{display:none!important}
+body{
+  background:var(--bg);
+  background-image:radial-gradient(circle at 20px 20px, rgba(22,128,127,.10) 3px, transparent 4px);
+  background-size:40px 40px;
+  color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45;
+  padding-inline:16px;padding-block:14px 32px;
+}
+.game{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:3px solid var(--cini);outline-offset:2px}
+
+/* HUD */
+.hud{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px}
+.brand{display:flex;align-items:center;gap:10px}
+.brand svg{width:40px;height:40px;flex:none}
+.brand h1{font-family:var(--display);font-weight:800;font-size:28px;line-height:1;margin:0;color:var(--tomato-dark);letter-spacing:.2px}
+.brand small{display:block;font-size:12px;color:var(--ink-soft);font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.stats{display:flex;flex-wrap:wrap;gap:8px}
+.chip{background:var(--paper);border:2px solid var(--line);border-radius:999px;padding:4px 12px;font-weight:800;font-variant-numeric:tabular-nums;display:flex;gap:6px;align-items:baseline}
+.chip span{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft)}
+.chip.money b{color:var(--good)}
+.chip.mute{cursor:pointer}
+.chip.pat{align-items:center}
+.chip.pat.off{visibility:hidden}
+.chip.mute.off b{opacity:.35;text-decoration:line-through}
+.pat-bar{display:inline-block;width:72px;height:12px;border-radius:99px;background:#ead7bd;border:2px solid var(--ink);overflow:hidden}
+.pat-bar i{display:block;height:100%;width:100%;background:var(--good);transition:width .2s linear}
+.chip.pat b{font-size:15px;line-height:1}
+.chip.pat.low{animation:shake .4s 2}
+.decor-prev{width:100%;max-width:560px;aspect-ratio:16/9;display:block;border-radius:14px;border:3px solid var(--wood-dark);margin:0 auto 10px}
+.upg.using{border-color:var(--cini);background:var(--cini-soft)}
+.upg.using em{font-style:normal;color:var(--cini);font-weight:800}
+
+/* Stage */
+.stage{position:relative;width:100%;aspect-ratio:16/9;border-radius:18px;overflow:hidden;border:4px solid var(--wood-dark);background:#f4dcbc;box-shadow:0 6px 0 rgba(111,66,29,.25)}
+.stage canvas{display:block;width:100%;height:100%}
+.stage-wrap{position:relative}
+.bubble{position:absolute;right:3%;top:12%;width:42%;background:var(--paper);border:3px solid var(--ink);border-radius:20px;padding:12px 16px;box-shadow:0 4px 0 rgba(58,34,22,.25)}
+.bubble::before{content:"";position:absolute;left:-15px;top:38px;border:12px solid transparent;border-right-color:var(--ink);border-left:0}
+.bubble::after{content:"";position:absolute;left:-10px;top:40px;border:10px solid transparent;border-right-color:var(--paper);border-left:0}
+.bubble b{display:block;font-family:var(--display);font-size:14px;color:var(--cini);line-height:1.1}
+.bubble p{margin:2px 0 0;font-size:clamp(14px,2vw,19px);font-weight:800;line-height:1.3;text-wrap:balance}
+.bubble.pop{animation:pop .35s cubic-bezier(.2,1.6,.4,1)}
+@keyframes pop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+.float{position:absolute;left:50%;top:48%;font-family:var(--display);font-weight:800;font-size:clamp(22px,4vw,40px);color:var(--good);text-shadow:0 2px 0 #fff;animation:rise 1.4s ease-out forwards;pointer-events:none}
+@keyframes rise{from{transform:translate(-50%,0);opacity:1}to{transform:translate(-50%,-90px);opacity:0}}
+
+/* Paper panel under a scene */
+.panel{background:var(--paper);border:2px solid var(--line);border-radius:16px;padding:14px 16px;display:flex;flex-wrap:wrap;align-items:center;gap:12px 18px}
+.panel p{margin:0;flex:1 1 260px;min-width:0;color:var(--ink-soft);font-weight:700}
+.panel p strong{color:var(--ink)}
+.btn{border:0;border-radius:14px;padding:12px 20px;font-family:var(--display);font-weight:800;font-size:18px;line-height:1;background:var(--paper);border:3px solid var(--ink);box-shadow:0 4px 0 var(--ink);transition:transform .08s}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+.btn.primary{background:var(--tomato);color:#fff8ec}
+.btn.go{background:var(--good);color:#fff8ec}
+.btn[disabled]{opacity:.45;cursor:default}
+.btn.big{font-size:22px;padding:14px 26px}
+.result{display:flex;flex-wrap:wrap;align-items:center;gap:10px 22px;flex:1 1 auto}
+.stars{font-size:30px;letter-spacing:2px;color:var(--gold);text-shadow:0 2px 0 var(--wood-dark);line-height:1}
+.stars i{font-style:normal;color:#e3cfb3;text-shadow:none}
+.earn{display:flex;flex-direction:column;font-variant-numeric:tabular-nums}
+.earn span{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);font-weight:800}
+.earn b{font-family:var(--display);font-size:24px;line-height:1;color:var(--good)}
+.notes{margin:0;padding:0;list-style:none;flex:1 1 200px;min-width:0;font-weight:700;color:var(--ink-soft)}
+.notes li::before{content:"• ";color:var(--tomato)}
+.notes li.ok::before{content:"✓ ";color:var(--good)}
+
+/* Kitchen */
+.kitchen{display:grid;gap:14px;grid-template-columns:minmax(0,1fr) 300px;grid-template-areas:"board ticket" "board picker" "board actions";align-items:start}
+.ticket{grid-area:ticket;background:#fffdf6;border-radius:6px;padding:12px 14px 14px;box-shadow:0 3px 0 rgba(58,34,22,.18);position:relative;transform:rotate(-1deg);border-top:8px solid var(--tomato)}
+.ticket-head{display:flex;justify-content:space-between;gap:8px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);font-weight:800}
+.ticket-dish{font-family:var(--display);font-weight:800;font-size:26px;line-height:1.1;margin:2px 0 6px}
+.ticket ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+.ticket li{display:flex;justify-content:space-between;align-items:center;border-bottom:1px dashed var(--line);padding-bottom:3px;font-weight:800}
+.ticket em{font-style:normal;font-size:12px;text-transform:uppercase;letter-spacing:.06em;padding:1px 8px;border-radius:99px;background:var(--cini-soft);color:var(--cini)}
+.ticket em.bol{background:var(--tomato);color:#fff8ec}
+.picker{grid-area:picker;display:flex;flex-direction:column;gap:8px}
+.picker h3{margin:0;font-family:var(--display);font-size:18px;line-height:1.1}
+.dough-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.bins{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px}
+.bin,.dough{background:#cfd6d8;border:3px solid #8f9ba0;border-radius:10px;padding:4px 4px 6px;display:flex;flex-direction:column;align-items:center;gap:2px;font-weight:800;font-size:13px;line-height:1.1;text-align:center;box-shadow:inset 0 -4px 0 rgba(0,0,0,.08)}
+.dough{background:#f3e3c4;border-color:var(--wood)}
+.bin canvas,.dough canvas{width:100%;height:auto;aspect-ratio:112/72;display:block}
+.bin[aria-pressed="true"]{border-color:var(--tomato);background:#fde3d6;box-shadow:0 0 0 3px var(--tomato)}
+.dough[disabled]{opacity:.4;cursor:default}
+.dough small{display:block;font-size:11px;color:var(--ink-soft)}
+.actions{grid-area:actions;display:flex;gap:10px;flex-wrap:wrap}
+.actions .btn{flex:1 1 auto}
+.board-wrap{grid-area:board;display:flex;flex-direction:column;align-items:center;gap:8px;min-width:0}
+#board{width:100%;max-width:540px;aspect-ratio:1;touch-action:none;display:block;cursor:crosshair}
+.hint{margin:0;text-align:center;font-weight:800;color:var(--ink-soft);min-height:1.4em}
+.hint.flash{color:var(--tomato);animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+
+/* Oven */
+.gauge-wrap{flex:1 1 320px;min-width:0;display:flex;flex-direction:column;gap:4px}
+.gauge{position:relative;height:22px;border-radius:99px;border:3px solid var(--ink);background:linear-gradient(90deg,#f5e2b9 0 50%,#7cc576 50% 72%,#e59a3c 72% 86%,#6b3a1c 86% 100%)}
+.needle{position:absolute;top:-9px;width:6px;height:34px;margin-left:-3px;background:var(--ink);border-radius:3px;left:0}
+.gauge-labels{display:grid;grid-template-columns:50% 22% 28%;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft)}
+.gauge-labels span:nth-child(2){color:var(--good);text-align:center}
+.gauge-labels span:nth-child(3){text-align:right}
+.oven-tag{position:absolute;left:50%;top:6%;transform:translateX(-50%);background:var(--paper);border:3px solid var(--ink);border-radius:99px;padding:4px 16px;font-family:var(--display);font-weight:800;font-size:clamp(14px,2.4vw,22px);white-space:nowrap}
+
+/* Day end */
+.dayend{background:var(--paper);border:4px solid var(--wood-dark);border-radius:20px;padding:28px 22px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px}
+.dayend h2{font-family:var(--display);font-size:clamp(30px,5vw,44px);line-height:1;margin:0;color:var(--tomato-dark);text-wrap:balance}
+.sum{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;width:100%;max-width:560px}
+@media (max-width:480px){.sum{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.sum div{border:2px dashed var(--line);border-radius:12px;padding:10px 6px}
+.sum span{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);font-weight:800}
+.sum b{font-family:var(--display);font-size:26px;font-variant-numeric:tabular-nums}
+.unlock{background:var(--cini-soft);color:var(--cini);font-weight:800;border-radius:12px;padding:8px 14px;margin:0}
+
+.cut-info{margin:0;font-weight:800;color:var(--ink-soft)}
+.cut-info b{font-family:var(--display);font-size:30px;color:var(--ink);display:block;line-height:1.1}
+#cutC{width:100%;max-width:540px;aspect-ratio:1;touch-action:none;display:block;cursor:crosshair}
+.ticket .quote{font-weight:800;font-style:italic;margin:0;color:var(--ink)}
+.ticket .tag{display:inline-block;margin-top:6px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--tomato-dark)}
+.ticket .half{font-size:11px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.06em}
+.shop-list{width:100%;max-width:640px;text-align:left}
+.shop-list h3{font-family:var(--display);font-size:22px;margin:0 0 8px}
+.upgrades{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+.upg{background:#fffdf6;border:2px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;text-align:left}
+.upg b{font-family:var(--display);font-size:18px;line-height:1.1}
+.upg span{font-size:13px;color:var(--ink-soft);font-weight:700;flex:1}
+.upg .btn{font-size:15px;padding:8px 12px;align-self:flex-start}
+.upg.owned{border-color:var(--good);background:#eef7ee}
+.upg.owned em{font-style:normal;color:var(--good);font-weight:800}
+.panel .ask{font-size:15px;padding:10px 14px}
+.cost{color:var(--tomato-dark)!important}
+.book-btn{align-self:flex-start}
+.rep{width:100%;max-width:560px;text-align:left;display:flex;flex-direction:column;gap:4px}
+.rep-head{display:flex;justify-content:space-between;font-weight:800}
+.rep-head b{font-family:var(--display);font-size:22px;color:var(--good)}
+.rep-bar{height:18px;border-radius:99px;background:#8f2a1f;border:3px solid var(--ink);overflow:hidden}
+.rep-bar i{display:block;height:100%;width:50%;background:var(--good)}
+.rep-legend{display:flex;justify-content:space-between;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft)}
+.rep p{margin:4px 0 0;font-weight:700}
+.recipe-note{margin:0;font-weight:700;color:var(--ink-soft);font-size:14px}
+.book{position:fixed;inset:0;background:rgba(58,34,22,.55);display:flex;align-items:center;justify-content:center;padding:16px;z-index:10}
+.book-card{background:var(--paper);border:4px solid var(--wood-dark);border-radius:18px;max-width:560px;width:100%;max-height:85vh;overflow:auto;padding:18px 20px;display:flex;flex-direction:column;gap:10px}
+.book-card h2{font-family:var(--display);font-size:30px;line-height:1;margin:0;color:var(--tomato-dark)}
+.book-card section{border-top:2px dashed var(--line);padding-top:8px}
+.book-card h3{font-family:var(--display);font-size:20px;margin:0}
+.book-card p{margin:2px 0;font-weight:700}
+.book-card .how{color:var(--cini)}
+.book-card .btn{align-self:flex-end}
+@media (max-width:760px){
+  .kitchen{grid-template-columns:minmax(0,1fr);grid-template-areas:"ticket" "picker" "board" "actions"}
+  .ticket{transform:none}
+  .ticket ul{flex-direction:row;flex-wrap:wrap;gap:6px 14px}
+  .ticket li{border:0;gap:6px}
+  .ticket-dish{font-size:22px}
+  .bins{grid-template-columns:repeat(auto-fill,minmax(70px,1fr))}
+}
+@media (max-width:600px){
+  .bubble{position:relative;right:auto;top:auto;width:auto;margin-top:14px}
+  .bubble::before{left:40px;top:-15px;border:12px solid transparent;border-bottom-color:var(--ink);border-top:0}
+  .bubble::after{left:42px;top:-10px;border:10px solid transparent;border-bottom-color:var(--paper);border-top:0}
+  .brand h1{font-size:24px}
+  .btn{font-size:16px;padding:11px 16px}
+  .btn.big{font-size:19px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="game">
+  <header class="hud">
+    <div class="brand">
+      <svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18" fill="#1d4fa0"/><circle cx="20" cy="20" r="12.5" fill="#fff"/><circle cx="20" cy="20" r="8" fill="#5fb3e6"/><circle cx="20" cy="20" r="4" fill="#1a1a1a"/></svg>
+      <div><h1>Afiyet Olsun</h1><small>Lokanta oyunu</small></div>
+    </div>
+    <div class="stats">
+      <div class="chip"><span>Gün</span><b id="hDay">1</b></div>
+      <div class="chip"><span>Saat</span><b id="hClock">11:00</b></div>
+      <div class="chip money"><span>Kasa</span><b id="hMoney">0₺</b></div>
+      <div class="chip"><span>Ün</span><b id="hRep">50</b></div>
+      <div class="chip pat off" id="patChip" title="Müşterinin sabrı"><span>Sabır</span><i class="pat-bar"><i id="patFill"></i></i><b id="patFace">😊</b></div>
+      <button class="chip mute" id="muteBtn" type="button" aria-label="Sesi kapat" title="Ses"><b id="hMute">🔊</b></button>
+      <button class="chip mute" id="musicBtn" type="button" aria-label="Müziği kapat" title="Müzik"><b id="hMusic">🎵</b></button>
+    </div>
+  </header>
+
+  <section id="shop">
+    <div class="stage-wrap">
+      <div class="stage" id="stage">
+        <canvas id="stageC" aria-label="Dükkan: müşteri tezgahta"></canvas>
+      </div>
+      <div class="bubble" id="bubble" hidden><b id="bubName"></b><p id="bubText"></p></div>
+    </div>
+    <div class="panel" id="panel" style="margin-top:12px"></div>
+  </section>
+
+  <section id="kitchen" hidden>
+    <div class="kitchen">
+      <div class="ticket" id="ticket"></div>
+      <div class="picker">
+        <button class="btn ask book-btn" id="bookBtn" type="button">Tarif defteri</button>
+        <div id="doughPick">
+          <h3>1. Ne hazırlıyorsun?</h3>
+          <div class="dough-row" id="doughRow" style="margin-top:8px"></div>
+        </div>
+        <div id="binPick" hidden>
+          <h3 id="binTitle">2. Malzemeleri ekle</h3>
+          <div class="bins" id="bins" style="margin-top:8px"></div>
+        </div>
+      </div>
+      <div class="board-wrap">
+        <canvas id="board" aria-label="Hamur tahtası"></canvas>
+        <p class="hint" id="hint">Önce hamuru seç.</p>
+      </div>
+      <div class="actions">
+        <button class="btn" id="resetBtn" type="button">Baştan başla</button>
+        <button class="btn" id="undoBtn" type="button" hidden>Geri al</button>
+        <button class="btn primary" id="bakeBtn" type="button">Fırına ver</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="oven" hidden>
+    <div class="stage">
+      <canvas id="ovenC" aria-label="Taş fırın"></canvas>
+      <div class="oven-tag" id="ovenTag">Pişiyor…</div>
+    </div>
+    <div class="panel" style="margin-top:12px">
+      <div class="gauge-wrap">
+        <div class="gauge"><div class="needle" id="needle"></div></div>
+        <div class="gauge-labels"><span id="gl1">Çiğ</span><span>Tam kıvamında</span><span id="gl3">Yanık</span></div>
+      </div>
+      <button class="btn primary big" id="pullBtn" type="button">Fırından çıkar</button>
+    </div>
+  </section>
+
+  <section id="cut" hidden>
+    <div class="kitchen">
+      <div class="ticket" id="ticket2"></div>
+      <div class="picker">
+        <h3 id="cutTitle">3. Dilimle</h3>
+        <p class="cut-info" id="cutInfo"></p>
+      </div>
+      <div class="board-wrap">
+        <canvas id="cutC" aria-label="Kesme tahtası"></canvas>
+        <p class="hint" id="cutHint">Bıçakla kesmek için parmağını hamurun bir ucundan öbür ucuna sürükle.</p>
+      </div>
+      <div class="actions">
+        <button class="btn" id="undoCutBtn" type="button">Son kesiği geri al</button>
+        <button class="btn primary" id="serveBtn" type="button">Servis et</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="dayend" hidden>
+    <div class="dayend">
+      <h2 id="deTitle">1. gün bitti!</h2>
+      <div class="sum">
+        <div><span>Müşteri</span><b id="deServed">0</b></div>
+        <div><span>Gelir</span><b id="deEarn">0₺</b></div>
+        <div><span>Malzeme</span><b id="deCost">0₺</b></div>
+        <div><span>Ortalama</span><b id="deStars">0★</b></div>
+        <div><span>Bugünkü kâr</span><b id="deProfit">0₺</b></div>
+        <div><span>Kasa</span><b id="deMoney">0₺</b></div>
+      </div>
+      <div class="rep" id="deRepBox" hidden>
+        <div class="rep-head"><span>Mahalle kimi tutuyor?</span><b id="deRep">%50</b></div>
+        <div class="rep-bar"><i id="deRepBar"></i></div>
+        <div class="rep-legend"><span>Sen</span><span>Kebapçı Kâmil</span></div>
+        <p id="deRival"></p>
+      </div>
+      <p class="unlock" id="deUnlock" hidden></p>
+      <div class="shop-list">
+        <h3>Dükkanı geliştir</h3>
+        <div id="upgrades" class="upgrades"></div>
+      </div>
+      <div class="shop-list">
+        <h3>Dükkanı süsle</h3>
+        <p class="recipe-note" style="margin-bottom:8px">Aldığın süsler dükkanda hemen görünür. Güzel bir dükkanda müşteriler daha sabırlı bekler.</p>
+        <canvas class="decor-prev" id="decorPrev" aria-label="Dükkanın görünümü"></canvas>
+        <div id="decor" class="upgrades"></div>
+      </div>
+      <button class="btn go big" id="newDayBtn" type="button">Yeni güne başla</button>
+    </div>
+  </section>
+</div>
+
+<div class="book" id="book" hidden>
+  <div class="book-card" role="dialog" aria-labelledby="bookTitle">
+    <h2 id="bookTitle">Tarif defteri</h2>
+    <div id="bookBody"></div>
+    <button class="btn" id="bookClose" type="button">Kapat</button>
+  </div>
+</div>
+
+<script>
+(() => {
+const $ = s => document.querySelector(s);
+const rnd = (a, b) => a + Math.random() * (b - a);
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const shuffle = a => a.map(v => [Math.random(), v]).sort((x, y) => x[0] - y[0]).map(x => x[1]);
+const cap = s => s.charAt(0).toLocaleUpperCase('tr') + s.slice(1);
+const lower = s => s.toLocaleLowerCase('tr');
+const round5 = v => Math.round(v / 5) * 5;
+function mulberry(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+
+const STORE = 'afiyet-olsun-v1';
+const OPEN = 660;                      // 11:00
+const GAME_MIN_PER_SEC = 60 / 45;      // 1 oyun saati = 45 saniye
+
+// target: [normal'de en az, bol'da en az] parça · cost: parça/porsiyon başı ₺
+const ING = {
+  kiyma:    { name: 'Kıyma', label: 'Kıymalı harç', adj: 'kıymalı', spread: true, need: [0.45, 0.75], cost: 18 },
+  kasar:    { name: 'Kaşar', adj: 'kaşarlı', target: [10, 20], spacing: 22, cost: .6 },
+  sucuk:    { name: 'Sucuk', adj: 'sucuklu', target: [6, 12], spacing: 30, cost: 1.5 },
+  pastirma: { name: 'Pastırma', adj: 'pastırmalı', target: [5, 10], spacing: 34, cost: 3, upg: 'pastirma' },
+  yumurta:  { name: 'Yumurta', adj: 'yumurtalı', bolAdj: 'çift yumurtalı', target: [1, 2], spacing: 95, cost: 4 },
+  peynir:   { name: 'Beyaz peynir', adj: 'peynirli', target: [8, 16], spacing: 24, cost: .6 },
+  ispanak:  { name: 'Ispanak', adj: 'ıspanaklı', target: [8, 16], spacing: 26, cost: .4 },
+  patates:  { name: 'Patates', adj: 'patatesli', target: [8, 16], spacing: 24, cost: .4 },
+  maydanoz: { name: 'Maydanoz', adj: 'maydanozlu', target: [6, 12], spacing: 26, cost: .3 },
+  domates:  { name: 'Domates', adj: 'domatesli', target: [5, 10], spacing: 32, cost: .8 },
+  biber:    { name: 'Sivri biber', adj: 'acılı', bolAdj: 'çok acılı', target: [5, 10], spacing: 30, cost: .5 },
+  // kase ve tepsi malzemeleri: her dokunuş bir porsiyon ekler
+  bulgur:     { name: 'Bulgur', style: 'grain', colors: ['#d9b26a', '#c79a4e', '#e8c98a'], cost: 1, main: true, mix: [212, 170, 100] },
+  pirinc:     { name: 'Pirinç', style: 'grain', colors: ['#fbf8ef', '#e6dfcc', '#f4efe2'], cost: 1, main: true, mix: [236, 230, 212] },
+  salca:      { name: 'Salça', style: 'blob', colors: ['#c0301c'], cost: 1, mix: [190, 52, 30], mw: 2.5 },
+  zeytinyagi: { name: 'Zeytinyağı', style: 'liquid', colors: ['rgba(176,164,40,.8)'], cost: 2, mix: [180, 165, 60], mw: .5 },
+  yag:        { name: 'Sıvı yağ', style: 'liquid', colors: ['rgba(244,204,70,.75)'], cost: 1 },
+  sut:        { name: 'Süt', style: 'liquid', colors: ['rgba(255,255,248,.95)'], cost: 1 },
+  nar:        { name: 'Nar ekşisi', style: 'liquid', colors: ['rgba(92,20,28,.88)'], cost: 2, mix: [100, 30, 30] },
+  yesilsogan: { name: 'Taze soğan', style: 'rings', colors: ['#5fae3e'], cost: .5, mix: [80, 150, 60], mw: .5 },
+  sogan:      { name: 'Kuru soğan', style: 'dice', colors: ['#f4e9f1', '#c98fb4'], cost: .5 },
+  nane:       { name: 'Nane', style: 'leaves', colors: ['#2f7a3a', '#4e9a50'], cost: .5, mix: [60, 120, 55], mw: .5 },
+  limon:      { name: 'Limon', style: 'slice', colors: ['#f5d23a'], cost: 1 },
+  pulbiber:   { name: 'Pul biber', style: 'dust', colors: ['#c8321e', '#e2552e'], cost: .5, mix: [200, 50, 30] },
+  karabiber:  { name: 'Karabiber', style: 'dust', colors: ['#2a2420', '#4a403a'], cost: .5 },
+  tarcin:     { name: 'Tarçın', style: 'dust', colors: ['#8a5428', '#a8693a'], cost: .5 },
+  kusuzumu:   { name: 'Kuş üzümü', style: 'dice', colors: ['#3a1f2e', '#5a2f44'], cost: 1, small: true },
+  fistik:     { name: 'Dolmalık fıstık', style: 'dice', colors: ['#f2e6c4', '#dccb98'], cost: 2, small: true },
+  yufka:      { name: 'Yufka', style: 'sheet', cost: 3 },
+};
+// kase ve tepsideyken bazı malzemeler farklı görünür
+const PSTYLE = {
+  kiyma: { style: 'grain', colors: ['#8f3d1e', '#6b2711', '#a8492a'], mix: [140, 60, 30] },
+  yumurta: { style: 'liquid', colors: ['rgba(245,168,30,.85)'] },
+  maydanoz: { mix: [70, 140, 60], mw: .5 },
+};
+// kind: flat = hamur işi (fırın + kesme), bowl = kasede karıştır, tray = tepside fırın + kare kesme, sarma = harç + sar + tencere
+// cut: 'radial' = merkezden geçen kesik 2 dilim, 'cross' = enine kesik +1 dilim, 'grid' = dikine × enine
+const DISH = {
+  lahmacun: { kind: 'flat', name: 'Lahmacun', price: 60, cost: 5, opts: ['maydanoz', 'domates', 'biber'], slices: 1, sliceOpts: [2, 4], cut: 'radial' },
+  pide:     { kind: 'flat', name: 'Pide', price: 120, cost: 10, opts: ['kasar', 'sucuk', 'kiyma', 'yumurta', 'pastirma'], slices: 6, sliceOpts: [4, 8], cut: 'cross' },
+  gozleme:  { kind: 'flat', name: 'Gözleme', price: 90, cost: 8, opts: ['peynir', 'ispanak', 'patates', 'kiyma'], slices: 4, sliceOpts: [2, 6], cut: 'cross', upg: 'sac' },
+  kisir:    { kind: 'bowl', name: 'Kısır', base: 'Kısır kasesi', price: 50, cost: 2,
+    variants: [
+      { id: 'klasik', label: '', req: ['bulgur', 'salca', 'zeytinyagi', 'yesilsogan', 'maydanoz', 'nane', 'nar'], day: 1 },
+      { id: 'acili', label: 'acılı', req: ['bulgur', 'salca', 'zeytinyagi', 'yesilsogan', 'maydanoz', 'nane', 'nar', 'pulbiber'], day: 1 },
+    ], optional: ['pulbiber', 'limon'] },
+  borek:    { kind: 'tray', name: 'Börek', base: 'Börek tepsisi', price: 100, cost: 4, slices: 9, sliceOpts: [4, 6, 12], cut: 'grid',
+    variants: [
+      { id: 'patatesli', label: 'patatesli', req: ['yufka', 'patates', 'sogan', 'sut', 'yag', 'yumurta'], day: 1 },
+      { id: 'peynirli', label: 'peynirli', req: ['yufka', 'peynir', 'maydanoz', 'sut', 'yag', 'yumurta'], day: 2 },
+      { id: 'ispanakli', label: 'ıspanaklı', req: ['yufka', 'ispanak', 'sogan', 'sut', 'yag', 'yumurta'], day: 2 },
+    ], optional: ['karabiber', 'pulbiber'] },
+  sarma:    { kind: 'sarma', name: 'Yaprak sarma', base: 'Sarma iç harcı', price: 80, cost: 4, count: 8, countOpts: [6, 10, 12],
+    variants: [
+      { id: 'zeytinyagli', label: 'zeytinyağlı', req: ['pirinc', 'sogan', 'zeytinyagi', 'nane', 'kusuzumu', 'fistik'], day: 1 },
+      { id: 'etli', label: 'etli', req: ['pirinc', 'kiyma', 'sogan', 'salca', 'nane'], day: 2 },
+    ], optional: ['karabiber', 'tarcin', 'limon', 'pulbiber'] },
+};
+const ING_FOR = { lahmacun: ['kiyma', 'maydanoz', 'domates', 'biber'], pide: ['kasar', 'sucuk', 'pastirma', 'kiyma', 'yumurta'], gozleme: ['peynir', 'ispanak', 'patates', 'kiyma'] };
+const POOL = {
+  bowl: ['bulgur', 'pirinc', 'salca', 'zeytinyagi', 'nar', 'yesilsogan', 'sogan', 'maydanoz', 'nane', 'limon', 'pulbiber', 'karabiber', 'tarcin', 'kusuzumu', 'fistik', 'kiyma'],
+  tray: ['yufka', 'patates', 'sogan', 'peynir', 'ispanak', 'maydanoz', 'kiyma', 'sut', 'yag', 'yumurta', 'karabiber', 'pulbiber'],
+};
+Object.assign(ING, {
+  un:       { name: 'Un', style: 'grain', colors: ['#fbfaf4', '#ebe5d6'], cost: .5, main: true, mix: [245, 238, 222] },
+  tereyagi: { name: 'Tereyağı', style: 'blob', colors: ['#f7e08a'], cost: 2, mix: [245, 220, 140] },
+  seker:    { name: 'Şeker', style: 'grain', colors: ['#ffffff', '#ecebe6'], cost: .5, mix: [250, 248, 240], mw: .5 },
+  elma:     { name: 'Elma', style: 'dice', colors: ['#f6edc0', '#c9322a'], cost: 1, mix: [240, 225, 170] },
+  ceviz:    { name: 'Ceviz', style: 'dice', colors: ['#9a6a3a', '#7a4f28'], cost: 2 },
+  pudra:    { name: 'Pudra şekeri', style: 'dust', colors: ['#ffffff', '#f1f1ec'], cost: .5 },
+  portakal: { name: 'Portakal', style: 'peel', colors: ['#f08a1c', '#f7a63c'], cost: 1.5, main: true, mix: [240, 140, 30] },
+  su:       { name: 'Su', style: 'liquid', colors: ['rgba(150,200,235,.7)'], cost: 0 },
+});
+DISH.kurabiye = { kind: 'cookie', name: 'Elmalı kurabiye', base: 'Kurabiye hamuru', price: 70, cost: 2, count: 6, countOpts: [4, 8, 10], learn: 'kurabiye',
+  variants: [
+    { id: 'klasik', label: '', req: ['un', 'tereyagi', 'seker', 'yumurta', 'elma', 'tarcin'], day: 1 },
+    { id: 'cevizli', label: 'cevizli', req: ['un', 'tereyagi', 'seker', 'yumurta', 'elma', 'tarcin', 'ceviz'], day: 1 },
+  ], optional: ['ceviz', 'pudra'] };
+DISH.recel = { kind: 'jam', name: 'Portakal reçeli', base: 'Reçel tenceresi', price: 90, cost: 3, learn: 'recel',
+  variants: [{ id: 'klasik', label: '', req: ['portakal', 'seker', 'su', 'limon'], day: 1 }], optional: ['tarcin'] };
+Object.assign(ING, {
+  mercimek: { name: 'Kırmızı mercimek', style: 'grain', colors: ['#e8823a', '#f09a50', '#d9702a'], cost: 1, main: true, mix: [235, 140, 60], mw: 2 },
+  havuc:    { name: 'Havuç', style: 'dice', colors: ['#f07a1a', '#f59a40'], cost: .5, mix: [240, 130, 40] },
+  yogurt:   { name: 'Yoğurt', style: 'blob', colors: ['#fbfaf5'], cost: 1.5 },
+  sarimsak: { name: 'Sarımsak', style: 'dice', colors: ['#f6f2e4', '#e2d8bc'], cost: .5, small: true },
+  patlican: { name: 'Patlıcan', style: 'eggplant', cost: 2, main: true },
+});
+DISH.mercimek = { kind: 'jam', look: 'soup', name: 'Mercimek çorbası', base: 'Çorba tenceresi', price: 45, cost: 2, day: 2,
+  phrase: () => 'bir kase mercimek çorbası', unit: '1 kase', labels: ['Sulu', 'Dibi tuttu'],
+  gauge: ['Kaynıyor…', 'Mercimekler pişiyor…', 'Tam kıvamında, ocaktan al!', 'Fazla koyulaştı!', 'Dibi tutuyor!'],
+  texts: ['Çorba sulu kalmış!', 'Mercimekler biraz diri.', 'Çorba fazla koyulaşmış.', 'Çorbanın dibi tutmuş!'],
+  how: 'Malzemeleri tencereye koy, mercimekler dağılana kadar pişir. İstersen limon ve pul biberle ver.',
+  variants: [{ id: 'klasik', label: '', req: ['mercimek', 'sogan', 'havuc', 'salca', 'tereyagi', 'su'], day: 1 }], optional: ['patates', 'nane', 'pulbiber', 'limon'],
+  pool: ['mercimek', 'bulgur', 'pirinc', 'sogan', 'havuc', 'patates', 'salca', 'tereyagi', 'su', 'sut', 'nane', 'pulbiber', 'limon', 'seker'] };
+DISH.karniyarik = { kind: 'tray', noCut: true, name: 'Karnıyarık', base: 'Karnıyarık tepsisi', price: 110, cost: 3, day: 3,
+  phrase: () => 'bir porsiyon karnıyarık', unit: '1 porsiyon',
+  texts: ['Patlıcanlar çiğ kalmış!', 'Biraz diri kalmış.', 'Biraz fazla pişmiş.', 'Karnıyarık yanmış!'],
+  how: 'Kızarmış patlıcanları tepsiye diz, üstüne kıymalı harcı koy, fırında pişir.',
+  variants: [{ id: 'klasik', label: '', req: ['patlican', 'kiyma', 'sogan', 'domates', 'biber', 'salca'], day: 1 }], optional: ['sarimsak', 'maydanoz', 'yag'],
+  pool: ['patlican', 'patates', 'kiyma', 'sogan', 'sarimsak', 'domates', 'biber', 'salca', 'yag', 'peynir', 'maydanoz', 'yumurta'] };
+DISH.manti = { kind: 'manti', name: 'Mantı', base: 'Mantı iç harcı', price: 110, cost: 4, day: 4, count: 12, countOpts: [8, 10],
+  phrase: () => 'bir porsiyon mantı', unit: null,
+  texts: ['Mantının hamuru çiğ kalmış!', 'Biraz diri kalmış.', 'Biraz fazla haşlanmış.', 'Mantılar dağılmış!'],
+  gauge: ['Su kaynıyor…', 'Mantılar haşlanıyor…', 'Pişti, süzgece al!', 'Fazla haşlanıyor!', 'Mantılar dağılıyor!'], labels: ['Diri', 'Dağıldı'],
+  how: 'İç harcı karıştır, hamur karelerine koyup kapat, kaynar suda haşla. Üstüne sarımsaklı yoğurt, tereyağı ve pul biber.',
+  variants: [{ id: 'klasik', label: '', req: ['kiyma', 'sogan', 'karabiber', 'yogurt', 'sarimsak', 'tereyagi', 'pulbiber'], day: 1 }], optional: ['nane', 'salca'] };
+POOL.garnish = ['yogurt', 'sarimsak', 'tereyagi', 'pulbiber', 'nane', 'salca', 'sut', 'limon', 'seker'];
+POOL.sweet = ['un', 'tereyagi', 'seker', 'yumurta', 'sut', 'elma', 'portakal', 'tarcin', 'ceviz', 'pudra', 'su', 'limon', 'salca'];
+
+const UPG = [
+  { id: 'sac', name: 'Gözleme sacı', price: 150, desc: 'Menüye gözleme eklenir.' },
+  { id: 'pastirma', name: 'Kayseri pastırması', price: 200, desc: 'Pideye yeni malzeme: pastırma.' },
+  { id: 'cay', name: 'Çay ocağı', price: 200, desc: 'Bekleyen müşteriye çay ikram edilir, memnuniyet artar.' },
+  { id: 'firin', name: 'Hızlı taş fırın', price: 250, desc: 'Fırın ve ocak daha hızlı pişirir, zamandan kazanırsın.' },
+  { id: 'mesai', name: 'Uzun mesai', price: 300, desc: 'Dükkan 19:00 yerine 21:00\'de kapanır.' },
+  { id: 'masa', name: 'Masa ve sandalye', price: 350, desc: 'Müşteriler daha çok bahşiş bırakır.' },
+];
+
+const DECOR = [
+  { id: 'boya_krem', group: 'boya', name: 'Krem boya', price: 0, desc: 'Dükkanın ilk rengi.', wall: ['#f4dcbc', 'rgba(214,68,42,.07)'] },
+  { id: 'boya_cini', group: 'boya', name: 'Çini mavisi boya', price: 80, desc: 'Duvarlar serin bir çini mavisine boyanır.', wall: ['#d3e8e4', 'rgba(22,128,127,.10)'] },
+  { id: 'boya_nar', group: 'boya', name: 'Nar çiçeği boya', price: 80, desc: 'Duvarlar sıcak bir nar çiçeği rengine boyanır.', wall: ['#f6cfc2', 'rgba(180,45,35,.09)'] },
+  { id: 'boya_fistik', group: 'boya', name: 'Fıstık yeşili boya', price: 80, desc: 'Duvarlar açık fıstık yeşiline boyanır.', wall: ['#e0eac6', 'rgba(90,130,40,.11)'] },
+  { id: 'saksi', name: 'Sardunya saksıları', price: 60, desc: 'Pencerenin önüne kırmızı sardunyalar.' },
+  { id: 'lamba', name: 'Mozaik lamba', price: 90, desc: 'Rengarenk camlı, ışıl ışıl bir lamba.' },
+  { id: 'kilim', name: 'Tezgaha kilim', price: 100, desc: 'Tezgahın önüne el dokuması bir kilim.' },
+  { id: 'tabela', name: 'Lokanta tabelası', price: 120, desc: 'Tentenin üstüne ahşap bir tabela.' },
+  { id: 'bahce', name: 'Bahçe masaları', price: 150, desc: 'Dışarıya örtülü masalar kurulur, pencereden görünür.' },
+];
+const hasDecor = id => !!(S.decor && S.decor[id]);
+const decorCount = () => DECOR.filter(d => d.price && hasDecor(d.id)).length;
+const wallColors = () => (DECOR.find(d => d.id === S.decor.wall) || DECOR[0]).wall;
+
+// ---------- state ----------
+let S = { day: 1, money: 0, time: OPEN, upg: {}, dayServed: 0, dayEarn: 0, dayCost: 0, dayStars: 0, rep: 50, regulars: [], learned: {}, ev: {}, decor: {} };
+try { const s = JSON.parse(localStorage.getItem(STORE) || 'null'); if (s) Object.assign(S, s); } catch (e) {}
+if (!S.upg) S.upg = {};
+for (const [k, v] of [['regulars', []], ['learned', {}], ['ev', {}], ['decor', {}]]) if (!S[k]) S[k] = v;
+if (typeof S.rep !== 'number') S.rep = 50;
+if (typeof S.time !== 'number') S.time = OPEN;
+function save() { try { localStorage.setItem(STORE, JSON.stringify(S)); } catch (e) {} }
+const has = id => !!S.upg[id];
+const dishOpen = k => (!DISH[k].day || S.day >= DISH[k].day) && (!DISH[k].upg || has(DISH[k].upg)) && (!DISH[k].learn || !!S.learned[DISH[k].learn]);
+const ingOpen = k => !ING[k].upg || has(ING[k].upg);
+const kindOf = k => DISH[k].kind;
+const closeTime = () => has('mesai') ? 1260 : 1140;
+const clockText = m => String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(Math.floor(m % 60)).padStart(2, '0');
+
+let phase = 'enter';       // enter | order | serve | leave
+let cust = null, order = null, result = null, plate = null;
+let K = null;              // hazırlanan yemek: {dough, toppings, spread, portions, stage, stir, rolls, bake, cuts}
+let sel = null, baking = false, muted = false;
+
+// ---------- audio ----------
+let AC = null, NB = null;
+const ac = () => (AC = AC || new (window.AudioContext || window.webkitAudioContext)());
+function noise(d, ftype, freq, v, q = 1, delay = 0) {
+  if (muted) return;
+  try {
+    ac();
+    if (!NB) { NB = AC.createBuffer(1, AC.sampleRate, AC.sampleRate); const ch = NB.getChannelData(0); for (let i = 0; i < ch.length; i++) ch[i] = Math.random() * 2 - 1; }
+    const t = AC.currentTime + delay, src = AC.createBufferSource(), f = AC.createBiquadFilter(), g = AC.createGain();
+    src.buffer = NB; f.type = ftype; f.frequency.value = freq; f.Q.value = q;
+    g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+    src.connect(f).connect(g).connect(AC.destination); src.start(t, Math.random() * .5); src.stop(t + d);
+  } catch (e) {}
+}
+function tone(f, d = 0.08, type = 'sine', v = 0.05) {
+  if (muted) return;
+  try {
+    AC = AC || new (window.AudioContext || window.webkitAudioContext)();
+    const o = AC.createOscillator(), g = AC.createGain();
+    o.type = type; o.frequency.value = f;
+    g.gain.setValueAtTime(v, AC.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.0001, AC.currentTime + d);
+    o.connect(g).connect(AC.destination); o.start(); o.stop(AC.currentTime + d);
+  } catch (e) {}
+}
+const sfx = {
+  plop: () => tone(rnd(380, 540), .07, 'triangle', .05),
+  chop: () => { noise(.035, 'bandpass', rnd(2200, 3200), .14, 2); tone(rnd(180, 230), .05, 'triangle', .04); },
+  pour: () => { noise(.35, 'lowpass', rnd(700, 1000), .07, 1); noise(.25, 'bandpass', 1800, .02, 3, .05); },
+  knife: () => { noise(.14, 'highpass', 3500, .08); tone(1200, .05, 'square', .015); },
+  smear: () => { tone(rnd(140, 180), .05, 'triangle', .025); noise(.09, 'bandpass', rnd(600, 1000), .05, 1.5); },
+  sizzle: () => noise(rnd(.03, .09), 'highpass', rnd(4000, 7000), rnd(.01, .03)),
+  bubble: () => tone(rnd(260, 520), .07, 'sine', .025),
+  grumble: () => { tone(120, .25, 'sawtooth', .025); setTimeout(() => tone(98, .3, 'sawtooth', .025), 200); },
+  coin: () => { tone(988, .1, 'square', .03); setTimeout(() => tone(1319, .2, 'square', .03), 90); },
+  bell: () => { tone(1568, .45, 'sine', .05); setTimeout(() => tone(1319, .6, 'sine', .045), 180); },
+  bad: () => tone(150, .3, 'sawtooth', .03),
+  whoosh: () => tone(220, .2, 'sine', .04),
+};
+
+// ---------- music: hafif bir Hicaz ezgisi ----------
+let musicOn = true;
+try { musicOn = localStorage.getItem('afiyet-olsun-music') !== '0'; } catch (e) {}
+const Music = (() => {
+  const HICAZ = [0, 1, 4, 5, 7, 8, 10, 12, 13, 16, 17, 19];   // re hicaz: Re Mi♭ Fa♯ Sol La Si♭ Do Re…
+  const f = (deg, oct = 0) => 293.66 * Math.pow(2, (HICAZ[deg] + oct * 12) / 12);
+  const MEL = [
+    [7, -1, 6, 5, 4, -1, 3, 4], [5, 4, 3, 2, 1, -1, -1, -1], [3, 4, 5, 7, 6, 5, 4, -1], [3, 2, 1, 2, 0, -1, -1, -1],
+    [4, -1, 4, 5, 6, 7, 8, -1], [7, 6, 5, 6, 4, -1, -1, -1], [3, 4, 5, 4, 3, 2, 1, 2], [0, -1, -1, -1, 0, -1, -1, -1],
+  ];
+  const DRUM = 'Dt-tD-t-'.split('');   // maksum usulü
+  const BASS = [0, 0, 3, 0, 4, 4, 3, 0];
+  const STEP = .21;
+  let timer = null, step = 0, nextT = 0, bus = null;
+  function pluck(freq, t, v, d = .45) {
+    const o = AC.createOscillator(), o2 = AC.createOscillator(), g = AC.createGain();
+    o.type = 'triangle'; o.frequency.value = freq; o2.type = 'sine'; o2.frequency.value = freq * 2.01;
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + .008); g.gain.exponentialRampToValueAtTime(.0001, t + d);
+    o.connect(g); o2.connect(g); g.connect(bus); o.start(t); o2.start(t); o.stop(t + d); o2.stop(t + d);
+  }
+  function drum(kind, t) {
+    if (kind === 'D') {
+      const o = AC.createOscillator(), g = AC.createGain();
+      o.frequency.setValueAtTime(130, t); o.frequency.exponentialRampToValueAtTime(55, t + .18);
+      g.gain.setValueAtTime(.22, t); g.gain.exponentialRampToValueAtTime(.0001, t + .22);
+      o.connect(g).connect(bus); o.start(t); o.stop(t + .24);
+    } else {
+      const src = AC.createBufferSource(), fl = AC.createBiquadFilter(), g = AC.createGain();
+      src.buffer = NB; fl.type = 'bandpass'; fl.frequency.value = 3200; fl.Q.value = 1.2;
+      g.gain.setValueAtTime(.12, t); g.gain.exponentialRampToValueAtTime(.0001, t + .06);
+      src.connect(fl).connect(g).connect(bus); src.start(t, Math.random() * .5); src.stop(t + .07);
+    }
+  }
+  function tick() {
+    if (nextT < AC.currentTime) nextT = AC.currentTime + .05;
+    while (nextT < AC.currentTime + .25) {
+      const bar = Math.floor(step / 8) % MEL.length, i = step % 8, n = MEL[bar][i];
+      if (n >= 0) pluck(f(n), nextT, .09, i % 2 ? .3 : .5);
+      if (DRUM[i] !== '-') drum(DRUM[i], nextT);
+      if (i === 0 || i === 4) pluck(f(BASS[bar], -2), nextT, .12, .8);
+      if (bar % 4 === 3 && i === 6) pluck(f(7, 1), nextT, .03, .9);
+      step++; nextT += STEP;
+    }
+  }
+  return {
+    start() {
+      if (timer || muted || !musicOn) return;
+      try {
+        ac(); if (AC.state === 'suspended') AC.resume();
+        if (!NB) noise(.01, 'lowpass', 100, .0001);
+        bus = AC.createGain(); bus.gain.value = .0001; bus.connect(AC.destination);
+        bus.gain.exponentialRampToValueAtTime(.32, AC.currentTime + 1.5);
+        nextT = AC.currentTime + .1; timer = setInterval(tick, 60); tick();
+      } catch (e) {}
+    },
+    stop() {
+      if (!timer) return;
+      clearInterval(timer); timer = null;
+      const b = bus; try { b.gain.setTargetAtTime(.0001, AC.currentTime, .2); setTimeout(() => b.disconnect(), 1200); } catch (e) {}
+    },
+  };
+})();
+
+// ---------- geometry ----------
+function rr(p, x, y, w, h, r) { p.moveTo(x + r, y); p.arcTo(x + w, y, x + w, y + h, r); p.arcTo(x + w, y + h, x, y + h, r); p.arcTo(x, y + h, x, y, r); p.arcTo(x, y, x + w, y, r); p.closePath(); }
+function roundRect(ctx, x, y, w, h, r) { ctx.beginPath(); rr(ctx, x, y, w, h, r); }
+function circle(ctx, x, y, r) { ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); }
+function ellipse(ctx, x, y, rx, ry, rot = 0) { ctx.beginPath(); ctx.ellipse(x, y, rx, ry, rot, 0, Math.PI * 2); }
+
+const PATHS = (() => {
+  const l = new Path2D(); l.arc(250, 250, 200, 0, Math.PI * 2);
+  const p = new Path2D(); p.moveTo(28, 250); p.bezierCurveTo(120, 118, 380, 118, 472, 250); p.bezierCurveTo(380, 382, 120, 382, 28, 250); p.closePath();
+  const g = new Path2D(); rr(g, 50, 120, 400, 260, 46);
+  return { lahmacun: l, pide: p, gozleme: g };
+})();
+const hit = document.createElement('canvas').getContext('2d');
+const inside = (type, x, y) => hit.isPointInPath(PATHS[type], x, y);
+
+const RAW = [245, 226, 186], GOLD = [226, 162, 82], BURNT = [80, 44, 22];
+const mix = (a, b, t) => a.map((v, i) => Math.round(v + (b[i] - v) * t));
+const doughRGB = b => b < 0.6 ? mix(RAW, GOLD, b / 0.6) : mix(GOLD, BURNT, clamp((b - 0.6) / 0.4, 0, 1));
+const rgb = (c, k = 0) => `rgb(${c.map(v => clamp(Math.round(v * (1 + k)), 0, 255)).join(',')})`;
+
+function fit(canvas, lw, lh) {
+  const r = canvas.getBoundingClientRect();
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(w / lw, 0, 0, h / lh, 0, 0);
+  return ctx;
+}
+
+// ---------- ingredient sprites (500-unit dish space) ----------
+function drawPiece(ctx, type, x, y, rot, seed, b = 0) {
+  const r = mulberry(seed);
+  ctx.save(); ctx.translate(x, y); ctx.rotate(rot);
+  switch (type) {
+    case 'kasar': {
+      const melt = clamp((b - 0.3) / 0.3, 0, 1);
+      ctx.fillStyle = rgb(mix([249, 216, 92], [238, 172, 60], melt));
+      ctx.strokeStyle = 'rgba(185,125,25,.6)'; ctx.lineWidth = 1.5;
+      for (let i = 0; i < 3; i++) {
+        ctx.save(); ctx.rotate((r() - .5) * .9); ctx.translate((r() - .5) * 10, (i - 1) * 6);
+        roundRect(ctx, -13, -2.5, 26, 5 + melt * 3, 3); ctx.fill(); ctx.stroke(); ctx.restore();
+      }
+      break;
+    }
+    case 'sucuk':
+      ctx.fillStyle = '#9b2b22'; circle(ctx, 0, 0, 14); ctx.fill();
+      ctx.lineWidth = 2.5; ctx.strokeStyle = '#5e1510'; ctx.stroke();
+      ctx.fillStyle = '#eaa18a';
+      for (let i = 0; i < 5; i++) { circle(ctx, (r() - .5) * 16, (r() - .5) * 16, 1.6 + r() * 1.4); ctx.fill(); }
+      break;
+    case 'domates':
+      ctx.fillStyle = '#e2412c'; circle(ctx, 0, 0, 15); ctx.fill();
+      ctx.fillStyle = '#f27d5f'; circle(ctx, 0, 0, 10); ctx.fill();
+      ctx.fillStyle = '#fbe2a6';
+      for (let i = 0; i < 4; i++) { const a = i * Math.PI / 2 + .4; ellipse(ctx, Math.cos(a) * 5.5, Math.sin(a) * 5.5, 2.6, 1.6, a); ctx.fill(); }
+      break;
+    case 'biber':
+      ctx.strokeStyle = '#3c9a35'; ctx.lineWidth = 5; circle(ctx, 0, 0, 10); ctx.stroke();
+      ctx.strokeStyle = '#256a20'; ctx.lineWidth = 1.5; circle(ctx, 0, 0, 12.6); ctx.stroke();
+      ctx.fillStyle = '#f3efc6'; ellipse(ctx, -2, 1, 1.8, 1.1); ctx.fill(); ellipse(ctx, 2.5, -1.5, 1.8, 1.1); ctx.fill();
+      break;
+    case 'maydanoz':
+      for (let i = 0; i < 4; i++) {
+        const a = i * 1.6 + r();
+        ctx.fillStyle = i % 2 ? '#2f8f3a' : '#43a94d';
+        ellipse(ctx, Math.cos(a) * 6, Math.sin(a) * 6, 6.5, 4.5, a); ctx.fill();
+      }
+      break;
+    case 'yumurta': {
+      ctx.fillStyle = '#fffaf0'; ctx.strokeStyle = 'rgba(200,180,150,.6)'; ctx.lineWidth = 2;
+      ctx.beginPath();
+      for (let i = 0; i <= 12; i++) {
+        const a = i / 12 * Math.PI * 2, rad = 34 + (i % 12 === 0 ? 0 : r() * 12);
+        const px = Math.cos(a) * rad, py = Math.sin(a) * rad;
+        if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      }
+      ctx.closePath(); ctx.lineJoin = 'round'; ctx.fill(); ctx.stroke();
+      ctx.fillStyle = b > .55 ? '#ea9416' : '#f6a51e'; circle(ctx, 3, 2, 15); ctx.fill();
+      ctx.strokeStyle = '#d9840c'; ctx.stroke();
+      ctx.fillStyle = 'rgba(255,255,255,.7)'; ellipse(ctx, -2, -4, 5, 3, -.5); ctx.fill();
+      break;
+    }
+    case 'peynir': {
+      ctx.fillStyle = '#fdfcf4'; ctx.strokeStyle = '#d6cfb6'; ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      for (let i = 0; i < 5; i++) { const a = i / 5 * Math.PI * 2, rad = 8 + r() * 4; ctx.lineTo(Math.cos(a) * rad, Math.sin(a) * rad); }
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      break;
+    }
+    case 'ispanak':
+      ctx.fillStyle = '#2c6a29'; ellipse(ctx, 0, 0, 15, 8); ctx.fill();
+      ctx.strokeStyle = '#59a24c'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(-12, 0); ctx.lineTo(12, 0); ctx.stroke();
+      break;
+    case 'pastirma':
+      ctx.fillStyle = '#8e2a1f'; ctx.beginPath(); ctx.moveTo(-16, -6); ctx.quadraticCurveTo(0, -12, 16, -6); ctx.lineTo(14, 6); ctx.quadraticCurveTo(0, 1, -14, 7); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = '#c2541f'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(-16, -6); ctx.quadraticCurveTo(0, -12, 16, -6); ctx.stroke();
+      ctx.fillStyle = 'rgba(255,220,200,.45)'; ellipse(ctx, -3, -1, 6, 1.5, .1); ctx.fill();
+      break;
+    case 'patates':
+      roundRect(ctx, -8, -8, 16, 16, 4); ctx.fillStyle = '#f1d08a'; ctx.fill();
+      ctx.strokeStyle = '#c99c48'; ctx.lineWidth = 1.5; ctx.stroke();
+      ctx.fillStyle = 'rgba(255,255,255,.5)'; roundRect(ctx, -5, -5, 6, 4, 2); ctx.fill();
+      break;
+  }
+  ctx.restore();
+}
+
+function stampSpread(sp, type, x, y) {
+  const c = sp.getContext('2d');
+  c.save(); c.clip(PATHS[type]);
+  c.fillStyle = '#8f3d1e'; circle(c, x, y, 26); c.fill();
+  for (let i = 0; i < 5; i++) {
+    c.fillStyle = pick(['#6b2711', '#b8502a', '#a33a1a', '#4f8a2f']);
+    const a = Math.random() * 6.28, d = Math.random() * 22;
+    circle(c, x + Math.cos(a) * d, y + Math.sin(a) * d, 1.5 + Math.random() * 2.2); c.fill();
+  }
+  c.restore();
+}
+
+function renderDish(ctx, d, noShadow) {
+  const path = PATHS[d.dough], b = d.bake || 0, c = doughRGB(b);
+  ctx.save();
+  if (!noShadow) { ctx.shadowColor = 'rgba(60,30,10,.28)'; ctx.shadowBlur = 14; ctx.shadowOffsetY = 6; }
+  ctx.fillStyle = rgb(c); ctx.fill(path);
+  ctx.restore();
+  ctx.save(); ctx.clip(path);
+  const r = mulberry(d.dough.length * 99 + 7);
+  for (let i = 0; i < 70; i++) {
+    ctx.fillStyle = b > .35 ? `rgba(110,55,20,${.08 + b * .2})` : 'rgba(255,255,255,.35)';
+    ellipse(ctx, r() * 500, r() * 500, 3 + r() * 5, 2 + r() * 3, r() * 3); ctx.fill();
+  }
+  if (d.spread) ctx.drawImage(d.spread, 0, 0, 500, 500);
+  for (const t of d.toppings) drawPiece(ctx, t.type, t.x, t.y, t.rot, t.seed, b);
+  if (b > .62) { ctx.globalCompositeOperation = 'multiply'; ctx.fillStyle = `rgba(150,80,30,${clamp((b - .62) * 1.8, 0, .75)})`; ctx.fillRect(0, 0, 500, 500); }
+  ctx.restore();
+  ctx.save(); ctx.lineJoin = 'round';
+  ctx.strokeStyle = rgb(c, -0.1); ctx.lineWidth = d.dough === 'pide' ? 26 : d.dough === 'gozleme' ? 10 : 7; ctx.stroke(path);
+  if (d.dough === 'pide') { ctx.strokeStyle = rgb(c, 0.05); ctx.lineWidth = 9; ctx.stroke(path); }
+  ctx.restore();
+}
+
+function coverage(d) {
+  if (!d.spread) return 0;
+  const data = d.spread.getContext('2d').getImageData(0, 0, 500, 500).data;
+  let tot = 0, cov = 0;
+  for (let y = 5; y < 500; y += 10) for (let x = 5; x < 500; x += 10) {
+    if (!inside(d.dough, x, y)) continue;
+    tot++; if (data[(y * 500 + x) * 4 + 3] > 100) cov++;
+  }
+  return tot ? cov / tot : 0;
+}
+
+// ---------- customers ----------
+const SKINS = [['#f6d2b4', '#e2b48f'], ['#eac09a', '#d09f75'], ['#d9a57c', '#bb8259'], ['#b07a52', '#8f5f3c']];
+const TYPES = [
+  { names: ['Ahmet Amca', 'Hüseyin Amca', 'Rıza Amca', 'Kemal Bey', 'Osman Amca'], hair: ['bald', 'cap'], mustache: 1, colors: ['#d8d2c8', '#9a948a'], glasses: .5, shirt: ['#5b7fa6', '#7b6a4f', '#4f6b52'] },
+  { names: ['Ayşe Teyze', 'Fatma Teyze', 'Hatice Hanım', 'Emine Teyze', 'Nermin Hanım'], hair: ['scarf'], colors: ['#8b5a2b'], scarf: ['#c2395a', '#3c7a8f', '#7d4fa0', '#d98a1f'], glasses: .4, shirt: ['#7a3b5a', '#2f5d6e', '#8a6a3a'] },
+  { names: ['Zeynep', 'Elif', 'Selin', 'Defne', 'Melis'], hair: ['long', 'bun'], colors: ['#3b2618', '#7a4a22', '#c98b3c', '#1f1a17'], glasses: .25, shirt: ['#e07a5f', '#3d8b8b', '#f2b134', '#8f6bb3'] },
+  { names: ['Mehmet', 'Can', 'Emre', 'Burak', 'Kerem'], hair: ['short'], colors: ['#2b1d14', '#5b3a1e', '#1a1a1a'], mustache: .25, glasses: .3, shirt: ['#2f7d4f', '#c7462e', '#36558f', '#e3a23b'] },
+];
+const LOOK_KEYS = ['name', 'hair', 'hairColor', 'skin', 'skinDark', 'shirt', 'scarf', 'mustache', 'glasses'];
+const lookOf = c => Object.fromEntries(LOOK_KEYS.map(k => [k, c[k]]));
+function makeCustomer() {
+  if (S.regulars.length && Math.random() < .35) { const r = pick(S.regulars); return Object.assign({}, r.look, { mood: 'idle', seed: Math.random() * 100, regular: r }); }
+  return makeStranger();
+}
+const KAMIL = { name: 'Kebapçı Kâmil', hair: 'chef', hairColor: '#2b1d14', skin: '#eac09a', skinDark: '#d09f75', shirt: '#8f2a1f', scarf: null, mustache: true, glasses: false };
+const HAYRIYE = { name: 'Hayriye Teyze', hair: 'scarf', hairColor: '#8b5a2b', skin: '#f6d2b4', skinDark: '#e2b48f', shirt: '#7a3b5a', scarf: '#7d4fa0', mustache: false, glasses: true };
+function makeStranger() {
+  const T = pick(TYPES), sk = pick(SKINS);
+  return {
+    name: pick(T.names), hair: pick(T.hair), hairColor: pick(T.colors), skin: sk[0], skinDark: sk[1],
+    shirt: pick(T.shirt), scarf: T.scarf ? pick(T.scarf) : null,
+    mustache: Math.random() < (T.mustache || 0), glasses: Math.random() < T.glasses,
+    mood: 'idle', seed: Math.random() * 100,
+  };
+}
+
+function drawCustomer(ctx, c, x, t, walking) {
+  const y = 300;
+  const bob = walking ? Math.abs(Math.sin(t * 10)) * -8 : Math.sin(t * 2 + c.seed) * 2;
+  ctx.save(); ctx.translate(x, bob);
+  const scarfed = c.hair === 'scarf';
+  const hy = y - 160, fr = scarfed ? 46 : 54;
+  if (c.hair === 'long') { ctx.fillStyle = c.hairColor; roundRect(ctx, -64, hy - 58, 128, 170, 52); ctx.fill(); }
+  // body
+  ctx.fillStyle = c.shirt; roundRect(ctx, -84, y - 94, 168, 150, 50); ctx.fill();
+  ctx.fillStyle = 'rgba(0,0,0,.12)'; roundRect(ctx, -84, y - 30, 168, 90, 30); ctx.fill();
+  // collar
+  ctx.fillStyle = 'rgba(255,255,255,.85)';
+  ctx.beginPath(); ctx.moveTo(-22, y - 92); ctx.lineTo(0, y - 66); ctx.lineTo(22, y - 92); ctx.lineTo(10, y - 94); ctx.lineTo(0, y - 80); ctx.lineTo(-10, y - 94); ctx.closePath(); ctx.fill();
+  // neck
+  ctx.fillStyle = c.skinDark; ctx.fillRect(-15, y - 114, 30, 26);
+  if (scarfed) {
+    ctx.fillStyle = c.scarf;
+    circle(ctx, 0, hy - 4, 66); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(-40, hy + 40); ctx.lineTo(0, y - 70); ctx.lineTo(40, hy + 40); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,.55)';
+    const r = mulberry(7);
+    for (let i = 0; i < 14; i++) { const a = r() * Math.PI * 2, d = 50 + r() * 12; circle(ctx, Math.cos(a) * d, hy - 4 + Math.sin(a) * d, 3); ctx.fill(); }
+  } else {
+    ctx.fillStyle = c.skin; circle(ctx, -fr, hy + 4, 10); ctx.fill(); circle(ctx, fr, hy + 4, 10); ctx.fill();
+  }
+  ctx.fillStyle = c.skin; circle(ctx, 0, hy, fr); ctx.fill();
+  // hair
+  ctx.fillStyle = c.hairColor;
+  if (c.hair === 'short' || c.hair === 'long' || c.hair === 'bun' || c.hair === 'chef') {
+    ctx.beginPath(); ctx.arc(0, hy - 2, fr + 3, Math.PI * .93, Math.PI * 2.07);
+    ctx.quadraticCurveTo(20, hy - 30, -10, hy - 26); ctx.quadraticCurveTo(-40, hy - 22, -fr - 2, hy + 6); ctx.closePath(); ctx.fill();
+    if (c.hair === 'bun') { circle(ctx, 0, hy - fr - 10, 20); ctx.fill(); }
+    if (c.hair === 'chef') {
+      ctx.fillStyle = '#fbfbf7'; ctx.fillRect(-44, hy - fr - 14, 88, 26);
+      circle(ctx, -30, hy - fr - 28, 24); ctx.fill(); circle(ctx, 0, hy - fr - 40, 28); ctx.fill(); circle(ctx, 30, hy - fr - 28, 24); ctx.fill();
+      ctx.strokeStyle = 'rgba(0,0,0,.12)'; ctx.lineWidth = 2; ctx.strokeRect(-44, hy - fr - 14, 88, 26);
+    }
+  } else if (c.hair === 'bald' || c.hair === 'cap') {
+    ellipse(ctx, -fr + 4, hy - 4, 9, 16); ctx.fill(); ellipse(ctx, fr - 4, hy - 4, 9, 16); ctx.fill();
+    if (c.hair === 'cap') {
+      ctx.fillStyle = '#5b4a3a'; ctx.beginPath(); ctx.arc(0, hy - 14, fr + 2, Math.PI, Math.PI * 2); ctx.closePath(); ctx.fill();
+      ellipse(ctx, 20, hy - 14, 52, 10); ctx.fill();
+      ctx.strokeStyle = 'rgba(0,0,0,.2)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-30, hy - 40); ctx.lineTo(30, hy - 40); ctx.stroke();
+    }
+  }
+  // face
+  const m = c.mood;
+  ctx.fillStyle = 'rgba(232,110,110,.35)'; ellipse(ctx, -30, hy + 16, 9, 6); ctx.fill(); ellipse(ctx, 30, hy + 16, 9, 6); ctx.fill();
+  ctx.fillStyle = '#2a1a12';
+  const eyeY = hy + 2;
+  if (m === 'happy') {
+    ctx.strokeStyle = '#2a1a12'; ctx.lineWidth = 4; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.arc(-18, eyeY + 3, 6, Math.PI * 1.1, Math.PI * 1.9); ctx.stroke();
+    ctx.beginPath(); ctx.arc(18, eyeY + 3, 6, Math.PI * 1.1, Math.PI * 1.9); ctx.stroke();
+  } else {
+    circle(ctx, -18, eyeY, 5.5); ctx.fill(); circle(ctx, 18, eyeY, 5.5); ctx.fill();
+    ctx.fillStyle = '#fff'; circle(ctx, -16.5, eyeY - 2, 1.7); ctx.fill(); circle(ctx, 19.5, eyeY - 2, 1.7); ctx.fill();
+  }
+  ctx.strokeStyle = scarfed ? '#5a3a22' : (c.hair === 'bald' || c.hair === 'cap' ? '#8c8478' : c.hairColor);
+  ctx.lineWidth = 4; ctx.lineCap = 'round';
+  const tilt = m === 'angry' ? 5 : m === 'happy' ? -3 : 0;
+  ctx.beginPath(); ctx.moveTo(-27, eyeY - 14 - tilt); ctx.lineTo(-10, eyeY - 14 + tilt); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(27, eyeY - 14 - tilt); ctx.lineTo(10, eyeY - 14 + tilt); ctx.stroke();
+  // nose
+  ctx.strokeStyle = c.skinDark; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, hy + 10, 6, Math.PI * .2, Math.PI * .8); ctx.stroke();
+  // mouth
+  ctx.strokeStyle = '#5a2418'; ctx.lineWidth = 4;
+  if (m === 'happy') { ctx.fillStyle = '#7a2a1c'; ctx.beginPath(); ctx.arc(0, hy + 22, 13, 0, Math.PI); ctx.closePath(); ctx.fill(); }
+  else if (m === 'angry') { ctx.beginPath(); ctx.arc(0, hy + 40, 12, Math.PI * 1.2, Math.PI * 1.8); ctx.stroke(); }
+  else if (m === 'meh') { ctx.beginPath(); ctx.moveTo(-10, hy + 30); ctx.lineTo(10, hy + 27); ctx.stroke(); }
+  else { ctx.beginPath(); ctx.arc(0, hy + 22, 10, Math.PI * .2, Math.PI * .8); ctx.stroke(); }
+  if (c.mustache) {
+    ctx.fillStyle = c.hair === 'bald' || c.hair === 'cap' ? '#6f675d' : c.hairColor;
+    ellipse(ctx, -10, hy + 21, 13, 6, .15); ctx.fill(); ellipse(ctx, 10, hy + 21, 13, 6, -.15); ctx.fill();
+  }
+  if (c.glasses) {
+    ctx.strokeStyle = '#2a1a12'; ctx.lineWidth = 2.5;
+    circle(ctx, -18, eyeY, 13); ctx.stroke(); circle(ctx, 18, eyeY, 13); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-5, eyeY); ctx.lineTo(5, eyeY); ctx.stroke();
+  }
+  // mood marks
+  if (m === 'happy') {
+    ctx.fillStyle = '#f2b134';
+    for (const [sx, sy, s] of [[-80, hy - 50, 10], [76, hy - 62, 13], [88, hy - 20, 7]]) {
+      const k = s * (1 + .2 * Math.sin(t * 6 + sx));
+      ctx.beginPath(); ctx.moveTo(sx, sy - k); ctx.quadraticCurveTo(sx, sy, sx + k, sy); ctx.quadraticCurveTo(sx, sy, sx, sy + k); ctx.quadraticCurveTo(sx, sy, sx - k, sy); ctx.quadraticCurveTo(sx, sy, sx, sy - k); ctx.fill();
+    }
+  } else if (m === 'angry') {
+    ctx.strokeStyle = '#d6442a'; ctx.lineWidth = 4;
+    const ax = 52, ay = hy - 46;
+    for (let i = 0; i < 4; i++) { ctx.save(); ctx.translate(ax, ay); ctx.rotate(i * Math.PI / 2); ctx.beginPath(); ctx.arc(9, 9, 6, Math.PI, Math.PI * 1.5); ctx.stroke(); ctx.restore(); }
+  }
+  ctx.restore();
+}
+
+// ---------- scenes ----------
+function drawShop(ctx, t) {
+  const WALL = wallColors();
+  ctx.fillStyle = WALL[0]; ctx.fillRect(0, 0, 800, 450);
+  ctx.fillStyle = WALL[1]; for (let x = 0; x < 800; x += 36) ctx.fillRect(x, 0, 18, 260);
+  // çini band
+  for (let x = 0; x < 800; x += 44) {
+    ctx.fillStyle = '#fdf7ee'; ctx.fillRect(x, 252, 44, 44);
+    ctx.strokeStyle = '#16807f'; ctx.lineWidth = 2; ctx.strokeRect(x + 1, 253, 42, 42);
+    ctx.fillStyle = '#16807f'; ctx.beginPath(); ctx.moveTo(x + 22, 258); ctx.lineTo(x + 38, 274); ctx.lineTo(x + 22, 290); ctx.lineTo(x + 6, 274); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#d6442a'; circle(ctx, x + 22, 274, 5); ctx.fill();
+  }
+  // menu board
+  ctx.fillStyle = '#6f421d'; roundRect(ctx, 24, 58, 186, 180, 10); ctx.fill();
+  ctx.fillStyle = '#2f4a3a'; roundRect(ctx, 34, 68, 166, 160, 6); ctx.fill();
+  ctx.fillStyle = '#f6efe0'; ctx.textAlign = 'center'; ctx.font = '800 26px "Baloo 2", sans-serif'; ctx.fillText('MENÜ', 117, 100);
+  const menu = Object.keys(DISH).filter(k => (!DISH[k].learn && !DISH[k].day) || dishOpen(k));
+  const SHORT = { sarma: 'Sarma', kurabiye: 'Kurabiye', recel: 'Reçel', mercimek: 'Mercimek' };
+  if (menu.length > 7) {
+    ctx.font = '700 9.5px "Nunito", sans-serif';
+    const rows = Math.ceil(menu.length / 2), step = Math.min(16, 88 / Math.max(1, rows - 1));
+    menu.forEach((k, i) => {
+      const D = DISH[k], locked = !dishOpen(k), x = i < rows ? 41 : 119, y = 116 + (i % rows) * step;
+      ctx.fillStyle = locked ? 'rgba(246,239,224,.35)' : '#f6efe0'; ctx.textAlign = 'left';
+      ctx.fillText(SHORT[k] || D.name, x, y);
+      ctx.fillStyle = locked ? 'rgba(246,239,224,.35)' : '#f2c14e'; ctx.textAlign = 'right';
+      ctx.fillText(locked ? '—' : D.price + '₺', x + 75, y);
+    });
+    ctx.textAlign = 'left';
+  } else {
+  const step = Math.min(20, 110 / Math.max(1, menu.length - 1));
+  ctx.font = menu.length > 6 ? '700 12px "Nunito", sans-serif' : '700 14px "Nunito", sans-serif'; ctx.textAlign = 'left';
+  let my = 114;
+  for (const k of menu) {
+    const D = DISH[k], locked = !dishOpen(k);
+    ctx.fillStyle = locked ? 'rgba(246,239,224,.35)' : '#f6efe0';
+    ctx.fillText(D.name, 46, my); ctx.textAlign = 'right'; ctx.fillText(locked ? 'yakında' : D.price + '₺', 190, my); ctx.textAlign = 'left';
+    my += step;
+  }
+  }
+  // window with skyline
+  ctx.fillStyle = '#6f421d'; roundRect(ctx, 236, 56, 192, 186, 10); ctx.fill();
+  const sky = ctx.createLinearGradient(0, 66, 0, 232); sky.addColorStop(0, '#9fd3e6'); sky.addColorStop(1, '#f7e4c4');
+  ctx.fillStyle = sky; ctx.fillRect(246, 66, 172, 166);
+  ctx.fillStyle = '#9ab3c2';
+  circle(ctx, 330, 196, 34); ctx.fill(); circle(ctx, 292, 206, 18); ctx.fill(); circle(ctx, 368, 206, 18); ctx.fill();
+  ctx.fillRect(256, 200, 152, 32);
+  ctx.fillRect(266, 120, 7, 90); ctx.beginPath(); ctx.moveTo(262, 122); ctx.lineTo(269.5, 92); ctx.lineTo(277, 122); ctx.fill();
+  ctx.fillRect(388, 126, 7, 84); ctx.beginPath(); ctx.moveTo(384, 128); ctx.lineTo(391.5, 100); ctx.lineTo(399, 128); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,.8)'; ellipse(ctx, 300 + Math.sin(t * .2) * 20, 96, 26, 8); ctx.fill();
+  if (hasDecor('bahce')) drawGarden(ctx);
+  ctx.fillStyle = '#6f421d'; ctx.fillRect(328, 66, 6, 166); ctx.fillRect(246, 146, 172, 6);
+  if (hasDecor('saksi')) { drawPot2(ctx, 268, t); drawPot2(ctx, 396, t + 1); }
+  // shelf right
+  ctx.fillStyle = '#7b4a22'; ctx.fillRect(470, 196, 310, 12);
+  const jars = [[498, '#7aa63a'], [548, '#d9572f'], [598, '#e3b23c'], [690, '#7aa63a'], [740, '#b23a52']];
+  for (const [jx, col] of jars) {
+    ctx.fillStyle = 'rgba(255,255,255,.55)'; roundRect(ctx, jx - 18, 150, 36, 46, 8); ctx.fill();
+    ctx.fillStyle = col; roundRect(ctx, jx - 14, 162, 28, 32, 6); ctx.fill();
+    ctx.fillStyle = '#c0392b'; ctx.fillRect(jx - 16, 144, 32, 8);
+  }
+  // copper cezve
+  ctx.fillStyle = '#c4703a'; ctx.beginPath(); ctx.moveTo(628, 196); ctx.lineTo(634, 160); ctx.lineTo(666, 160); ctx.lineTo(672, 196); ctx.closePath(); ctx.fill();
+  ctx.fillRect(664, 166, 30, 6);
+  // nazar boncuğu
+  const sw = Math.sin(t * 1.5) * .08;
+  ctx.save(); ctx.translate(hasDecor('lamba') ? 223 : 446, 0); ctx.rotate(sw);
+  ctx.strokeStyle = '#6f421d'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(0, 30); ctx.lineTo(0, 88); ctx.stroke();
+  for (const [r, col] of [[18, '#1d4fa0'], [12.5, '#fff'], [8, '#5fb3e6'], [4, '#1a1a1a']]) { ctx.fillStyle = col; circle(ctx, 0, 104, r); ctx.fill(); }
+  ctx.restore();
+  if (hasDecor('lamba')) drawLamp(ctx, 456, t);
+  // awning
+  for (let i = 0; i < 20; i++) {
+    ctx.fillStyle = i % 2 ? '#fff4e2' : '#d6442a';
+    ctx.fillRect(i * 40, 0, 40, 30); circle(ctx, i * 40 + 20, 30, 20); ctx.fill();
+  }
+  if (hasDecor('tabela')) {
+    ctx.fillStyle = 'rgba(0,0,0,.2)'; roundRect(ctx, 264, 8, 280, 40, 8); ctx.fill();
+    ctx.fillStyle = '#6f421d'; roundRect(ctx, 260, 4, 280, 40, 8); ctx.fill();
+    ctx.strokeStyle = '#e3b23c'; ctx.lineWidth = 2; roundRect(ctx, 266, 10, 268, 28, 5); ctx.stroke();
+    ctx.textAlign = 'center'; ctx.font = '800 20px "Baloo 2", sans-serif';
+    ctx.fillStyle = '#3a2216'; ctx.fillText('AFİYET OLSUN LOKANTASI', 400, 33);
+    ctx.fillStyle = '#fff4e2'; ctx.fillText('AFİYET OLSUN LOKANTASI', 400, 31);
+  }
+  // customer
+  if (cust) drawCustomer(ctx, cust, custX, t, !!walk);
+  // counter
+  ctx.fillStyle = '#a86a37'; ctx.fillRect(0, 304, 800, 146);
+  ctx.fillStyle = '#c4864d'; ctx.fillRect(0, 292, 800, 18);
+  ctx.fillStyle = 'rgba(0,0,0,.15)'; ctx.fillRect(0, 310, 800, 6);
+  for (let x = 0; x < 800; x += 160) { ctx.strokeStyle = 'rgba(80,45,15,.35)'; ctx.lineWidth = 3; ctx.strokeRect(x + 14, 330, 132, 104); }
+  for (let x = 22; x < 800; x += 160) {
+    ctx.fillStyle = '#fdf7ee'; ctx.fillRect(x + 28, 358, 60, 48);
+    ctx.fillStyle = '#16807f'; ctx.beginPath(); ctx.moveTo(x + 58, 362); ctx.lineTo(x + 82, 382); ctx.lineTo(x + 58, 402); ctx.lineTo(x + 34, 382); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#d6442a'; circle(ctx, x + 58, 382, 6); ctx.fill();
+  }
+  if (hasDecor('kilim')) drawKilim(ctx);
+  // register
+  ctx.fillStyle = '#5a6670'; roundRect(ctx, 40, 238, 140, 62, 10); ctx.fill();
+  ctx.fillStyle = '#3e4850'; roundRect(ctx, 52, 214, 70, 32, 6); ctx.fill();
+  ctx.fillStyle = '#b8e6a8'; ctx.fillRect(58, 220, 58, 18);
+  ctx.fillStyle = '#2a3238'; ctx.font = '800 13px "Nunito", sans-serif'; ctx.textAlign = 'right'; ctx.fillText(S.money + '₺', 112, 234);
+  ctx.fillStyle = '#e8e2d6'; for (let i = 0; i < 4; i++) for (let j = 0; j < 2; j++) { roundRect(ctx, 56 + i * 28, 256 + j * 18, 20, 12, 3); ctx.fill(); }
+  // çay
+  const cx = 716;
+  ctx.fillStyle = '#f2ece0'; ellipse(ctx, cx, 296, 30, 7); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,.65)';
+  ctx.beginPath(); ctx.moveTo(cx - 15, 236); ctx.quadraticCurveTo(cx - 6, 262, cx - 13, 292); ctx.lineTo(cx + 13, 292); ctx.quadraticCurveTo(cx + 6, 262, cx + 15, 236); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#b5441a'; ctx.beginPath(); ctx.moveTo(cx - 12, 246); ctx.quadraticCurveTo(cx - 5, 264, cx - 12, 290); ctx.lineTo(cx + 12, 290); ctx.quadraticCurveTo(cx + 5, 264, cx + 12, 246); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,.6)'; ctx.lineWidth = 3;
+  for (let i = 0; i < 2; i++) { const o = Math.sin(t * 2 + i) * 4; ctx.beginPath(); ctx.moveTo(cx - 5 + i * 10, 228); ctx.quadraticCurveTo(cx + o + i * 10, 214, cx - 5 + i * 10, 200); ctx.stroke(); }
+  // served plate
+  if (plate) {
+    ctx.fillStyle = 'rgba(0,0,0,.18)'; ellipse(ctx, 520, 304, 98, 20); ctx.fill();
+    ctx.fillStyle = '#fbfaf5'; ellipse(ctx, 520, 298, 96, 22); ctx.fill();
+    ctx.strokeStyle = '#16807f'; ctx.lineWidth = 3; ellipse(ctx, 520, 298, 84, 17); ctx.stroke();
+    ctx.save(); ctx.translate(520, 292); ctx.scale(.36, .16); ctx.translate(-250, -250); renderPlate(ctx, plate); ctx.restore();
+    if (plate.dough === 'recel') drawJar(ctx, 520, 252, plate.bake, .42);
+    if (plate.dough === 'mercimek') drawSoupBowl(ctx, 520, 280, plate.bake, .6);
+  }
+}
+
+function drawGarden(ctx) {
+  ctx.fillStyle = '#c9b48f'; ctx.fillRect(246, 214, 172, 18);
+  for (const [x, s] of [[288, 1], [376, .85]]) {
+    ctx.save(); ctx.translate(x, 226); ctx.scale(s, s);
+    ctx.strokeStyle = '#6f421d'; ctx.lineWidth = 2.5;
+    for (const cx of [-24, 24]) { ctx.beginPath(); ctx.moveTo(cx, -2); ctx.lineTo(cx, -22); ctx.moveTo(cx - 6, -2); ctx.lineTo(cx - 6, -12); ctx.lineTo(cx + 6, -12); ctx.lineTo(cx + 6, -2); ctx.stroke(); }
+    ctx.fillStyle = '#6f421d'; ctx.fillRect(-2, -16, 4, 16);
+    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.moveTo(-17, -20); ctx.lineTo(17, -20); ctx.lineTo(20, -10); ctx.lineTo(-20, -10); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#d6442a'; for (let i = 0; i < 5; i++) ctx.fillRect(-17 + i * 7.5, -20, 3.5, 10);
+    ctx.fillStyle = '#b5441a'; ctx.fillRect(-4, -27, 5, 7); ctx.fillStyle = 'rgba(255,255,255,.7)'; ctx.fillRect(-4, -27, 5, 2);
+    ctx.restore();
+  }
+}
+function drawPot2(ctx, x, t) {
+  ctx.fillStyle = '#3f7d34';
+  for (let i = 0; i < 5; i++) { ellipse(ctx, x - 12 + i * 6, 226 + Math.sin(i * 2) * 3, 7, 4, i - 2); ctx.fill(); }
+  const sw = Math.sin(t * 1.2) * 1.5;
+  for (const [dx, dy] of [[-8, -6], [6, -10], [12, 0], [-2, -16], [-14, 2]]) {
+    ctx.fillStyle = '#d6303a'; for (let k = 0; k < 5; k++) { circle(ctx, x + dx + sw + Math.cos(k * 1.26) * 4, 214 + dy + Math.sin(k * 1.26) * 4, 3.4); ctx.fill(); }
+    ctx.fillStyle = '#f7c2c6'; circle(ctx, x + dx + sw, 214 + dy, 1.6); ctx.fill();
+  }
+  ctx.fillStyle = '#c4623a'; ctx.beginPath(); ctx.moveTo(x - 17, 228); ctx.lineTo(x + 17, 228); ctx.lineTo(x + 13, 250); ctx.lineTo(x - 13, 250); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#a84e2c'; ctx.fillRect(x - 19, 226, 38, 6);
+}
+function drawLamp(ctx, x, t) {
+  ctx.save(); ctx.translate(0, 46);
+  const glow = .5 + Math.sin(t * 3) * .05 + Math.sin(t * 7.3) * .03;
+  const g = ctx.createRadialGradient(x, 100, 4, x, 100, 90);
+  g.addColorStop(0, `rgba(255,214,120,${glow * .55})`); g.addColorStop(1, 'rgba(255,214,120,0)');
+  ctx.fillStyle = g; circle(ctx, x, 100, 90); ctx.fill();
+  ctx.strokeStyle = '#8a5a2b'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x, -16); ctx.lineTo(x, 72); ctx.stroke();
+  ctx.fillStyle = '#b8862f'; ellipse(ctx, x, 74, 10, 4); ctx.fill();
+  const cols = ['#d6303a', '#1d4fa0', '#e3b23c', '#16807f', '#8e3a9e', '#e8823a'];
+  for (let i = 0; i < 6; i++) {
+    ctx.fillStyle = cols[i];
+    ctx.beginPath(); ctx.moveTo(x - 24 + i * 8, 78); ctx.lineTo(x - 16 + i * 8, 78);
+    ctx.quadraticCurveTo(x - 18 + i * 6.5 + (i > 2 ? 6 : 0), 104, x - 6 + i * 2.6, 122); ctx.lineTo(x - 9 + i * 3, 122);
+    ctx.quadraticCurveTo(x - 30 + i * 9, 104, x - 24 + i * 8, 78); ctx.fill();
+  }
+  ctx.globalAlpha = .9;
+  for (let i = 0; i < 14; i++) { ctx.fillStyle = cols[i % 6]; circle(ctx, x - 22 + (i % 7) * 7.3, 90 + Math.floor(i / 7) * 14, 3); ctx.fill(); }
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = '#fff1c4'; ellipse(ctx, x, 100, 9, 12); ctx.fill();
+  ctx.fillStyle = '#b8862f'; ctx.beginPath(); ctx.moveTo(x - 6, 122); ctx.lineTo(x + 6, 122); ctx.lineTo(x, 132); ctx.closePath(); ctx.fill();
+  ctx.restore();
+}
+function drawKilim(ctx) {
+  const x0 = 200, x1 = 600, y0 = 318, y1 = 444;
+  ctx.fillStyle = '#9e2a22'; ctx.fillRect(x0, y0, x1 - x0, y1 - y0);
+  ctx.fillStyle = '#1f3b6e'; ctx.fillRect(x0 + 8, y0 + 8, x1 - x0 - 16, y1 - y0 - 16);
+  ctx.fillStyle = '#c7372c'; ctx.fillRect(x0 + 16, y0 + 16, x1 - x0 - 32, y1 - y0 - 32);
+  for (let i = 0; i < 5; i++) {
+    const cx = x0 + 52 + i * 74, cy = (y0 + y1) / 2;
+    ctx.fillStyle = '#e3b23c'; ctx.beginPath(); ctx.moveTo(cx, cy - 40); ctx.lineTo(cx + 30, cy); ctx.lineTo(cx, cy + 40); ctx.lineTo(cx - 30, cy); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#1f3b6e'; ctx.beginPath(); ctx.moveTo(cx, cy - 26); ctx.lineTo(cx + 18, cy); ctx.lineTo(cx, cy + 26); ctx.lineTo(cx - 18, cy); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#fdf7ee'; ctx.beginPath(); ctx.moveTo(cx, cy - 10); ctx.lineTo(cx + 7, cy); ctx.lineTo(cx, cy + 10); ctx.lineTo(cx - 7, cy); ctx.closePath(); ctx.fill();
+  }
+  ctx.fillStyle = '#fdf7ee';
+  for (let x = x0 + 22; x < x1 - 16; x += 14) { ctx.beginPath(); ctx.moveTo(x, y0 + 16); ctx.lineTo(x + 7, y0 + 23); ctx.lineTo(x + 14, y0 + 16); ctx.fill(); ctx.beginPath(); ctx.moveTo(x, y1 - 16); ctx.lineTo(x + 7, y1 - 23); ctx.lineTo(x + 14, y1 - 16); ctx.fill(); }
+  ctx.strokeStyle = '#efe2c6'; ctx.lineWidth = 2;
+  for (let x = x0 + 4; x < x1; x += 7) { ctx.beginPath(); ctx.moveTo(x, y1); ctx.lineTo(x, y1 + 6); ctx.stroke(); }
+}
+function flame(ctx, x, y, w, h) {
+  ctx.beginPath(); ctx.moveTo(x, y);
+  ctx.bezierCurveTo(x - w, y - h * .4, x - w * .2, y - h * .7, x, y - h);
+  ctx.bezierCurveTo(x + w * .2, y - h * .7, x + w, y - h * .4, x, y); ctx.fill();
+}
+function drawOven(ctx, t) {
+  ctx.fillStyle = '#b4523a'; ctx.fillRect(0, 0, 800, 450);
+  const br = mulberry(3);
+  for (let row = 0; row < 18; row++) for (let i = -1; i < 14; i++) {
+    const x = i * 64 + (row % 2) * 32, y = row * 26;
+    ctx.fillStyle = `rgba(${120 + br() * 40},${50 + br() * 20},${30 + br() * 10},.35)`;
+    ctx.fillRect(x + 2, y + 2, 60, 22);
+  }
+  // dome body
+  ctx.fillStyle = '#ead6b4';
+  ctx.beginPath(); ctx.moveTo(100, 450); ctx.lineTo(100, 250); ctx.bezierCurveTo(100, 30, 700, 30, 700, 250); ctx.lineTo(700, 450); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = 'rgba(120,80,40,.25)'; ctx.lineWidth = 3; ctx.stroke();
+  // çini arch
+  const mouth = new Path2D(); mouth.moveTo(220, 400); mouth.lineTo(220, 270); mouth.bezierCurveTo(220, 128, 580, 128, 580, 270); mouth.lineTo(580, 400); mouth.closePath();
+  ctx.save(); ctx.lineWidth = 34; ctx.strokeStyle = '#16807f'; ctx.stroke(mouth); ctx.lineWidth = 6; ctx.strokeStyle = '#fdf7ee'; ctx.setLineDash([6, 14]); ctx.stroke(mouth); ctx.restore();
+  const g = ctx.createRadialGradient(400, 360, 20, 400, 320, 260);
+  const glow = .85 + .15 * Math.sin(t * 7);
+  g.addColorStop(0, `rgba(255,170,70,${glow})`); g.addColorStop(.45, '#7a2a0e'); g.addColorStop(1, '#1d0a05');
+  ctx.fillStyle = g; ctx.fill(mouth);
+  ctx.save(); ctx.clip(mouth);
+  // fire at the back
+  for (let i = 0; i < 7; i++) {
+    const fx = 250 + i * 18, h = 70 + Math.sin(t * 9 + i * 1.7) * 18 + (i % 3) * 14;
+    ctx.fillStyle = '#e8541c'; flame(ctx, fx, 372, 18, h);
+    ctx.fillStyle = '#ffc23d'; flame(ctx, fx, 372, 10, h * .6);
+  }
+  for (let i = 0; i < 4; i++) { ctx.fillStyle = '#3a1a0c'; roundRect(ctx, 240 + i * 26, 366, 40, 12, 6); ctx.fill(); }
+  ctx.fillStyle = '#3a160a'; ellipse(ctx, 400, 388, 190, 26); ctx.fill();
+  // dish on the peel
+  if (K && K.dough) {
+    ctx.fillStyle = '#b98249'; ctx.fillRect(392, 370, 16, 90);
+    ctx.fillStyle = '#c99358'; ellipse(ctx, 420, 360, 120, 30); ctx.fill();
+    ctx.save(); ctx.translate(420, 352); ctx.scale(.5, .2); ctx.translate(-250, -250); renderAny(ctx, K, true); ctx.restore();
+    if (K.bake > .75) {
+      ctx.fillStyle = `rgba(70,60,55,${clamp((K.bake - .75) * 2, 0, .5)})`;
+      for (let i = 0; i < 4; i++) { const k = (t * .6 + i / 4) % 1; circle(ctx, 400 + i * 20 + Math.sin(t + i) * 10, 330 - k * 150, 14 + k * 26); ctx.fill(); }
+    }
+  }
+  ctx.restore();
+  ctx.fillStyle = '#c99a6a'; ctx.fillRect(80, 410, 640, 40);
+  ctx.fillStyle = 'rgba(0,0,0,.12)'; ctx.fillRect(80, 410, 640, 6);
+}
+
+// ---------- kase, tepsi, sarma çizimleri ----------
+PATHS.kisir = (() => { const p = new Path2D(); p.arc(250, 250, 178, 0, Math.PI * 2); return p; })();
+PATHS.sarma = PATHS.kisir;
+PATHS.borek = (() => { const p = new Path2D(); rr(p, 70, 120, 360, 260, 16); return p; })();
+const pstyle = t => Object.assign({}, ING[t], PSTYLE[t] || {});
+
+function drawPortion(ctx, type, x, y, seed) {
+  const I = pstyle(type), cols = I.colors || [], r = mulberry(seed);
+  ctx.save(); ctx.translate(x, y);
+  switch (I.style) {
+    case 'grain':
+      for (let i = 0; i < 70; i++) { const a = r() * 6.283, d = Math.sqrt(r()) * 44; ctx.fillStyle = cols[i % cols.length]; ellipse(ctx, Math.cos(a) * d, Math.sin(a) * d, 2.8, 1.9, r() * 3); ctx.fill(); }
+      break;
+    case 'blob':
+      ctx.fillStyle = cols[0]; for (let i = 0; i < 4; i++) { circle(ctx, (r() - .5) * 24, (r() - .5) * 24, 12 + r() * 8); ctx.fill(); }
+      ctx.fillStyle = 'rgba(255,255,255,.25)'; ellipse(ctx, -4, -6, 6, 3); ctx.fill();
+      break;
+    case 'liquid':
+      ctx.fillStyle = cols[0]; ctx.beginPath();
+      for (let i = 0; i <= 14; i++) { const a = i / 14 * 6.283, rad = 30 + (i % 14 ? r() * 10 : 0); if (i) ctx.lineTo(Math.cos(a) * rad, Math.sin(a) * rad); else ctx.moveTo(rad, 0); }
+      ctx.closePath(); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,.35)'; ellipse(ctx, -8, -10, 10, 4, -.4); ctx.fill();
+      break;
+    case 'rings':
+      ctx.strokeStyle = cols[0]; ctx.lineWidth = 3;
+      for (let i = 0; i < 9; i++) { circle(ctx, (r() - .5) * 64, (r() - .5) * 64, 5); ctx.stroke(); }
+      break;
+    case 'dice':
+      for (let i = 0; i < 16; i++) {
+        ctx.fillStyle = cols[i % cols.length]; const px = (r() - .5) * 66, py = (r() - .5) * 66;
+        if (I.small) ellipse(ctx, px, py, 3.8, 2.5, r() * 3); else roundRect(ctx, px - 4, py - 4, 8, 8, 2);
+        ctx.fill();
+      }
+      break;
+    case 'leaves':
+      for (let i = 0; i < 10; i++) { ctx.fillStyle = cols[i % 2]; ellipse(ctx, (r() - .5) * 62, (r() - .5) * 62, 6.5, 3.5, r() * 3); ctx.fill(); }
+      break;
+    case 'slice':
+      ctx.fillStyle = '#f5d23a'; circle(ctx, 0, 0, 20); ctx.fill();
+      ctx.fillStyle = '#fbeea0'; circle(ctx, 0, 0, 16); ctx.fill();
+      ctx.strokeStyle = '#efc42a'; ctx.lineWidth = 2;
+      for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(a) * 16, Math.sin(a) * 16); ctx.stroke(); }
+      break;
+    case 'dust':
+      for (let i = 0; i < 60; i++) { const a = r() * 6.283, d = Math.sqrt(r()) * 36; ctx.fillStyle = cols[i % 2]; circle(ctx, Math.cos(a) * d, Math.sin(a) * d, 1.1 + r() * .9); ctx.fill(); }
+      break;
+    case 'peel':
+      ctx.lineCap = 'round'; ctx.lineWidth = 6;
+      for (let i = 0; i < 8; i++) { ctx.strokeStyle = cols[i % 2]; const px = (r() - .5) * 60, py = (r() - .5) * 60, a = r() * 6.28; ctx.beginPath(); ctx.arc(px, py, 10, a, a + 1.8); ctx.stroke(); }
+      break;
+    case 'eggplant':
+      ctx.rotate((seed % 7) / 7 * 1.2 - .6);
+      ctx.fillStyle = '#4b2a5c'; ellipse(ctx, 0, 0, 48, 21); ctx.fill();
+      ctx.fillStyle = '#e8dcb0'; ellipse(ctx, 2, 0, 36, 10); ctx.fill();
+      ctx.fillStyle = '#6b3a7c'; ellipse(ctx, -10, -12, 18, 4, -.2); ctx.fill();
+      ctx.fillStyle = '#4f7d33'; ctx.beginPath(); ctx.moveTo(-44, -10); ctx.lineTo(-60, 0); ctx.lineTo(-44, 10); ctx.closePath(); ctx.fill();
+      break;
+    case 'sheet':
+      for (let i = 0; i < 3; i++) { ctx.fillStyle = i % 2 ? '#efdcb0' : '#f6e8c6'; roundRect(ctx, -36 + i * 3, -24 + i * 6, 72, 34, 8); ctx.fill(); ctx.strokeStyle = 'rgba(180,140,80,.5)'; ctx.lineWidth = 1.5; ctx.stroke(); }
+      break;
+    default:
+      for (let i = 0; i < 6; i++) drawPiece(ctx, type, (r() - .5) * 56, (r() - .5) * 56, r() * 6.28, Math.floor(r() * 1e9), 0);
+  }
+  ctx.restore();
+}
+function mixRGB(d) {
+  let w = 0, acc = [0, 0, 0];
+  for (const p of d.portions) {
+    const I = pstyle(p.type); const c = I.mix || [205, 185, 150]; const k = I.main ? 2 : I.mw || (I.mix ? 1 : .35);
+    acc = acc.map((v, i) => v + c[i] * k); w += k;
+  }
+  return w ? acc.map(v => v / w) : [220, 200, 160];
+}
+function renderBowl(ctx, d, noShadow, copper) {
+  ctx.save();
+  if (!noShadow) { ctx.shadowColor = 'rgba(60,30,10,.28)'; ctx.shadowBlur = 14; ctx.shadowOffsetY = 6; }
+  ctx.fillStyle = copper ? '#b8622e' : '#16807f'; circle(ctx, 250, 250, 215); ctx.fill(); ctx.restore();
+  if (copper) { ctx.strokeStyle = '#d98a52'; ctx.lineWidth = 6; circle(ctx, 250, 250, 200); ctx.stroke(); }
+  if (!copper) {
+  ctx.fillStyle = '#fdf7ee'; for (let i = 0; i < 28; i++) { const a = i / 28 * 6.283; circle(ctx, 250 + Math.cos(a) * 207, 250 + Math.sin(a) * 207, 3); ctx.fill(); }
+  ctx.fillStyle = '#d6442a'; for (let i = 0; i < 14; i++) { const a = i / 14 * 6.283 + .1; circle(ctx, 250 + Math.cos(a) * 196, 250 + Math.sin(a) * 196, 4); ctx.fill(); }
+  }
+  ctx.fillStyle = '#f3ead8'; circle(ctx, 250, 250, 180); ctx.fill();
+  ctx.save(); ctx.clip(PATHS.kisir);
+  const st = d.stir || 0, n = d.portions.length;
+  if (st > 0 && n) {
+    const c = mixRGB(d), rad = 70 + Math.min(1, n / 8) * 100, r = mulberry(11);
+    ctx.globalAlpha = st; ctx.fillStyle = rgb(c);
+    ctx.beginPath(); for (let i = 0; i <= 20; i++) { const a = i / 20 * 6.283, q = rad + (i % 20 ? r() * 14 : 0); if (i) ctx.lineTo(250 + Math.cos(a) * q, 250 + Math.sin(a) * q); else ctx.moveTo(250 + q, 250); } ctx.closePath(); ctx.fill();
+    for (let i = 0; i < 260; i++) { const a = r() * 6.283, q = Math.sqrt(r()) * rad; ctx.fillStyle = r() < .5 ? rgb(c, -.18) : rgb(c, .15); ellipse(ctx, 250 + Math.cos(a) * q, 250 + Math.sin(a) * q, 2.6, 1.8, r() * 3); ctx.fill(); }
+    ctx.globalAlpha = 1;
+  }
+  for (const p of d.portions) {
+    ctx.save(); ctx.translate(250, 250); ctx.rotate(st * 5); ctx.scale(1 - st * .35, 1 - st * .35); ctx.translate(-250, -250);
+    ctx.globalAlpha = 1 - .85 * st; drawPortion(ctx, p.type, p.x, p.y, p.seed); ctx.restore();
+  }
+  ctx.restore();
+}
+function renderTray(ctx, d, noShadow) {
+  ctx.save();
+  if (!noShadow) { ctx.shadowColor = 'rgba(60,30,10,.28)'; ctx.shadowBlur = 14; ctx.shadowOffsetY = 6; }
+  ctx.fillStyle = '#8e9a9f'; roundRect(ctx, 50, 100, 400, 300, 24); ctx.fill(); ctx.restore();
+  ctx.fillStyle = '#c5cfd3'; roundRect(ctx, 62, 112, 376, 276, 18); ctx.fill();
+  const layers = d.portions.filter(p => p.type === 'yufka').length, b = d.bake || 0;
+  ctx.save(); ctx.clip(PATHS.borek);
+  const wr = mulberry(layers + 3);
+  if (layers) {
+    ctx.fillStyle = '#f4e3bd'; ctx.fill(PATHS.borek);
+    ctx.strokeStyle = 'rgba(190,150,90,.4)'; ctx.lineWidth = 2;
+    for (let i = 0; i < 10 + layers * 3; i++) { const x = 80 + wr() * 340, y = 130 + wr() * 240; ctx.beginPath(); ctx.moveTo(x, y); ctx.quadraticCurveTo(x + 20, y + (wr() - .5) * 20, x + 40 + wr() * 30, y + (wr() - .5) * 10); ctx.stroke(); }
+  }
+  for (const p of d.portions) if (p.type !== 'yufka') drawPortion(ctx, p.type, p.x, p.y, p.seed);
+  if (b > 0 && !layers) { ctx.globalCompositeOperation = 'multiply'; ctx.fillStyle = `rgba(170,90,30,${clamp(b * .7, 0, .75)})`; ctx.fill(PATHS.borek); ctx.globalCompositeOperation = 'source-over'; }
+  if (b > 0 && layers) {
+    const c = doughRGB(b);
+    ctx.globalAlpha = clamp(b * 4, 0, 1); ctx.fillStyle = rgb(c); ctx.fill(PATHS.borek);
+    ctx.strokeStyle = rgb(c, -.15); ctx.lineWidth = 3;
+    const r2 = mulberry(9);
+    for (let i = 0; i < 26; i++) { const x = 80 + r2() * 340, y = 130 + r2() * 240; ctx.beginPath(); ctx.moveTo(x, y); ctx.quadraticCurveTo(x + 20, y + (r2() - .5) * 20, x + 50, y + (r2() - .5) * 10); ctx.stroke(); }
+    if (d.portions.some(p => p.type === 'yumurta')) { ctx.fillStyle = 'rgba(255,240,200,.35)'; for (let i = 0; i < 12; i++) { ellipse(ctx, 90 + r2() * 320, 140 + r2() * 220, 18, 5, -.3); ctx.fill(); } }
+    ctx.globalAlpha = 1;
+  }
+  ctx.restore();
+  if (layers && !b) { ctx.fillStyle = 'rgba(58,34,22,.8)'; ctx.font = '800 22px "Baloo 2", sans-serif'; ctx.textAlign = 'right'; ctx.fillText(layers + ' kat yufka', 426, 372); }
+}
+function drawLeaf(ctx, x, y, rolled, b = 0) {
+  ctx.save(); ctx.translate(x, y);
+  if (!rolled) {
+    ctx.fillStyle = '#5e8f3a'; ctx.beginPath(); ctx.moveTo(0, -44);
+    ctx.bezierCurveTo(40, -50, 52, -6, 30, 14); ctx.bezierCurveTo(22, 30, 8, 40, 0, 46);
+    ctx.bezierCurveTo(-8, 40, -22, 30, -30, 14); ctx.bezierCurveTo(-52, -6, -40, -50, 0, -44); ctx.fill();
+    ctx.strokeStyle = '#8dbb5e'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(0, -36); ctx.lineTo(0, 40);
+    for (const s of [-1, 1]) { ctx.moveTo(0, 0); ctx.lineTo(s * 28, -18); ctx.moveTo(0, 16); ctx.lineTo(s * 22, 22); }
+    ctx.stroke();
+  } else {
+    ctx.fillStyle = rgb(mix([79, 125, 51], [112, 104, 40], b)); roundRect(ctx, -34, -14, 68, 28, 14); ctx.fill();
+    ctx.strokeStyle = 'rgba(30,60,20,.45)'; ctx.lineWidth = 2;
+    for (let i = -2; i <= 2; i++) { ctx.beginPath(); ctx.moveTo(i * 12 - 4, -12); ctx.quadraticCurveTo(i * 12 + 4, 0, i * 12 - 4, 12); ctx.stroke(); }
+    ctx.fillStyle = 'rgba(255,255,255,.18)'; roundRect(ctx, -28, -10, 56, 6, 3); ctx.fill();
+  }
+  ctx.restore();
+}
+function cookieRGB(b) { return b < .72 ? mix([244, 224, 178], [214, 150, 78], b / .72) : mix([214, 150, 78], [90, 50, 25], clamp((b - .72) / .28, 0, 1)); }
+const cookieOpts = d => ({ tarcin: d.portions.some(p => p.type === 'tarcin'), pudra: d.portions.some(p => p.type === 'pudra'), ceviz: d.portions.some(p => p.type === 'ceviz') });
+function drawCookie(ctx, x, y, b, o = {}) {
+  const r = mulberry(Math.round(x * 7 + y * 13));
+  ctx.save(); ctx.translate(x, y);
+  ctx.fillStyle = rgb(cookieRGB(b)); ctx.beginPath();
+  for (let i = 0; i <= 16; i++) { const a = i / 16 * 6.283, q = 34 + (i % 16 ? r() * 4 : 0); if (i) ctx.lineTo(Math.cos(a) * q, Math.sin(a) * q); else ctx.moveTo(q, 0); }
+  ctx.closePath(); ctx.fill(); ctx.strokeStyle = rgb(cookieRGB(b), -.15); ctx.lineWidth = 2; ctx.stroke();
+  ctx.fillStyle = 'rgba(255,245,200,.85)'; for (let i = 0; i < 5; i++) { roundRect(ctx, (r() - .5) * 40 - 3, (r() - .5) * 40 - 3, 7, 6, 2); ctx.fill(); }
+  if (o.ceviz) { ctx.fillStyle = '#8a5a2e'; for (let i = 0; i < 3; i++) { ellipse(ctx, (r() - .5) * 36, (r() - .5) * 36, 5, 3.5, r() * 3); ctx.fill(); } }
+  if (o.tarcin) { ctx.fillStyle = 'rgba(120,70,30,.6)'; for (let i = 0; i < 16; i++) { circle(ctx, (r() - .5) * 52, (r() - .5) * 52, 1.3); ctx.fill(); } }
+  if (o.pudra && b > .3) { ctx.fillStyle = 'rgba(255,255,255,.9)'; for (let i = 0; i < 40; i++) { circle(ctx, (r() - .5) * 54, (r() - .5) * 54, 1.6); ctx.fill(); } }
+  ctx.restore();
+}
+function renderCookieTray(ctx, d, spots) {
+  ctx.fillStyle = '#3e4248'; roundRect(ctx, 40, 36, 420, 384, 20); ctx.fill();
+  ctx.fillStyle = '#f1e6cf'; roundRect(ctx, 54, 50, 392, 356, 12); ctx.fill();
+  const o = cookieOpts(d);
+  LEAVES.forEach((L, i) => {
+    if (d.rolls[i]) drawCookie(ctx, L.x, L.y, d.bake, o);
+    else if (spots) { ctx.save(); ctx.setLineDash([6, 6]); ctx.strokeStyle = 'rgba(120,80,40,.45)'; ctx.lineWidth = 2; circle(ctx, L.x, L.y, 34); ctx.stroke(); ctx.restore(); }
+  });
+}
+function drawJar(ctx, x, y, b, s = 1) {
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+  ctx.fillStyle = 'rgba(255,255,255,.6)'; roundRect(ctx, -50, -60, 100, 122, 22); ctx.fill();
+  ctx.fillStyle = rgb(mix([245, 150, 30], [140, 55, 10], clamp(b, 0, 1))); roundRect(ctx, -44, -38, 88, 94, 18); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,205,100,.85)'; ctx.lineWidth = 4; ctx.lineCap = 'round';
+  for (const [px, py, a] of [[-18, -10, .3], [14, 8, 2], [-6, 30, 4], [20, -22, 5]]) { ctx.beginPath(); ctx.arc(px, py, 9, a, a + 1.8); ctx.stroke(); }
+  ctx.fillStyle = '#d6442a'; roundRect(ctx, -56, -78, 112, 22, 6); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,.75)'; for (let i = 0; i < 6; i++) { ctx.fillRect(-50 + i * 18, -74, 8, 6); ctx.fillRect(-41 + i * 18, -66, 8, 6); }
+  ctx.fillStyle = 'rgba(255,255,255,.4)'; roundRect(ctx, -38, -30, 10, 72, 5); ctx.fill();
+  ctx.restore();
+}
+const LEAVES = Array.from({ length: 12 }, (_, i) => ({ x: 95 + (i % 4) * 103, y: 100 + Math.floor(i / 4) * 125 }));
+const rolledCount = d => (d.rolls || []).filter(Boolean).length;
+function renderAny(ctx, d, noShadow) {
+  const k = kindOf(d.dough);
+  if (k === 'flat') renderDish(ctx, d, noShadow);
+  else if (k === 'tray') renderTray(ctx, d, noShadow);
+  else if (k === 'cookie' && rolledCount(d)) renderCookieTray(ctx, d, false);
+  else if (k === 'jam') renderBowl(ctx, d, noShadow, true);
+  else if (k === 'manti' && d.stage === 'garnish') renderMantiPlate(ctx, d);
+  else renderBowl(ctx, d, noShadow);
+}
+function drawManti(ctx, x, y, b, s = 1) {
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+  ctx.fillStyle = rgb(mix([250, 240, 216], [238, 222, 186], clamp(b, 0, 1)));
+  ctx.beginPath();
+  for (let i = 0; i < 4; i++) {
+    const a = i * Math.PI / 2, n = a + Math.PI / 2, m = a + Math.PI / 4;
+    if (!i) ctx.moveTo(Math.cos(a) * 20, Math.sin(a) * 20);
+    ctx.quadraticCurveTo(Math.cos(m) * 24, Math.sin(m) * 24, Math.cos(n) * 20, Math.sin(n) * 20);
+  }
+  ctx.closePath(); ctx.fill(); ctx.strokeStyle = 'rgba(150,110,60,.85)'; ctx.lineWidth = 2; ctx.stroke();
+  ctx.strokeStyle = 'rgba(180,150,100,.5)'; ctx.beginPath(); ctx.moveTo(-8, -8); ctx.lineTo(8, 8); ctx.moveTo(8, -8); ctx.lineTo(-8, 8); ctx.stroke();
+  ctx.fillStyle = '#9a4a28'; circle(ctx, 0, 0, 3.5); ctx.fill();
+  ctx.restore();
+}
+function renderMantiPlate(ctx, d) {
+  ctx.fillStyle = '#fbfaf5'; circle(ctx, 250, 250, 214); ctx.fill();
+  ctx.strokeStyle = '#16807f'; ctx.lineWidth = 9; circle(ctx, 250, 250, 202); ctx.stroke();
+  const n = rolledCount(d), g = d.garnish || [], has = t => g.some(p => p.type === t);
+  if (has('yogurt')) {
+    const yc = has('sarimsak') ? '#efe8d2' : '#f4efe0';
+    ctx.fillStyle = 'rgba(190,175,140,.35)'; circle(ctx, 252, 254, 150); ctx.fill();
+    ctx.fillStyle = yc; ctx.beginPath();
+    for (let i = 0; i <= 24; i++) { const a = i / 24 * Math.PI * 2, r = 146 + Math.sin(i * 2.7) * 7; ctx[i ? 'lineTo' : 'moveTo'](250 + Math.cos(a) * r, 250 + Math.sin(a) * r); }
+    ctx.fill();
+  }
+  for (let i = 0; i < n; i++) { const a = i * 2.4, q = 26 * Math.sqrt(i) + 8; drawManti(ctx, 250 + Math.cos(a) * q, 250 + Math.sin(a) * q, d.bake, 1.1); }
+  if (has('tereyagi')) {
+    const red = has('pulbiber') || has('salca');
+    ctx.strokeStyle = red ? 'rgba(205,60,25,.75)' : 'rgba(240,200,80,.8)'; ctx.lineWidth = 6; ctx.lineCap = 'round';
+    ctx.beginPath(); for (let i = 0; i <= 40; i++) { const a = i / 40 * Math.PI * 5, r = 20 + i * 2.6; ctx[i ? 'lineTo' : 'moveTo'](250 + Math.cos(a) * r, 250 + Math.sin(a) * r * .9); } ctx.stroke();
+  }
+  for (const p of g) if (!['yogurt', 'tereyagi'].includes(p.type)) drawPortion(ctx, p.type, p.x, p.y, p.seed);
+}
+function drawSoupBowl(ctx, x, y, b, s = 1) {
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+  ctx.fillStyle = '#16807f'; ctx.beginPath(); ctx.moveTo(-80, -10); ctx.quadraticCurveTo(-76, 60, 0, 64); ctx.quadraticCurveTo(76, 60, 80, -10); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#fdf7ee'; for (let i = -3; i <= 3; i++) { circle(ctx, i * 20, 22 + Math.abs(i) * -3, 4); ctx.fill(); }
+  ctx.fillStyle = '#0f6665'; ellipse(ctx, 0, -10, 80, 18); ctx.fill();
+  ctx.fillStyle = rgb(mix([242, 165, 60], [170, 80, 20], clamp(b, 0, 1))); ellipse(ctx, 0, -10, 72, 14); ctx.fill();
+  ctx.fillStyle = '#c8321e'; for (let i = 0; i < 18; i++) { circle(ctx, -30 + (i * 37) % 60, -14 + (i % 5) * 2, 1.4); ctx.fill(); }
+  ctx.fillStyle = '#f5d23a'; ctx.beginPath(); ctx.arc(64, -12, 16, Math.PI * .9, Math.PI * 1.9); ctx.closePath(); ctx.fill();
+  ctx.restore();
+}
+function renderPlate(ctx, d) {
+  if (kindOf(d.dough) === 'jam') return;
+  if (kindOf(d.dough) === 'manti') { renderMantiPlate(ctx, d); return; }
+  if (kindOf(d.dough) === 'cookie' && rolledCount(d)) {
+    const n = rolledCount(d), per = 4, o = cookieOpts(d);
+    for (let i = 0; i < n; i++) drawCookie(ctx, 250 + ((i % per) - (per - 1) / 2) * 80, 250 + (Math.floor(i / per) - (Math.ceil(n / per) - 1) / 2) * 72, d.bake, o);
+    return;
+  }
+  if (kindOf(d.dough) === 'sarma' && rolledCount(d)) {
+    const n = rolledCount(d), perRow = 4;
+    for (let i = 0; i < n; i++) drawLeaf(ctx, 250 + ((i % perRow) - (perRow - 1) / 2) * 72, 250 + (Math.floor(i / perRow) - (Math.ceil(n / perRow) - 1) / 2) * 34, true, d.bake);
+    drawPortion(ctx, 'limon', 250 + 170, 250, 3);
+    return;
+  }
+  renderAny(ctx, d, true); drawCuts(ctx, d);
+}
+
+function drawPot(ctx, t) {
+  ctx.fillStyle = '#fdf7ee'; ctx.fillRect(0, 0, 800, 450);
+  for (let x = 0; x < 800; x += 50) for (let y = 0; y < 360; y += 50) {
+    ctx.strokeStyle = 'rgba(22,128,127,.35)'; ctx.lineWidth = 2; ctx.strokeRect(x + 1, y + 1, 48, 48);
+    ctx.fillStyle = 'rgba(22,128,127,.5)'; ctx.beginPath(); ctx.moveTo(x + 25, y + 12); ctx.lineTo(x + 38, y + 25); ctx.lineTo(x + 25, y + 38); ctx.lineTo(x + 12, y + 25); ctx.closePath(); ctx.fill();
+  }
+  ctx.fillStyle = '#55504c'; ctx.fillRect(0, 352, 800, 14); ctx.fillStyle = '#3d3a38'; ctx.fillRect(0, 366, 800, 84);
+  for (let i = 0; i < 10; i++) {
+    const fx = 290 + i * 24, h = 20 + Math.sin(t * 12 + i) * 6;
+    ctx.fillStyle = '#3b7bd9'; flame(ctx, fx, 360, 8, h); ctx.fillStyle = '#9fd0ff'; flame(ctx, fx, 360, 4, h * .55);
+  }
+  const b = K ? K.bake : 0;
+  ctx.fillStyle = '#b8622e'; roundRect(ctx, 220, 172, 360, 180, 46); ctx.fill();
+  ctx.fillStyle = '#d07a40'; ctx.fillRect(220, 214, 360, 10); ctx.fillRect(220, 300, 360, 8);
+  ctx.fillStyle = '#8a4520'; roundRect(ctx, 186, 206, 40, 20, 8); ctx.fill(); roundRect(ctx, 574, 206, 40, 20, 8); ctx.fill();
+  ctx.fillStyle = '#8a4520'; ellipse(ctx, 400, 174, 182, 34); ctx.fill();
+  const broth = new Path2D(); broth.ellipse(400, 176, 166, 26, 0, 0, Math.PI * 2);
+  const look = K && K.dough ? (DISH[K.dough].look || kindOf(K.dough)) : '';
+  const jam = look === 'jam';
+  ctx.fillStyle = jam ? rgb(mix([245, 145, 30], [130, 50, 10], b)) : look === 'soup' ? rgb(mix([240, 160, 60], [160, 70, 20], b)) : look === 'manti' ? rgb(mix([225, 215, 190], [200, 185, 150], b)) : rgb(mix([150, 120, 50], [100, 80, 30], b)); ctx.fill(broth);
+  ctx.save(); ctx.clip(broth);
+  if (jam) { ctx.strokeStyle = 'rgba(255,205,100,.85)'; ctx.lineWidth = 5; ctx.lineCap = 'round'; for (let i = 0; i < 14; i++) { const a = t * .6 + i; ctx.beginPath(); ctx.arc(260 + (i * 41) % 280, 168 + (i % 3) * 8, 10, a, a + 1.6); ctx.stroke(); } }
+  const n = K ? rolledCount(K) : 0;
+  if (look === 'manti') { for (let i = 0; i < n; i++) drawManti(ctx, 255 + (i % 7) * 48, 166 + Math.floor(i / 7) * 16 + Math.sin(t * 3 + i) * 2, b, .7); }
+  else if (look === 'soup') { ctx.fillStyle = 'rgba(240,120,30,.7)'; for (let i = 0; i < 40; i++) { circle(ctx, 250 + (i * 53) % 300, 160 + (i * 7) % 30, 2.5); ctx.fill(); } }
+  else for (let i = 0; i < n; i++) { ctx.save(); ctx.translate(262 + (i % 6) * 55, 166 + Math.floor(i / 6) * 16); ctx.scale(.7, .45); drawLeaf(ctx, 0, 0, true, b); ctx.restore(); }
+  ctx.fillStyle = 'rgba(255,255,255,.35)';
+  for (let i = 0; i < 8; i++) { const k = (t * 1.3 + i * .37) % 1; circle(ctx, 260 + ((i * 53) % 280), 186 - k * 14, 3 + k * 4); ctx.fill(); }
+  ctx.restore();
+  ctx.fillStyle = 'rgba(255,255,255,.4)';
+  for (let i = 0; i < 4; i++) { const k = (t * .5 + i / 4) % 1; circle(ctx, 340 + i * 40 + Math.sin(t + i) * 12, 150 - k * 130, 12 + k * 24); ctx.fill(); }
+}
+
+function drawBoard(canvas, mode) {
+  const ctx = fit(canvas, 500, 500);
+  ctx.clearRect(0, 0, 500, 500);
+  const pb = new Path2D(); rr(pb, 14, 14, 472, 440, 30); rr(pb, 212, 430, 76, 66, 18);
+  ctx.save(); ctx.shadowColor = 'rgba(60,30,10,.3)'; ctx.shadowBlur = 12; ctx.shadowOffsetY = 5; ctx.fillStyle = '#c48a52'; ctx.fill(pb); ctx.restore();
+  ctx.save(); ctx.clip(pb); ctx.strokeStyle = 'rgba(120,70,30,.22)'; ctx.lineWidth = 2;
+  for (let y = 30; y < 500; y += 22) { ctx.beginPath(); ctx.moveTo(0, y); ctx.bezierCurveTo(160, y + 6, 320, y - 6, 500, y + 3); ctx.stroke(); }
+  ctx.restore();
+  ctx.fillStyle = '#6f421d'; circle(ctx, 250, 478, 8); ctx.fill();
+  if (mode === 'shape') { renderCookieTray(ctx, K, true); return; }
+  if (mode === 'fold') {
+    ctx.fillStyle = '#f6e8c6'; roundRect(ctx, 44, 40, 412, 380, 26); ctx.fill();
+    const r = mulberry(5); ctx.fillStyle = 'rgba(255,255,255,.6)'; for (let i = 0; i < 60; i++) { circle(ctx, 60 + r() * 380, 56 + r() * 350, 1.5 + r() * 2); ctx.fill(); }
+    LEAVES.forEach((L, i) => {
+      if (K.rolls[i]) { drawManti(ctx, L.x, L.y, 0, 1.6); return; }
+      ctx.save(); ctx.setLineDash([6, 6]); ctx.strokeStyle = 'rgba(150,110,60,.5)'; ctx.lineWidth = 2; ctx.strokeRect(L.x - 40, L.y - 40, 80, 80); ctx.restore();
+      ctx.fillStyle = '#9a4a28'; circle(ctx, L.x, L.y, 9); ctx.fill();
+    });
+    return;
+  }
+  if (mode === 'wrap') { LEAVES.forEach((L, i) => drawLeaf(ctx, L.x, L.y, K.rolls[i])); return; }
+  if (K && K.dough) {
+    renderAny(ctx, K);
+    drawCuts(ctx, K);
+    if (mode === 'cut' && cutDrag) {
+      ctx.save(); ctx.setLineDash([10, 8]); ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(58,34,22,.8)';
+      ctx.beginPath(); ctx.moveTo(cutDrag.x1, cutDrag.y1); ctx.lineTo(cutDrag.x2, cutDrag.y2); ctx.stroke(); ctx.restore();
+    }
+    if (K.stage === 'stir' && K.stir < 1) {
+      ctx.fillStyle = 'rgba(58,34,22,.25)'; roundRect(ctx, 150, 452, 200, 14, 7); ctx.fill();
+      ctx.fillStyle = '#2e8a4b'; roundRect(ctx, 150, 452, 200 * K.stir, 14, 7); ctx.fill();
+    }
+  } else {
+    ctx.fillStyle = 'rgba(80,40,15,.45)'; ctx.textAlign = 'center';
+    ctx.font = '800 34px "Baloo 2", sans-serif'; ctx.fillText('Tezgah boş', 250, 250);
+    ctx.font = '700 18px "Nunito", sans-serif'; ctx.fillText('Önce ne hazırlayacağını seç', 250, 282);
+  }
+}
+function drawCuts(ctx, d) {
+  if (!d.cuts || !d.cuts.length) return;
+  ctx.save(); ctx.clip(PATHS[d.dough]); ctx.lineCap = 'round';
+  for (const c of d.cuts) {
+    ctx.strokeStyle = 'rgba(60,28,10,.75)'; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(c.x1, c.y1); ctx.lineTo(c.x2, c.y2); ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,240,210,.55)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(c.x1 + 3, c.y1 + 3); ctx.lineTo(c.x2 + 3, c.y2 + 3); ctx.stroke();
+  }
+  ctx.restore();
+}
+function slicesOf(d) {
+  const cuts = d.cuts || [], c = cuts.length, how = DISH[d.dough].cut;
+  if (how === 'radial') return c ? c * 2 : 1;
+  if (how === 'grid') { const v = cuts.filter(k => Math.abs(k.x2 - k.x1) < Math.abs(k.y2 - k.y1)).length; return (v + 1) * (c - v + 1); }
+  return c + 1;
+}
+const slicesText = n => n === 1 ? 'Kesilmeyecek' : n + ' dilim';
+function dishCost(d) {
+  if (!d || !d.dough) return 0;
+  let c = DISH[d.dough].cost;
+  for (const p of d.toppings) c += ING[p.type].cost;
+  for (const p of d.portions.concat(d.garnish || [])) c += ING[p.type].cost;
+  if (d.spread) c += coverage(d) * ING.kiyma.cost;
+  return Math.round(c);
+}
+
+// ---------- UI refs ----------
+const stageC = $('#stageC'), boardC = $('#board'), ovenC = $('#ovenC'), cutC = $('#cutC');
+const bubble = $('#bubble'), panel = $('#panel'), hint = $('#hint');
+
+function show(id) { for (const s of ['shop', 'kitchen', 'oven', 'cut', 'dayend']) $('#' + s).hidden = s !== id; }
+function hud() {
+  $('#hDay').textContent = S.day;
+  const closed = S.time >= closeTime();
+  const ck = $('#hClock'); ck.textContent = closed ? 'Kapanış' : clockText(S.time); ck.style.color = closed || closeTime() - S.time < 45 ? 'var(--tomato)' : '';
+  $('#hRep').textContent = Math.round(S.rep);
+  const m = $('#hMoney'); m.textContent = S.money + '₺'; m.style.color = S.money < 0 ? 'var(--tomato)' : '';
+}
+function say(name, text) { $('#bubName').textContent = name; $('#bubText').textContent = text; bubble.hidden = false; bubble.classList.remove('pop'); void bubble.offsetWidth; bubble.classList.add('pop'); }
+function setHint(text, flash) { hint.textContent = text; hint.classList.remove('flash'); if (flash) { void hint.offsetWidth; hint.classList.add('flash'); } }
+
+// ---------- orders ----------
+const RIDDLES = [
+  { day: 2, text: 'Sabah kahvaltısı tadında bir pide istiyorum!', dish: 'pide', items: [['yumurta'], ['sucuk']] },
+  { day: 2, text: 'Ağzım yansın istiyorum, bana bir lahmacun!', dish: 'lahmacun', items: [['kiyma'], ['biber', 1]] },
+  { day: 2, text: 'Bahçeden yeni toplanmış gibi taptaze bir lahmacun.', dish: 'lahmacun', items: [['kiyma'], ['maydanoz'], ['domates']] },
+  { day: 2, text: 'Sade olsun usta, hamurdan başka bir şey istemem. Pide lütfen.', dish: 'pide', items: [] },
+  { day: 2, text: 'Peyniri ipek gibi uzayan bir pide! Ama başka hiçbir şey koyma.', dish: 'pide', items: [['kasar', 1]] },
+  { day: 2, text: 'Etli bir pide olsun ama kıymalı değil. Kahvaltıda yediğimiz et!', dish: 'pide', items: [['sucuk']] },
+  { day: 3, text: 'Her şeyli pide! Dolapta ne varsa koy.', dish: 'pide', items: 'all' },
+  { day: 2, need: 'sac', text: 'Temel Reis gibi güçlü olmak istiyorum. Bir gözleme lütfen!', dish: 'gozleme', items: [['ispanak']] },
+  { day: 2, need: 'sac', text: 'Köy kahvaltısı gibi bir gözleme: beyazı da olsun, sarısı da.', dish: 'gozleme', items: [['peynir'], ['patates']] },
+  { day: 2, need: 'pastirma', text: 'Kayseri\'den geldim, memleket kokan bir pide isterim. Yanında da güneş gibi bir şey olsun.', dish: 'pide', items: [['pastirma'], ['yumurta']] },
+  { day: 2, text: 'Bulgurlu, nar ekşili o güzel salatadan istiyorum ama ağzım yansın!', dish: 'kisir', variant: 'acili' },
+  { day: 2, text: 'Ege\'den geldim, zeytinyağlı bir şey isterim. Yapraklısından, 8 tane!', dish: 'sarma', variant: 'zeytinyagli', count: 8 },
+  { day: 2, text: 'Annemin yaptığı gibi, içi etli yapraklardan 10 tane lütfen.', dish: 'sarma', variant: 'etli', count: 10 },
+  { day: 2, text: 'Çay saatine kat kat bir şey, içinde beyaz peynir olsun.', dish: 'borek', variant: 'peynirli' },
+];
+const dishOpts = k => DISH[k].opts.filter(ingOpen);
+const variantOf = o => DISH[o.dish].variants ? DISH[o.dish].variants.find(v => v.id === o.variant) : null;
+function dishTitle(o) {
+  const D = DISH[o.dish], V = variantOf(o);
+  return V && V.label ? cap(V.label) + ' ' + lower(D.name) : D.name;
+}
+function makeOrder(forced) {
+  const dish = forced || pick(Object.keys(DISH).filter(dishOpen)), D = DISH[dish];
+  const riddles = RIDDLES.filter(r => r.dish === dish && r.day <= S.day && (!r.need || has(r.need)));
+  let o;
+  if (S.day >= 2 && riddles.length && Math.random() < .3) {
+    const r = pick(riddles);
+    o = { dish, riddle: r.text, items: [] };
+    if (r.variant) { o.variant = r.variant; if (r.count) o.count = r.count; }
+    else o.items = r.items === 'all' ? dishOpts('pide').map(t => ({ type: t, bol: false })) : r.items.map(([t, b]) => ({ type: t, bol: !!b }));
+  } else if (D.variants) {
+    o = { dish, items: [], variant: pick(D.variants.filter(v => v.day <= S.day)).id };
+  } else if (dish === 'pide' && S.day >= 2 && Math.random() < .3) {
+    const [a, b] = shuffle(dishOpts('pide').filter(t => t !== 'yumurta' && t !== 'kiyma')).slice(0, 2);
+    o = { dish, half: true, items: [{ type: a, bol: false, half: 'A' }, { type: b, bol: false, half: 'B' }] };
+  } else {
+    const items = [], maxExtra = S.day >= 3 ? 2 : 1;
+    if (dish === 'lahmacun') {
+      items.push({ type: 'kiyma', bol: Math.random() < .3 });
+      const n = Math.floor(Math.random() * (maxExtra + 1));
+      shuffle(dishOpts(dish)).slice(0, n).forEach(t => items.push({ type: t, bol: Math.random() < .25 }));
+    } else {
+      const n = 1 + Math.floor(Math.random() * (maxExtra + 1));
+      shuffle(dishOpts(dish)).slice(0, n).forEach(t => items.push({ type: t, bol: Math.random() < (t === 'yumurta' ? .2 : .3) }));
+    }
+    o = { dish, items };
+  }
+  if (D.slices) o.slices = Math.random() < (S.day >= 2 ? .35 : .2) ? pick(D.sliceOpts) : D.slices;
+  if ((D.kind === 'sarma' || D.kind === 'cookie' || D.kind === 'manti') && !o.count) o.count = Math.random() < .5 ? pick(D.countOpts) : D.count;
+  o.wellDone = D.kind === 'flat' && S.day >= 3 && Math.random() < .2;
+  return o;
+}
+function orderPhrase(o) {
+  const D = DISH[o.dish], dn = lower(D.name), V = variantOf(o);
+  if (V) {
+    if (D.phrase) return D.phrase(o, V);
+    if (D.kind === 'sarma') return `${o.count} tane ${V.label} yaprak sarma`;
+    if (D.kind === 'bowl') return V.label ? `${V.label} bir kısır` : 'bir porsiyon kısır';
+    if (D.kind === 'cookie') return `${o.count} tane ${V.label ? V.label + ' ' : ''}elmalı kurabiye`;
+    if (D.kind === 'jam') return 'bir kavanoz portakal reçeli';
+    return `${V.label} bir börek`;
+  }
+  if (o.half) return `yarısı ${ING[o.items[0].type].adj}, yarısı ${ING[o.items[1].type].adj} bir ${dn}`;
+  if (!o.items.length) return 'sade bir ' + dn;
+  const adjs = o.items
+    .filter(i => !(o.dish === 'lahmacun' && i.type === 'kiyma' && !i.bol))
+    .map(i => i.bol ? (ING[i.type].bolAdj || 'bol ' + ING[i.type].adj) : ING[i.type].adj);
+  const joined = adjs.length <= 1 ? (adjs[0] || '') : adjs.slice(0, -1).join(', ') + ' ve ' + adjs[adjs.length - 1];
+  return (joined ? joined + ' bir ' : 'bir ') + dn;
+}
+function orderExtras(o) {
+  const parts = [];
+  if (o.slices && o.slices !== DISH[o.dish].slices) parts.push(o.slices + ' dilim');
+  if (o.wellDone) parts.push('iyi pişmiş');
+  if (DISH[o.dish].kind === 'manti' && o.count !== DISH[o.dish].count) parts.push(o.count + ' tane');
+  return parts.length ? ` ${cap(parts.join(' ve '))} olsun.` : '';
+}
+const GREET = [
+  p => `Merhaba usta! ${cap(p)} alabilir miyim?`,
+  p => `Kolay gelsin! Bana ${p} yapar mısın?`,
+  p => `${cap(p)} lütfen, çok acıktım.`,
+  p => `Hayırlı işler usta. ${cap(p)} rica ediyorum.`,
+  p => `Selam! ${cap(p)} olsun, eline sağlık.`,
+];
+function ticketHTML() {
+  const o = order, D = DISH[o.dish];
+  let body;
+  if (o.riddle && !o.asked) body = `<p class="quote">“${o.riddle}”</p>`;
+  else if (D.variants) body = '<p class="recipe-note">Malzemeleri tarifine göre koy. Hatırlamıyorsan tarif defterine bak.</p>';
+  else if (o.half) body = `<ul>${o.items.map((i, n) => `<li><span class="half">${n + 1}. yarı</span><span>${ING[i.type].name}</span></li>`).join('')}</ul>`;
+  else if (!o.items.length) body = '<ul><li><span>Malzemesiz, sade</span></li></ul>';
+  else body = `<ul>${o.items.map(i => `<li><span>${ING[i.type].label || ING[i.type].name}</span><em class="${i.bol ? 'bol' : ''}">${i.bol ? 'bol' : 'normal'}</em></li>`).join('')}</ul>`;
+  const tag = D.kind === 'sarma' || D.kind === 'cookie' || D.kind === 'manti' ? `${o.count} tane` : D.unit ? D.unit : D.kind === 'jam' ? '1 kavanoz' : D.kind === 'bowl' ? '1 porsiyon' : slicesText(o.slices) + (o.wellDone ? ' · iyi pişmiş' : '');
+  const title = o.riddle && !o.asked ? D.name : dishTitle(o);
+  return `<div class="ticket-head"><span>Sipariş</span><span>${cust.name}</span></div>
+    <div class="ticket-dish">${title}</div>${body}<span class="tag">${tag}</span>`;
+}
+function bookHTML() {
+  return Object.keys(DISH).filter(dishOpen).map(k => {
+    const D = DISH[k];
+    if (D.kind === 'flat') {
+      const what = k === 'lahmacun' ? 'Hamur ve kıymalı harç. İsteğe göre maydanoz, domates ya da sivri biber.' : `Hamur, üstüne müşteri ne isterse: ${dishOpts(k).map(t => lower(ING[t].name)).join(', ')}.`;
+      return `<section><h3>${D.name}</h3><p>${what}</p><p class="how">Fırında pişir, ${D.slices === 1 ? 'kesmeden ver' : D.slices + ' dilim kes'}.</p></section>`;
+    }
+    const how = { bowl: 'Kasede iyice karıştır ve servis et.', tray: 'En az 3 kat yufka ser, iç harcı ve sosu ekle. Fırında pişir, 9 dilim kes.', sarma: 'İç harcı kasede karıştır, yapraklara sar, tencerede pişir.', cookie: 'Hamuru kasede yoğur, kurabiyelere şekil ver, fırında pişir. Üstüne istersen pudra şekeri.', jam: 'Malzemeleri tencereye koy, kıvamını tutturana kadar kaynat.' }[D.kind];
+    const how2 = (D.how || how) + (D.learn ? ' (Hayriye Teyze\'nin tarifi)' : '');
+    return `<section><h3>${D.name}</h3>${D.variants.filter(v => v.day <= S.day).map(v => `<p><b>${v.label ? cap(v.label) : 'Klasik'}:</b> ${v.req.map(t => lower(ING[t].name)).join(', ')}</p>`).join('')}<p class="how">${how2}</p></section>`;
+  }).join('');
+}
+
+function bakeScore(b, lo, hi, txt, issues) {
+  if (b < lo) { const s = Math.max(.1, 1 - (lo - b) / .35); issues.push({ w: 1 - s, t: b < .3 ? txt[0] : txt[1] }); return s; }
+  if (b > hi) { const s = Math.max(0, 1 - (b - hi) / .22); issues.push({ w: 1 - s, t: b > .9 ? txt[3] : txt[2] }); return s; }
+  return 1;
+}
+function sliceScore(d, want, issues) {
+  const got = slicesOf(d);
+  if (got === want) return 1;
+  issues.push({ w: .4, t: want === 1 ? 'Kesmeni istememiştim.' : `${want} dilim istemiştim, ${got === 1 ? 'hiç kesmemişsin' : got + ' dilim olmuş'}.` });
+  return got === 1 || want === 1 ? .4 : .65;
+}
+function finish(o, total, issues, ok, d) {
+  if (has('cay')) total += .05;
+  if (o.asked) total *= .9;
+  if (cust && cust.pat != null && cust.pat < .5) {
+    const pen = (.5 - cust.pat) * .4;
+    total -= pen;
+    issues.push({ w: .13 + pen, t: cust.pat <= 0 ? 'Çok bekledim, sabrım tükendi!' : 'Biraz fazla bekledim.' });
+  }
+  total = clamp(total, 0, 1);
+  issues.sort((a, c) => c.w - a.w);
+  const price = DISH[o.dish].price, refund = !ok || total < .3;
+  const pay = refund ? 0 : round5(price * total);
+  const tip = !refund && total >= .85 ? round5(price * .25 * (has('masa') ? 1.6 : 1)) : 0;
+  return { total, refund, stars: Math.max(1, Math.round(total * 5)), issues: issues.filter(i => i.w > .12), pay, tip, cost: dishCost(d) };
+}
+function evaluate(o, d) { return DISH[o.dish].variants ? evalRecipe(o, d) : evalFlat(o, d); }
+function evalRecipe(o, d) {
+  const D = DISH[o.dish], V = variantOf(o), issues = [];
+  const ok = d.dough === o.dish;
+  if (!ok) issues.push({ w: 1, t: `Ben ${lower(dishTitle(o))} istemiştim!` });
+  const counts = {};
+  for (const p of d.portions.concat(d.toppings, d.garnish || [])) counts[p.type] = (counts[p.type] || 0) + 1;
+  const allowed = new Set([...V.req, ...D.optional]);
+  const sc = [];
+  let missing = 0;
+  for (const t of V.req) {
+    const c = counts[t] || 0, nm = ING[t].name, big = ING[t].main || t === 'yufka';
+    let s = 1;
+    if (!c) { s = 0; missing += .12; issues.push({ w: .8, t: `İçinde ${lower(nm)} yok!` }); }
+    else if (big && c < 3) { s = c / 3; issues.push({ w: 1 - s, t: t === 'yufka' ? 'Yufka az olmuş, börek kat kat olur.' : `${nm} az olmuş.` }); }
+    else if (!big && c > 4) { s = .7; issues.push({ w: .3, t: `${nm} çok fazla olmuş.` }); }
+    sc.push(s);
+  }
+  let extra = 0;
+  for (const t of Object.keys(counts)) if (!allowed.has(t)) { extra += .12; issues.push({ w: .45, t: `${ING[t].name} istememiştim.` }); }
+  let proc = 1;
+  if (D.kind === 'tray') {
+    const bs = bakeScore(d.bake, .5, .72, D.texts || ['Börek çiğ kalmış!', 'Biraz çiğ kalmış.', 'Biraz fazla pişmiş.', 'Börek yanmış!'], issues);
+    proc = D.noCut ? bs : bs * .6 + sliceScore(d, o.slices, issues) * .4;
+  }
+  if (D.kind === 'manti') {
+    const n = rolledCount(d);
+    let cs = 1;
+    if (n !== o.count) { cs = Math.max(0, 1 - Math.abs(n - o.count) / o.count); issues.push({ w: .4, t: `${o.count} tane istemiştim, ${n} tane olmuş.` }); }
+    proc = bakeScore(d.bake, .5, .72, D.texts, issues) * .6 + cs * .4;
+  }
+  if (D.kind === 'sarma') {
+    const n = rolledCount(d);
+    let cs = 1;
+    if (n !== o.count) { cs = Math.max(0, 1 - Math.abs(n - o.count) / o.count); issues.push({ w: .4, t: `${o.count} tane istemiştim, ${n} tane olmuş.` }); }
+    proc = bakeScore(d.bake, .5, .72, ['Pirinç çiğ kalmış!', 'Pirinç biraz diri kalmış.', 'Biraz fazla pişmiş.', 'Lapa olmuş!'], issues) * .6 + cs * .4;
+  }
+  if (D.kind === 'cookie') {
+    const n = rolledCount(d);
+    let cs = 1;
+    if (n !== o.count) { cs = Math.max(0, 1 - Math.abs(n - o.count) / o.count); issues.push({ w: .4, t: `${o.count} tane istemiştim, ${n} tane olmuş.` }); }
+    proc = bakeScore(d.bake, .5, .72, ['Kurabiyeler çiğ kalmış!', 'Biraz hamur kalmış.', 'Biraz fazla pişmiş.', 'Kurabiyeler yanmış!'], issues) * .6 + cs * .4;
+  }
+  if (D.kind === 'jam') proc = bakeScore(d.bake, .5, .72, D.texts || ['Reçel sulu kalmış!', 'Biraz sulu olmuş.', 'Fazla koyulaşmış.', 'Şekeri yanmış!'], issues);
+  const ing = sc.length ? sc.reduce((a, c) => a + c, 0) / sc.length : 1;
+  return finish(o, (ing * .6 + proc * .4) * (ok ? 1 : .25) - extra - missing, issues, ok, d);
+}
+function evalFlat(o, d) {
+  const issues = [];
+  const ok = d.dough === o.dish;
+  if (!ok) issues.push({ w: 1, t: `Ben ${lower(DISH[o.dish].name)} istemiştim!` });
+  const counts = { all: {}, L: {}, R: {} };
+  for (const p of d.toppings) {
+    counts.all[p.type] = (counts.all[p.type] || 0) + 1;
+    const side = p.x < 250 ? 'L' : 'R';
+    counts[side][p.type] = (counts[side][p.type] || 0) + 1;
+  }
+  for (const p of d.portions) counts.all[p.type] = (counts.all[p.type] || 0) + 1;
+  const cov = coverage(d);
+  const wanted = new Set(o.items.map(i => i.type));
+  function itemScore(it, cnt) {
+    const I = ING[it.type], nm = I.name;
+    if (I.spread) {
+      const need = I.need[it.bol ? 1 : 0], s = Math.min(1, cov / need);
+      if (cov < .08) return { s, issue: { w: 1, t: 'Kıyma hiç yok!' } };
+      if (s < .8) return { s, issue: { w: 1 - s, t: it.bol ? 'Bol kıyma demiştim, az olmuş.' : 'Kıyma az olmuş.' } };
+      return { s };
+    }
+    const c = cnt[it.type] || 0, need = I.target[it.bol ? 1 : 0];
+    const s = Math.min(1, c / need);
+    if (c === 0) return { s, issue: { w: 1, t: `${nm} hiç yok!` } };
+    if (s < .8) return { s, issue: { w: 1 - s, t: it.bol ? `Bol ${lower(nm)} demiştim, az olmuş.` : `${nm} az olmuş.` } };
+    if (!it.bol && c > I.target[1] * 1.7) return { s: s * .85, issue: { w: .15, t: `${nm} biraz fazla olmuş.` } };
+    return { s };
+  }
+  const scores = [];
+  if (o.half) {
+    // iki yerleşimi de dene, müşteri hangi yarının hangisi olduğuna takılmaz
+    let best = null;
+    for (const [sa, sb] of [['L', 'R'], ['R', 'L']]) {
+      const ra = itemScore(o.items[0], counts[sa]), rb = itemScore(o.items[1], counts[sb]);
+      const mixed = (counts[sb][o.items[0].type] || 0) >= 3 || (counts[sa][o.items[1].type] || 0) >= 3;
+      const sum = ra.s + rb.s - (mixed ? .3 : 0);
+      if (!best || sum > best.sum) best = { sum, ra, rb, mixed };
+    }
+    scores.push(best.ra.s, best.rb.s);
+    if (best.ra.issue) issues.push(best.ra.issue);
+    if (best.rb.issue) issues.push(best.rb.issue);
+    if (best.mixed) { scores.push(.5); issues.push({ w: .5, t: 'Yarımlar birbirine karışmış.' }); }
+  } else {
+    for (const it of o.items) { const r = itemScore(it, counts.all); scores.push(r.s); if (r.issue) issues.push(r.issue); }
+  }
+  let extra = 0;
+  for (const k of Object.keys(ING)) {
+    if (wanted.has(k)) continue;
+    const present = ING[k].spread ? cov > .06 : (counts.all[k] || 0) >= 2;
+    if (present) { extra += .12; issues.push({ w: .3, t: `${ING[k].name} istememiştim.` }); }
+  }
+  const [lo, hi] = o.wellDone ? [.72, .86] : [.5, .72];
+  const txt = o.wellDone && d.bake >= .5 && d.bake < lo
+    ? ['', 'İyi pişmiş demiştim, biraz daha pişmeliydi.', '', '']
+    : ['Hamur çiğ kalmış!', 'Biraz çiğ kalmış.', 'Biraz fazla pişmiş.', 'Bu yanmış!'];
+  if (!txt[0]) txt[0] = 'Hamur çiğ kalmış!', txt[2] = 'Biraz fazla pişmiş.', txt[3] = 'Bu yanmış!';
+  const bs = bakeScore(d.bake, lo, hi, txt, issues);
+  const sl = sliceScore(d, o.slices, issues);
+  const top = scores.length ? scores.reduce((a, c) => a + c, 0) / scores.length : 1;
+  return finish(o, (top * .5 + bs * .3 + sl * .2) * (ok ? 1 : .25) - extra, issues, ok, d);
+}
+const HAPPY = ['Ellerine sağlık usta, harika olmuş!', 'Mis gibi! Tam istediğim gibi.', 'Oh be, nefis! Yine gelirim.', 'Bu ne güzellik! Afiyetle yerim.'];
+const OK = ['Fena değil.', 'İdare eder.', 'Güzel ama tam değil.'];
+const BAD = ['Bu ne böyle?!', 'Usta, olmamış bu.', 'Hiç beğenmedim.'];
+
+// ---------- customer walk ----------
+let custX = 330, walk = null;
+function walkTo(to, dur, cb) { walk = { from: custX, to, start: performance.now(), dur, cb }; }
+function updateWalk(now) {
+  if (!walk) return;
+  const k = clamp((now - walk.start) / walk.dur, 0, 1), e = 1 - Math.pow(1 - k, 3);
+  custX = walk.from + (walk.to - walk.from) * e;
+  if (k >= 1) { const cb = walk.cb; walk = null; cb && cb(); }
+}
+
+// ---------- flow ----------
+const EVENTS = {
+  rival1: { who: KAMIL, mood: 'meh', end: 'Görürüz Kâmil Usta', after: () => { S.ev.rival1 = true; },
+    lines: ['Merhaba komşu. Ben Kâmil, karşıya yeni bir lokanta açtım.', 'Bu mahallede iki lokantaya yer yok. Bakalım müşteriler kimi seçecek!'],
+    panel: '<strong>Rakibin geldi.</strong> Müşterileri memnun ettikçe mahallede ünün artar ve dükkanına daha sık müşteri gelir.' },
+  teyze1: { who: HAYRIYE, mood: 'happy', end: 'Sağ ol teyzeciğim', unlock: 'kurabiye', after: () => { S.learned.kurabiye = true; },
+    lines: ['Kolay gelsin evladım! Ben Hayriye, üst sokakta otururum.', 'Senin yemeklerini çok övüyorlar. Sana annemden kalma bir tarif vereyim: elmalı kurabiye!', 'Un, tereyağı, şeker, yumurta, rendelenmiş elma ve tarçın. Hamuru yoğur, şekil ver, fırına at. İstersen üstüne pudra şekeri.'] },
+  teyze2: { who: HAYRIYE, mood: 'happy', end: 'Ellerine sağlık teyze', unlock: 'recel', after: () => { S.learned.recel = true; },
+    lines: ['Yine ben geldim evladım! Kurabiyeyi herkes çok sevmiş, duydum.', 'Bu sefer de portakal reçeli tarifimi vereyim.', 'Portakal kabuklarını şeker ve biraz suyla tencereye koy, limon sık. Kıvamını iyi tut, ne sulu olsun ne yansın!'] },
+};
+function pendingEvent() {
+  if (S.day >= 2 && !S.ev.rival1 && S.dayServed === 0) return 'rival1';
+  if (S.day >= 2 && !S.learned.kurabiye && S.dayServed >= 2) return 'teyze1';
+  if (S.day >= 3 && S.learned.kurabiye && !S.learned.recel && S.dayServed >= 2) return 'teyze2';
+  if (S.day >= 4 && S.ev.rival1 && !S.ev.rival2 && S.dayServed >= 1) return 'rival2';
+  return null;
+}
+const nameTag = () => cust.regular ? `${cust.name} · müdavim` : cust.special === 'rival2' ? `${cust.name} · rakip` : cust.name;
+// ünün yüksekse ve müdavimin çoksa müşteriler daha sık gelir
+const PAT_SEC = { flat: 80, bowl: 60, tray: 75, sarma: 100, cookie: 90, jam: 60, manti: 115 };
+function patienceSeconds() {
+  let s = PAT_SEC[kindOf(order.dish)] || 80;
+  s *= 1 + .06 * decorCount();
+  if (has('cay')) s += 12;
+  if (cust.regular) s += 10;
+  if (cust.special === 'rival2') s *= .85;
+  return s;
+}
+function updatePatience(dt) {
+  const chip = $('#patChip');
+  const on = cust && cust.pat != null && phase === 'order';
+  chip.classList.toggle('off', !on);
+  if (!on) return;
+  if (!(S.day === 1 && S.dayServed === 0) && !walk) {
+    const before = cust.pat;
+    cust.pat = Math.max(0, cust.pat - dt / cust.patT);
+    if (before >= .35 && cust.pat < .35) { sfx.grumble(); chip.classList.remove('low'); void chip.offsetWidth; chip.classList.add('low'); cust.mood = 'meh'; }
+    if (before > 0 && cust.pat <= 0) { sfx.grumble(); chip.classList.remove('low'); void chip.offsetWidth; chip.classList.add('low'); cust.mood = 'angry'; }
+  }
+  const p = cust.pat, fill = $('#patFill');
+  fill.style.width = (p * 100) + '%';
+  fill.style.background = p > .5 ? 'var(--good)' : p > .25 ? 'var(--gold)' : 'var(--tomato)';
+  $('#patFace').textContent = p > .5 ? '😊' : p > .25 ? '😐' : '😠';
+}
+const customerGap = () => Math.max(2, Math.round(4 + (100 - S.rep) / 6 - Math.min(4, S.regulars.length * .5)));
+let talk = null;
+function enterCustomer(onArrive) {
+  result = null; plate = null;
+  phase = 'enter'; bubble.hidden = true; custX = 980;
+  show('shop'); hud(); renderPanel();
+  walkTo(330, 1000, onArrive);
+}
+function nextCustomer() {
+  if (S.dayServed > 0) S.time = Math.min(closeTime(), S.time + customerGap());
+  if (S.time >= closeTime()) { endDay(); return; }
+  const ev = pendingEvent();
+  if (ev && ev !== 'rival2') {
+    const E = EVENTS[ev];
+    cust = Object.assign({}, E.who, { mood: E.mood, seed: 3, special: ev }); order = null; talk = { ev, i: 0 };
+    enterCustomer(() => { phase = 'talk'; sfx.bell(); say(cust.name, E.lines[0]); renderPanel(); });
+    return;
+  }
+  cust = ev === 'rival2' ? Object.assign({}, KAMIL, { mood: 'meh', seed: 1, special: 'rival2' }) : makeCustomer();
+  order = makeOrder(cust.regular && Math.random() < .5 && dishOpen(cust.regular.fav) ? cust.regular.fav : null);
+  enterCustomer(() => {
+    phase = 'order'; sfx.bell();
+    cust.pat = 1; cust.patT = patienceSeconds();
+    const intro = cust.special === 'rival2' ? 'Yine ben, Kâmil. Bakalım yemeklerin övüldüğü kadar var mı? '
+      : cust.regular ? pick(['Yine ben geldim usta! ', 'Selam usta, beni hatırladın mı? ', 'Geçen sefer çok beğenmiştim, yine geldim! ']) : '';
+    say(nameTag(), intro + (order.riddle || pick(GREET)(orderPhrase(order))) + orderExtras(order));
+    renderPanel();
+  });
+}
+
+function renderPanel() {
+  if (phase === 'enter') { panel.innerHTML = `<p>Kapı çaldı, biri geliyor…</p>`; return; }
+  if (phase === 'talk') {
+    const E = EVENTS[talk.ev], last = talk.i >= E.lines.length - 1;
+    let info = '';
+    if (last && E.unlock) { const D = DISH[E.unlock]; info = `<strong>Yeni tarif: ${D.name}.</strong> ${cap(D.variants[0].req.map(t => lower(ING[t].name)).join(', '))}. Menüye ve tarif defterine eklendi.`; }
+    else if (last && E.panel) info = E.panel;
+    panel.innerHTML = `<p>${info}</p><button class="btn ${last ? 'go' : 'primary'}" id="talkBtn" type="button">${last ? E.end : 'Devam'}</button>`;
+    $('#talkBtn').onclick = () => {
+      if (!last) { talk.i++; say(cust.name, E.lines[talk.i]); renderPanel(); return; }
+      E.after(); save(); sfx.coin();
+      phase = 'leave'; bubble.hidden = true; panel.innerHTML = '<p>Güle güle!</p>';
+      walkTo(-200, 900, () => { if (S.time >= closeTime()) endDay(); else nextCustomer(); });
+    };
+    return;
+  }
+  if (phase === 'order') {
+    const first = S.day === 1 && S.dayServed === 0;
+    const canAsk = order.riddle && !order.asked;
+    panel.innerHTML = `<p>${first
+      ? '<strong>Hoş geldin usta!</strong> Siparişi dinle, mutfakta doğru malzemeleri koy, pişir ve servis et. Tarifini bilmediğin yemek için mutfakta tarif defteri var. Dükkan 19:00\'da kapanıyor.'
+      : canAsk ? `<strong>${cust.name}</strong> bilmece gibi konuşuyor. Anlamadıysan sorabilirsin ama memnuniyeti biraz düşer.`
+      : `<strong>${cust.name}</strong> siparişini verdi.`}</p>
+      ${canAsk ? '<button class="btn ask" id="askBtn" type="button">Ne dedin?</button>' : ''}
+      <button class="btn primary" id="takeBtn" type="button">Siparişi al</button>`;
+    $('#takeBtn').onclick = toKitchen;
+    if (canAsk) $('#askBtn').onclick = () => {
+      order.asked = true; tone(520, .08, 'triangle', .04);
+      say(nameTag(), `Yani ${orderPhrase(order)} demek istedim.` + orderExtras(order));
+      renderPanel();
+    };
+    return;
+  }
+  if (phase === 'serve' && result) {
+    const r = result;
+    const stars = '★'.repeat(r.stars) + `<i>${'★'.repeat(5 - r.stars)}</i>`;
+    const notes = (r.notes || []).map(n => `<li class="${n.bad ? '' : 'ok'}">${n.t}</li>`).join('')
+      + (r.issues.length ? r.issues.slice(0, 2).map(i => `<li>${i.t}</li>`).join('') : '<li class="ok">Kusursuz!</li>');
+    const closing = S.time >= closeTime();
+    panel.innerHTML = `<div class="result"><div class="stars" aria-label="${r.stars} yıldız">${stars}</div>
+      <div class="earn"><span>${r.refund ? 'Para iadesi' : 'Ödeme'}</span><b>+${r.pay}₺</b></div>
+      ${r.tip ? `<div class="earn"><span>Bahşiş</span><b>+${r.tip}₺</b></div>` : ''}
+      <div class="earn"><span>Malzeme</span><b class="cost">−${r.cost}₺</b></div>
+      <ul class="notes">${notes}</ul></div>
+      <button class="btn go" id="nextBtn" type="button">${closing ? 'Dükkanı kapat' : 'Sıradaki müşteri'}</button>`;
+    $('#nextBtn').onclick = leave;
+  }
+}
+
+function leave() {
+  if (phase !== 'serve') return;
+  phase = 'leave'; bubble.hidden = true; plate = null; panel.innerHTML = '<p>Güle güle, yine bekleriz!</p>';
+  walkTo(-200, 900, () => {
+    save();
+    if (S.time >= closeTime()) endDay(); else nextCustomer();
+  });
+}
+
+function newDish() {
+  K = { dough: null, toppings: [], portions: [], garnish: [], spread: null, bake: 0, cuts: [], stage: 'build', stir: 0, rolls: [], rollOrder: [] };
+  sel = null;
+  $('#doughPick').hidden = false; $('#binPick').hidden = true;
+  setHint('Önce ne hazırlayacağını seç.');
+  updateActions();
+}
+function toKitchen() {
+  if (phase !== 'order') return;
+  sfx.whoosh();
+  $('#ticket').innerHTML = ticketHTML();
+  buildDoughButtons(); newDish();
+  show('kitchen');
+}
+function chooseDough(type) {
+  K.dough = type; K.stage = 'build';
+  const kind = kindOf(type);
+  if (kind === 'flat') { K.spread = document.createElement('canvas'); K.spread.width = K.spread.height = 500; }
+  sfx.plop();
+  buildBins(kind);
+  $('#doughPick').hidden = true; $('#binPick').hidden = false;
+  $('#binTitle').textContent = kind === 'flat' ? '2. Malzemeleri ekle' : kind === 'tray' ? '2. Tepsiye ekle' : kind === 'jam' ? '2. Tencereye ekle' : '2. Kaseye ekle';
+  setHint(kind === 'flat'
+    ? (order.half ? 'Yarım sipariş: bir malzemeyi sol yarıya, diğerini sağ yarıya koy.' : 'Bir malzeme seç, sonra hamura dokun ya da parmağını sürükle.')
+    : kind === 'tray' ? 'Malzemenin kabına dokun, tepsiye eklensin. Her yufka bir kat.' : kind === 'jam' ? 'Malzemenin kabına dokun, tencereye eklensin. Bitince ocağa koy.'
+    : kind === 'cookie' ? 'Malzemenin kabına dokun, kaseye eklensin. Bitince hamuru yoğur.' : 'Malzemenin kabına dokun, kaseye eklensin. Bitince karıştır.');
+  updateActions();
+}
+function selectBin(type) {
+  const kind = kindOf(K.dough);
+  if (kind !== 'flat') return addPortion(type);
+  sel = type;
+  [...document.querySelectorAll('.bin')].forEach(b => b.setAttribute('aria-pressed', String(b.dataset.type === type)));
+  setHint(ING[type].spread ? 'Harcı parmağınla hamurun üstüne sür.' : `${ING[type].name} seçili. Hamurun üstüne dokun ya da sürükle.`);
+  tone(660, .05, 'triangle', .04);
+}
+function addPortion(type) {
+  const arr = K.stage === 'garnish' ? K.garnish : K.portions;
+  const n = arr.filter(p => p.type === type).length;
+  if (n >= 8 || arr.length >= 60) { setHint('Bu kadarı yeter!', true); return; }
+  let x, y;
+  if (kindOf(K.dough) === 'tray') { x = rnd(110, 390); y = rnd(160, 340); }
+  else { const a = Math.random() * 6.283, d = Math.sqrt(Math.random()) * 120; x = 250 + Math.cos(a) * d; y = 250 + Math.sin(a) * d; }
+  arr.push({ type, x, y, seed: Math.floor(Math.random() * 1e9) });
+  const st = pstyle(type).style;
+  if (st === 'liquid') sfx.pour(); else if (['dice', 'rings', 'leaves', 'slice', 'peel', 'eggplant'].includes(st)) sfx.chop(); else sfx.plop();
+  setHint(`${ING[type].name} eklendi${n ? ` (${n + 1}. kez)` : ''}.`);
+}
+function undoLast() {
+  if (!K.dough) return;
+  if (K.stage === 'garnish') { if (!K.garnish.pop()) return; }
+  else if (K.stage !== 'build') return;
+  else if (K.portions.length) K.portions.pop(); else if (K.toppings.length) K.toppings.pop(); else return;
+  tone(340, .06, 'triangle', .04);
+}
+function discardDish() {
+  const c = dishCost(K);
+  if (c > 0) { S.money -= c; S.dayCost += c; save(); hud(); }
+  newDish();
+  if (c > 0) setHint(`Çöpe gitti, malzeme ${c}₺ tuttu. Baştan seç.`);
+  tone(300, .1, 'triangle', .04);
+}
+function updateActions() {
+  const btn = $('#bakeBtn'), kind = K && K.dough ? kindOf(K.dough) : null;
+  $('#undoBtn').hidden = !kind || (K.stage !== 'build' && K.stage !== 'garnish');
+  btn.disabled = false;
+  if (K && K.stage === 'garnish') { btn.textContent = 'Servis et'; return; }
+  if (!kind || kind === 'flat' || kind === 'tray') { btn.textContent = 'Fırına ver'; return; }
+  if (kind === 'jam') { btn.textContent = 'Ocağa koy'; return; }
+  if (K.stage === 'build') { btn.textContent = kind === 'cookie' ? 'Yoğur' : 'Karıştır'; return; }
+  btn.textContent = kind === 'bowl' ? 'Servis et' : kind === 'cookie' ? 'Şekil ver' : kind === 'manti' ? 'Hamura koy' : 'Yaprağa sar';
+  btn.disabled = K.stir < 1;
+}
+function kitchenNext() {
+  if (!K.dough) { setHint('Önce ne hazırlayacağını seç.', true); sfx.bad(); return; }
+  if (K.stage === 'garnish') return serve();
+  const kind = kindOf(K.dough);
+  if (kind === 'flat' || kind === 'tray') return startBake();
+  if (!K.portions.length) { setHint(kind === 'jam' ? 'Tencere boş, önce malzeme ekle.' : 'Kase boş, önce malzeme ekle.', true); sfx.bad(); return; }
+  if (kind === 'jam') return startBake();
+  if (K.stage === 'build') {
+    K.stage = 'stir'; $('#binPick').hidden = true;
+    setHint(kind === 'cookie' ? 'Hamuru yoğurmak için parmağını kasenin içinde döndür.' : 'Kaşığı çevirir gibi parmağını kasenin içinde döndür.');
+    updateActions(); return;
+  }
+  if (K.stir < 1) return;
+  if (kind === 'bowl') serve();
+  else { cutMode = kind === 'cookie' ? 'shape' : kind === 'manti' ? 'fold' : 'wrap'; K.rolls = Array(12).fill(false); K.rollOrder = []; setupCutScreen(); }
+}
+
+let cutMode = 'cut';
+function toWrap() {
+  cutMode = 'wrap'; K.rolls = Array(12).fill(false); K.rollOrder = [];
+  setupCutScreen();
+}
+const CUT_UI = {
+  cut: ['3. Dilimle', 'Son kesiği geri al', 'Servis et'],
+  wrap: ['3. Yaprağa sar', 'Son sarmayı aç', 'Tencereye koy'],
+  shape: ['3. Şekil ver', 'Son kurabiyeyi geri al', 'Fırına ver'],
+  fold: ['3. Mantıları kapat', 'Son mantıyı aç', 'Tencereye at'],
+};
+function setupCutScreen() {
+  const [title, undo, next] = CUT_UI[cutMode];
+  $('#ticket2').innerHTML = ticketHTML();
+  $('#cutTitle').textContent = title; $('#undoCutBtn').textContent = undo; $('#serveBtn').textContent = next;
+  updateCutInfo(); show('cut'); sfx.whoosh();
+}
+function startBake() {
+  if (!K.dough) { setHint('Önce ne hazırlayacağını seç.', true); sfx.bad(); return; }
+  K.bake = 0; baking = true; sfx.whoosh();
+  const kd = kindOf(K.dough), pot = kd === 'sarma' || kd === 'jam' || kd === 'manti', lab = DISH[K.dough].labels;
+  $('#pullBtn').disabled = false; $('#pullBtn').textContent = pot ? 'Ocaktan al' : 'Fırından çıkar';
+  $('#gl1').textContent = lab ? lab[0] : kd === 'jam' ? 'Sulu' : pot ? 'Diri' : 'Çiğ'; $('#gl3').textContent = lab ? lab[1] : kd === 'jam' ? 'Karamel' : pot ? 'Lapa' : 'Yanık';
+  show('oven'); updateGauge();
+}
+function updateGauge() {
+  $('#needle').style.left = (K.bake * 100) + '%';
+  const b = K.bake;
+  const G = DISH[K.dough].gauge;
+  if (G) { $('#ovenTag').textContent = b < .3 ? G[0] : b < .5 ? G[1] : b <= .72 ? G[2] : b <= .86 ? G[3] : G[4]; return; }
+  if (kindOf(K.dough) === 'jam') {
+    $('#ovenTag').textContent = b < .3 ? 'Kaynıyor…' : b < .5 ? 'Koyulaşıyor…' : b <= .72 ? 'Kıvamında, ocaktan al!' : b <= .86 ? 'Fazla koyulaştı!' : 'Şekeri yanıyor!';
+    return;
+  }
+  if (kindOf(K.dough) === 'sarma') {
+    $('#ovenTag').textContent = b < .3 ? 'Tencere kaynıyor…' : b < .5 ? 'Pişiyor…' : b <= .72 ? 'Tam kıvamında, ocaktan al!' : b <= .86 ? 'Pirinç dağılıyor!' : 'Lapa oluyor!';
+    return;
+  }
+  $('#ovenTag').textContent = b < .3 ? 'Fırında…' : b < .5 ? 'Pişiyor…' : b <= .72 ? (order.wellDone ? 'Pişti, iyi pişmiş için biraz daha…' : 'Tam kıvamında, çıkar!') : b <= .86 ? (order.wellDone ? 'İyi pişmiş, çıkar!' : 'Fazla pişiyor!') : 'Yanıyor!';
+}
+function pull() {
+  if (!baking) return;
+  baking = false; $('#pullBtn').disabled = true;
+  if (['sarma', 'jam', 'cookie'].includes(kindOf(K.dough)) || DISH[K.dough].noCut) { serve(); return; }
+  if (kindOf(K.dough) === 'manti') {
+    K.stage = 'garnish'; buildBins('manti'); show('kitchen');
+    $('#doughPick').hidden = true; $('#binPick').hidden = false; $('#binTitle').textContent = '4. Sosunu hazırla';
+    setHint('Mantının üstüne ne gerekiyorsa ekle, sonra servis et.'); updateActions(); sfx.whoosh();
+    return;
+  }
+  K.cuts = []; cutMode = 'cut';
+  setupCutScreen();
+}
+function updateCutInfo() {
+  if (cutMode === 'fold') {
+    $('#cutInfo').innerHTML = `<b>${rolledCount(K)} mantı</b>İstenen: ${order.count || '?'} tane`;
+    $('#cutHint').textContent = 'Harç konmuş bir hamur karesine dokun, mantıyı kapat.';
+    return;
+  }
+  if (cutMode === 'shape') {
+    $('#cutInfo').innerHTML = `<b>${rolledCount(K)} kurabiye</b>İstenen: ${order.count || '?'} tane`;
+    $('#cutHint').textContent = 'Tepside boş bir yere dokun, kurabiye şekillensin.';
+    return;
+  }
+  if (cutMode === 'wrap') {
+    $('#cutInfo').innerHTML = `<b>${rolledCount(K)} sarma</b>İstenen: ${order.count || '?'} tane`;
+    $('#cutHint').textContent = 'Bir yaprağa dokun, iç harcı koyup sarılsın.';
+    return;
+  }
+  const n = slicesOf(K), want = order.slices || 1;
+  $('#cutInfo').innerHTML = `<b>${slicesText(n)}</b>İstenen: ${lower(slicesText(want))}`;
+  const how = DISH[K.dough].cut;
+  $('#cutHint').textContent = how === 'radial' ? 'Ortadan geçen bir çizgiyle kes. Her kesik 2 dilim yapar.'
+    : how === 'grid' ? 'Önce dikine, sonra enine kes. 2 dikine + 2 enine kesik 9 dilim yapar.'
+    : 'Enine kes: parmağını bir kenardan öbür kenara sürükle.';
+}
+function serve() {
+  if (phase !== 'order' || !K || !K.dough) return;
+  result = evaluate(order, K);
+  plate = K;
+  const reg = cust.regular;
+  let extraLine = '';
+  result.notes = [];
+  if (reg && result.tip) result.tip += Math.min(30, 10 * reg.visits);
+  if (cust.special === 'rival2') {
+    S.ev.rival2 = true;
+    if (result.stars >= 4) { S.rep += 10; extraLine = 'Hmm… İtiraf edeyim, benimkinden güzel olmuş.'; result.notes.push({ t: 'Kâmil bile beğendi, ünün arttı!' }); }
+    else { S.rep -= 5; extraLine = 'Hah! Bunu mu övüyorlar? Benim dükkanım daha iyi.'; result.notes.push({ t: 'Kâmil mahallede kötü konuşacak.', bad: true }); }
+  } else if (result.total >= .85) {
+    if (reg) { reg.visits++; reg.fav = order.dish; }
+    else { S.regulars.push({ look: lookOf(cust), visits: 1, fav: order.dish }); if (S.regulars.length > 8) S.regulars.shift(); S.rep += 2; result.notes.push({ t: `${cust.name} müdavimin oldu, yine gelecek!` }); }
+  } else if (result.total < .55 && reg) {
+    S.regulars = S.regulars.filter(r => r !== reg); S.rep -= 3;
+    extraLine = 'Eskisi gibi değil, bir daha gelmem.'; result.notes.push({ t: `${cust.name} artık müdavimin değil.`, bad: true });
+  }
+  S.rep = clamp(S.rep + (result.stars - 3) * 1.5, 0, 100);
+  const earned = result.pay + result.tip;
+  S.money += earned - result.cost; S.dayEarn += earned; S.dayCost += result.cost; S.dayStars += result.stars; S.dayServed++; save();
+  phase = 'serve';
+  cust.mood = result.total >= .85 ? 'happy' : result.total >= .55 ? 'meh' : 'angry';
+  const issue = result.issues[0] ? ' ' + result.issues[0].t : '';
+  let line = cust.mood === 'happy' ? pick(HAPPY) : (cust.mood === 'meh' ? pick(OK) : pick(BAD)) + issue;
+  if (result.refund) line += ' Paramı geri ver!';
+  if (cust.special === 'rival2') line = extraLine;
+  else if (extraLine) line += ' ' + extraLine;
+  show('shop'); hud(); renderPanel();
+  say(nameTag(), line);
+  if (earned > 0) {
+    const f = document.createElement('div'); f.className = 'float'; f.textContent = '+' + earned + '₺';
+    $('#stage').appendChild(f); setTimeout(() => f.remove(), 1500);
+    sfx.coin();
+  } else sfx.bad();
+}
+
+function endDay() {
+  show('dayend'); hud();
+  $('#deTitle').textContent = `${S.day}. gün bitti!`;
+  $('#deServed').textContent = S.dayServed;
+  $('#deEarn').textContent = S.dayEarn + '₺';
+  $('#deCost').textContent = '−' + S.dayCost + '₺';
+  $('#deStars').textContent = (S.dayServed ? S.dayStars / S.dayServed : 0).toFixed(1) + '★';
+  $('#deProfit').textContent = (S.dayEarn - S.dayCost) + '₺';
+  const u = $('#deUnlock'), next = S.day + 1;
+  const msg = next === 2 ? 'Yarın mahallede hareketli bir gün: yeni komşular, bilmeceli siparişler, menüde mercimek çorbası, peynirli ve ıspanaklı börek, etli sarma.'
+    : next === 3 ? 'Yarın menüye karnıyarık geliyor. "İyi pişmiş" isteyenler ve daha kalabalık siparişler de var.'
+    : next === 4 ? 'Yarın menüye mantı geliyor: harcı karıştır, hamura kapat, haşla, sosunu yap.' : '';
+  u.hidden = !msg; u.textContent = msg;
+  renderUpgrades(); renderDecor();
+  const rb = $('#deRepBox'); rb.hidden = !S.ev.rival1;
+  if (S.ev.rival1) {
+    $('#deRep').textContent = '%' + Math.round(S.rep); $('#deRepBar').style.width = S.rep + '%';
+    let t;
+    if (S.ev.rivalWin) t = 'Kâmil\'in dükkanı kapalı, mahalle artık senin.';
+    else if (S.rep >= 85 && S.day >= 5) { S.ev.rivalWin = true; t = 'Büyük haber: Kebapçı Kâmil dükkanını kapattı! Mahallenin bir numarası artık sensin.'; }
+    else if (S.rep >= 65) t = 'Kâmil\'in dükkanı bomboş, müşteriler senden yana.';
+    else if (S.rep >= 45) t = 'Kâmil ile başa baş gidiyorsunuz.';
+    else t = 'Kâmil müşterilerini kapıyor. Daha çok yıldız topla!';
+    $('#deRival').textContent = `${t} Müdavim sayın: ${S.regulars.length}.`;
+    save();
+  }
+  sfx.coin();
+}
+function renderUpgrades() {
+  $('#deMoney').textContent = S.money + '₺';
+  const wrap = $('#upgrades'); wrap.innerHTML = '';
+  for (const u of UPG) {
+    const d = document.createElement('div'); d.className = 'upg' + (has(u.id) ? ' owned' : '');
+    d.innerHTML = `<b>${u.name}</b><span>${u.desc}</span>` + (has(u.id) ? '<em>Alındı ✓</em>' : `<button class="btn" type="button" ${S.money < u.price ? 'disabled' : ''}>Satın al · ${u.price}₺</button>`);
+    const btn = d.querySelector('button');
+    if (btn) btn.onclick = () => { if (S.money < u.price) return; S.money -= u.price; S.upg[u.id] = true; save(); sfx.coin(); renderUpgrades(); renderDecor(); hud(); };
+    wrap.appendChild(d);
+  }
+}
+function renderDecor() {
+  const wrap = $('#decor'); wrap.innerHTML = '';
+  if (!S.decor.wall) S.decor.wall = 'boya_krem';
+  for (const d of DECOR) {
+    const owned = !d.price || hasDecor(d.id), using = d.group === 'boya' && S.decor.wall === d.id;
+    const el = document.createElement('div'); el.className = 'upg' + (using ? ' using' : owned ? ' owned' : '');
+    let act;
+    if (using) act = '<em>Duvarda ✓</em>';
+    else if (owned && d.group === 'boya') act = '<button class="btn" type="button">Duvara sür</button>';
+    else if (owned) act = '<em>Dükkanda ✓</em>';
+    else act = `<button class="btn" type="button" ${S.money < d.price ? 'disabled' : ''}>Satın al · ${d.price}₺</button>`;
+    el.innerHTML = `<b>${d.name}</b><span>${d.desc}</span>${act}`;
+    const btn = el.querySelector('button');
+    if (btn) btn.onclick = () => {
+      if (!owned) { if (S.money < d.price) return; S.money -= d.price; S.decor[d.id] = true; sfx.coin(); }
+      else tone(660, .08, 'triangle', .04);
+      if (d.group === 'boya') S.decor.wall = d.id;
+      save(); renderDecor(); renderUpgrades(); hud();
+    };
+    wrap.appendChild(el);
+  }
+  drawShop(fit($('#decorPrev'), 800, 450), performance.now() / 1000);
+}
+$('#newDayBtn').onclick = () => { S.day++; S.time = OPEN; S.dayServed = 0; S.dayEarn = 0; S.dayCost = 0; S.dayStars = 0; save(); nextCustomer(); };
+
+// ---------- kitchen widgets ----------
+function iconCanvas(drawFn) {
+  const c = document.createElement('canvas'); c.width = 224; c.height = 144;
+  const x = c.getContext('2d'); x.scale(2, 2); drawFn(x); return c;
+}
+function buildDoughButtons() {
+  const row = $('#doughRow'); row.innerHTML = '';
+  for (const k of Object.keys(DISH).filter(k => (!DISH[k].learn && !DISH[k].day) || dishOpen(k))) {
+    const D = DISH[k], locked = !dishOpen(k);
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'dough'; b.disabled = locked;
+    b.appendChild(iconCanvas(x => {
+      if (D.kind === 'sarma') { x.translate(56, 38); x.scale(.55, .55); drawLeaf(x, -22, 0, false); drawLeaf(x, 34, 4, true); return; }
+      if (k === 'mercimek') { drawSoupBowl(x, 56, 34, .55, .5); return; }
+      if (k === 'karniyarik') { drawPortion(x, 'patlican', 56, 38, 3); return; }
+      if (k === 'manti') { drawManti(x, 40, 38, 0, 1); drawManti(x, 72, 38, 0, 1); return; }
+      if (D.kind === 'cookie') { x.translate(56, 38); x.scale(.55, .55); drawCookie(x, -32, 0, .45, { tarcin: true }); drawCookie(x, 32, 0, .45, { pudra: true }); return; }
+      if (D.kind === 'jam') { drawJar(x, 56, 42, .55, .38); return; }
+      x.translate(56, 38); x.scale(.17, .17); x.translate(-250, -250);
+      renderAny(x, { dough: k, toppings: [], portions: [], bake: 0 }, true);
+    }));
+    const s = document.createElement('span'); s.innerHTML = (D.base || D.name) + (locked ? '<small>sac gerekli</small>' : ''); b.appendChild(s);
+    b.onclick = () => chooseDough(k);
+    row.appendChild(b);
+  }
+}
+function buildBins(kind) {
+  const wrap = $('#bins'); wrap.innerHTML = '';
+  let list;
+  if (kind === 'flat') {
+    const avail = new Set();
+    Object.keys(DISH).filter(k => dishOpen(k) && kindOf(k) === 'flat').forEach(k => ING_FOR[k].filter(ingOpen).forEach(i => avail.add(i)));
+    list = Object.keys(ING).filter(k => avail.has(k));
+  } else if (K && K.stage === 'garnish') list = POOL.garnish;
+  else if (K && K.dough && DISH[K.dough].pool) list = DISH[K.dough].pool;
+  else list = POOL[kind === 'tray' ? 'tray' : kind === 'cookie' || kind === 'jam' ? 'sweet' : 'bowl'];
+  for (const k of list) {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'bin'; b.dataset.type = k; b.setAttribute('aria-pressed', 'false');
+    b.appendChild(iconCanvas(x => {
+      x.fillStyle = '#9aa6ab'; roundRect(x, 4, 8, 104, 60, 8); x.fill();
+      x.fillStyle = '#e9eef0'; roundRect(x, 9, 13, 94, 50, 6); x.fill();
+      x.save(); roundRect(x, 9, 13, 94, 50, 6); x.clip();
+      if (kind !== 'flat') {
+        x.translate(56, 38); x.scale(.72, .72); drawPortion(x, k, 0, 0, 12345);
+        if (pstyle(k).style === 'grain' || pstyle(k).style === 'dust') drawPortion(x, k, 34, 6, 777);
+      } else if (ING[k].spread) {
+        x.fillStyle = '#8f3d1e'; ellipse(x, 56, 46, 42, 20); x.fill();
+        x.fillStyle = '#b8502a'; for (let i = 0; i < 14; i++) { circle(x, 24 + Math.random() * 64, 34 + Math.random() * 24, 2); x.fill(); }
+        x.fillStyle = '#4f8a2f'; for (let i = 0; i < 6; i++) { circle(x, 24 + Math.random() * 64, 34 + Math.random() * 24, 1.6); x.fill(); }
+      } else {
+        const n = k === 'yumurta' ? 3 : 16;
+        for (let i = 0; i < n; i++) {
+          const px = k === 'yumurta' ? 26 + i * 30 : 18 + Math.random() * 76, py = k === 'yumurta' ? 40 : 22 + Math.random() * 36;
+          x.save(); x.translate(px, py); x.scale(k === 'yumurta' ? .38 : .7, k === 'yumurta' ? .38 : .7);
+          drawPiece(x, k, 0, 0, Math.random() * 6, Math.random() * 1e6);
+          x.restore();
+        }
+      }
+      x.restore();
+    }));
+    const s = document.createElement('span'); s.textContent = kind === 'flat' ? (ING[k].label || ING[k].name) : ING[k].name; b.appendChild(s);
+    b.onclick = () => selectBin(k);
+    wrap.appendChild(b);
+  }
+}
+
+// ---------- board input ----------
+let drawing = false, lastPt = null, lastSmear = 0, cutDrag = null;
+function canvasPt(c, e) { const r = c.getBoundingClientRect(); return { x: (e.clientX - r.left) / r.width * 500, y: (e.clientY - r.top) / r.height * 500 }; }
+function applyAt(p) {
+  if (K.stage === 'stir') {
+    if (lastPt) {
+      K.stir = Math.min(1, K.stir + Math.hypot(p.x - lastPt.x, p.y - lastPt.y) / 2600);
+      const now = performance.now(); if (now - lastSmear > 120) { sfx.smear(); lastSmear = now; }
+      if (K.stir >= 1) { setHint('Güzelce karıştı!'); tone(880, .15, 'sine', .05); updateActions(); drawing = false; }
+    }
+    lastPt = p; return;
+  }
+  if (ING[sel].spread) {
+    const from = lastPt || p, d = Math.hypot(p.x - from.x, p.y - from.y), steps = Math.max(1, Math.ceil(d / 8));
+    for (let i = 1; i <= steps; i++) stampSpread(K.spread, K.dough, from.x + (p.x - from.x) * i / steps, from.y + (p.y - from.y) * i / steps);
+    lastPt = p;
+    const now = performance.now(); if (now - lastSmear > 90) { sfx.smear(); lastSmear = now; }
+    return;
+  }
+  const sp = ING[sel].spacing || 28;
+  if (lastPt && Math.hypot(p.x - lastPt.x, p.y - lastPt.y) < sp) return;
+  if (!inside(K.dough, p.x, p.y) || K.toppings.length > 500) return;
+  K.toppings.push({ type: sel, x: p.x + rnd(-4, 4), y: p.y + rnd(-4, 4), rot: Math.random() * 6.28, seed: Math.floor(Math.random() * 1e9) });
+  lastPt = p; sfx.plop();
+}
+boardC.addEventListener('pointerdown', e => {
+  if (!K || !K.dough) { setHint('Önce ne hazırlayacağını seç.', true); return; }
+  const kind = kindOf(K.dough);
+  if (K.stage !== 'stir') {
+    if (kind !== 'flat') { setHint(kind === 'tray' ? 'Malzemenin kabına dokunman yeterli, tepsiye kendisi eklenir.' : 'Malzemenin kabına dokunman yeterli, kaseye kendisi eklenir.', true); return; }
+    if (!sel) { setHint('Önce bir malzeme seç.', true); return; }
+  } else if (K.stir >= 1) return;
+  e.preventDefault();
+  try { boardC.setPointerCapture(e.pointerId); } catch (_) {}
+  drawing = true; lastPt = null; applyAt(canvasPt(boardC, e));
+});
+boardC.addEventListener('pointermove', e => { if (drawing) applyAt(canvasPt(boardC, e)); });
+['pointerup', 'pointercancel', 'pointerleave'].forEach(ev => boardC.addEventListener(ev, () => { drawing = false; lastPt = null; }));
+
+cutC.addEventListener('pointerdown', e => {
+  e.preventDefault();
+  const p = canvasPt(cutC, e);
+  if (cutMode !== 'cut') {
+    const i = LEAVES.findIndex(L => Math.hypot(L.x - p.x, L.y - p.y) < 52);
+    if (i >= 0 && !K.rolls[i]) { K.rolls[i] = true; K.rollOrder.push(i); sfx.plop(); updateCutInfo(); }
+    return;
+  }
+  try { cutC.setPointerCapture(e.pointerId); } catch (_) {}
+  cutDrag = { x1: p.x, y1: p.y, x2: p.x, y2: p.y };
+});
+cutC.addEventListener('pointermove', e => { if (cutDrag) { const p = canvasPt(cutC, e); cutDrag.x2 = p.x; cutDrag.y2 = p.y; } });
+cutC.addEventListener('pointerup', () => {
+  if (!cutDrag) return;
+  const c = cutDrag; cutDrag = null;
+  const len = Math.hypot(c.x2 - c.x1, c.y2 - c.y1);
+  if (len < 120) { $('#cutHint').textContent = 'Kesik çok kısa. Bir ucundan öbür ucuna sürükle.'; return; }
+  // kesiği kenarların dışına kadar uzat, düzgün dursun
+  const ux = (c.x2 - c.x1) / len, uy = (c.y2 - c.y1) / len;
+  K.cuts.push({ x1: c.x1 - ux * 400, y1: c.y1 - uy * 400, x2: c.x2 + ux * 400, y2: c.y2 + uy * 400 });
+  sfx.knife(); updateCutInfo();
+});
+cutC.addEventListener('pointercancel', () => { cutDrag = null; });
+
+$('#resetBtn').onclick = discardDish;
+$('#undoBtn').onclick = undoLast;
+$('#bakeBtn').onclick = kitchenNext;
+$('#pullBtn').onclick = pull;
+$('#undoCutBtn').onclick = () => {
+  if (cutMode !== 'cut') { const i = K.rollOrder.pop(); if (i !== undefined) K.rolls[i] = false; }
+  else K.cuts.pop();
+  updateCutInfo();
+};
+$('#serveBtn').onclick = () => {
+  if (cutMode !== 'cut') { if (!rolledCount(K)) { $('#cutHint').textContent = cutMode === 'wrap' ? 'Önce birkaç yaprak sar.' : cutMode === 'fold' ? 'Önce birkaç mantı kapat.' : 'Önce birkaç kurabiye şekillendir.'; return; } startBake(); }
+  else serve();
+};
+$('#bookBtn').onclick = () => { $('#bookBody').innerHTML = bookHTML(); $('#book').hidden = false; $('#bookClose').focus(); };
+$('#bookClose').onclick = () => { $('#book').hidden = true; };
+$('#book').addEventListener('click', e => { if (e.target.id === 'book') $('#book').hidden = true; });
+$('#muteBtn').onclick = () => {
+  muted = !muted; $('#hMute').textContent = muted ? '🔇' : '🔊'; $('#muteBtn').setAttribute('aria-label', muted ? 'Sesi aç' : 'Sesi kapat');
+  if (muted) Music.stop(); else Music.start();
+};
+const musicUI = () => { $('#musicBtn').classList.toggle('off', !musicOn); $('#musicBtn').setAttribute('aria-label', musicOn ? 'Müziği kapat' : 'Müziği aç'); };
+musicUI();
+$('#musicBtn').onclick = () => {
+  musicOn = !musicOn; musicUI();
+  try { localStorage.setItem('afiyet-olsun-music', musicOn ? '1' : '0'); } catch (e) {}
+  if (musicOn) Music.start(); else Music.stop();
+};
+document.addEventListener('pointerdown', () => Music.start(), { once: false, passive: true });
+document.addEventListener('keydown', () => Music.start(), { passive: true });
+
+// ---------- loop ----------
+let lastT = performance.now(), lastHud = 0, lastAmb = 0;
+function frame(now) {
+  const dt = Math.min(.05, (now - lastT) / 1000); lastT = now;
+  const t = now / 1000;
+  updateWalk(now);
+  updatePatience(dt);
+  if (baking && now - lastAmb > (kindOf(K.dough) === 'jam' || kindOf(K.dough) === 'sarma' || kindOf(K.dough) === 'manti' ? 170 : 60)) {
+    lastAmb = now;
+    if (['sarma', 'jam', 'manti'].includes(kindOf(K.dough))) { if (Math.random() < .6) sfx.bubble(); } else sfx.sizzle();
+  }
+  if ($('#dayend').hidden && S.time < closeTime()) {
+    S.time = Math.min(closeTime(), S.time + dt * GAME_MIN_PER_SEC);
+    if (now - lastHud > 500) { hud(); lastHud = now; if (S.time >= closeTime() && phase === 'serve') renderPanel(); }
+  }
+  if (!$('#shop').hidden) drawShop(fit(stageC, 800, 450), t);
+  if (!$('#kitchen').hidden) drawBoard(boardC, 'build');
+  if (!$('#cut').hidden) drawBoard(cutC, cutMode);
+  if (!$('#oven').hidden) {
+    if (baking) { K.bake = Math.min(1, K.bake + dt / (has('firin') ? 4.5 : 7)); updateGauge(); if (K.bake >= 1) pull(); }
+    const ctx = fit(ovenC, 800, 450);
+    if (K && K.dough && ['sarma', 'jam', 'manti'].includes(kindOf(K.dough))) drawPot(ctx, t); else drawOven(ctx, t);
+  }
+  requestAnimationFrame(frame);
+}
+
+function start() {
+  hud();
+  if (S.time >= closeTime()) endDay(); else nextCustomer();
+  requestAnimationFrame(frame);
+}
+try { window.claude?.hot?.snapshot?.(() => ({ S })); } catch (e) {}
+const boot = d => { if (d && d.S) Object.assign(S, d.S); start(); };
+window.claude?.hot?.ready ? window.claude.hot.ready(boot) : boot(window.claude?.hot?.data ?? {});
+})();
+</script>
+
+</body></html>
