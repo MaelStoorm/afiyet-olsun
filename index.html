@@ -406,6 +406,7 @@ button:focus-visible{outline:3px solid var(--cini);outline-offset:2px}
 @media (max-width:520px){
   .morning{padding:12px;gap:10px}
   .m-head h2{font-size:24px}
+  .m-clock{display:none}
   .m-head p{font-size:14px}
   .m-grid{grid-template-columns:1fr 1fr;gap:8px}
   .m-card{padding:8px;gap:4px}
@@ -2737,6 +2738,7 @@ function renderMorning() {
   card(drawMarketIcon, '🛒 Market', low.length ? `<span class="miss">Azalan: ${low.slice(0, 4).map(k => lower(mName(k))).join(', ')}${low.length > 4 ? '…' : ''}</span>` : 'Depo dolu, eksik yok.', [['Markete git', openMarket, low.length ? 'primary' : '']], !low.length);
   const tea = card(x => drawTeapot(x, S.cay > 0), '🫖 Çay', S.cay > 0 ? `Demlik dolu: ${S.cay} bardak.` : `Demlik boş. Çay paketi: ${stock('caypaketi')}`, [[S.cay > 0 ? 'Tazele' : 'Çayı demle', () => brewTea(tea), S.cay > 0 ? '' : 'primary']], S.cay > 0);
   tea.insertBefore(Object.assign(document.createElement('div'), { className: 'tea-bar', innerHTML: '<i></i>' }), tea.querySelector('button'));
+  tea.querySelector('.tea-bar i').style.width = Math.min(100, S.cay / (has('cay') ? 30 : 24) * 100) + '%';
   for (const k of Object.keys(PREP).filter(dishOpen)) {
     const D = DISH[k], vs = D.variants.filter(v => v.day <= S.day), bs = batchesOf(k);
     const ready = bs.length ? 'Hazır: ' + bs.map(b => `${b.left} ${PREP[k].unit}${vs.length > 1 ? ' ' + (D.variants.find(v => v.id === b.variant).label || '') : ''}`).join(', ') : 'Henüz hazırlanmadı.';
