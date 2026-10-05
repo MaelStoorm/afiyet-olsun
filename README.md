@@ -7,7 +7,7 @@ Her gün sabah hazırlığıyla başlar: marketten malzeme al, çayı demle, sar
 ## Oyna
 
 - **Telefonda veya bilgisayarda:** https://maelstoorm.github.io/afiyet-olsun/
-- **iPhone:** Linki Safari'de aç → Paylaş → "Ana Ekrana Ekle". Uygulama gibi açılır.
+- **iPhone:** Linki Safari'de aç → Paylaş → "Ana Ekrana Ekle". Ana ekrandaki simgeden tam ekran, uygulama gibi açılır; bir kez açtıktan sonra internetsiz de oynanır. Telefonu yan çevirerek oyna (dönmüyorsa Denetim Merkezi'nden dikey yön kilidini kapat). Akşam hatırlatma bildirimleri yalnızca Android uygulamasında var.
 - **Android APK:** https://maelstoorm.github.io/afiyet-olsun/AfiyetOlsun.apk
   İndir, dokun, yükle. "Bilinmeyen uygulamalar" uyarısı çıkarsa izin ver.
 

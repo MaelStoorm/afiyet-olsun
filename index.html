@@ -5,9 +5,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Afiyet Olsun">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="format-detection" content="telephone=no">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-512.png">
+<script>if ('serviceWorker' in navigator && location.protocol === 'https:') addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));</script>
 <title>Afiyet Olsun</title>
 <!-- Afiyet Olsun © 2026 Egemen (GitHub: MaelStoorm). Tüm hakları saklıdır. İzinsiz kopyalanamaz, değiştirilemez, yayınlanamaz. -->
 <meta name="author" content="Egemen (MaelStoorm)">
@@ -34,15 +37,20 @@
   --display:"Baloo 2","Trebuchet MS",system-ui,sans-serif;
   --body:"Nunito",system-ui,-apple-system,"Segoe UI",sans-serif;
   color-scheme:light;
+  --sat:env(safe-area-inset-top,0px);--sar:env(safe-area-inset-right,0px);--sab:env(safe-area-inset-bottom,0px);--sal:env(safe-area-inset-left,0px);
+  --ih:calc(100dvh - max(0px,var(--sab) - 6px) - max(0px,var(--sat) - 6px));
 }
 html,body{min-height:100%}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;touch-action:manipulation}
+body{-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;overscroll-behavior:none}
+input,textarea{-webkit-user-select:text;user-select:text}
 [hidden]{display:none!important}
 body{
   background:var(--bg);
   background-image:radial-gradient(circle at 20px 20px, rgba(22,128,127,.10) 3px, transparent 4px);
   background-size:40px 40px;
   color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45;
-  padding-inline:16px;padding-block:14px 32px;
+  padding:max(14px,var(--sat)) max(16px,var(--sar)) max(32px,var(--sab)) max(16px,var(--sal));
 }
 .game{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
 button{font:inherit;color:inherit;cursor:pointer}
@@ -291,7 +299,7 @@ button:focus-visible{outline:3px solid var(--cini);outline-offset:2px}
 .owner b{color:var(--tomato-dark)}
 /* Yatay telefon ekranı: her şey tek ekrana sığsın, sayfa kaymasın */
 @media (orientation:landscape) and (max-height:600px){
-  body{padding:max(6px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) 6px max(12px,env(safe-area-inset-left))}
+  body{padding:max(6px,var(--sat)) max(12px,var(--sar)) max(6px,var(--sab)) max(12px,var(--sal))}
   .game{max-width:none;gap:6px}
   .hud{flex-wrap:nowrap;gap:8px}
   .brand{gap:6px}
@@ -303,13 +311,13 @@ button:focus-visible{outline:3px solid var(--cini);outline-offset:2px}
   .chip span{font-size:10px}
   .pat-bar{width:50px}
   #shop:not([hidden]),#oven:not([hidden]){display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:start}
-  #shop .stage,#oven .stage{width:min(calc((100dvh - 62px) * 16 / 9),calc(100vw - 300px));border-width:3px}
-  #shop .panel,#oven .panel{margin-top:0!important;flex-direction:column;flex-wrap:nowrap;align-items:stretch;gap:8px;padding:10px 12px;max-height:calc(100dvh - 62px);overflow:auto}
+  #shop .stage,#oven .stage{width:min(calc((var(--ih) - 62px) * 16 / 9),calc(100vw - 300px));border-width:3px}
+  #shop .panel,#oven .panel{margin-top:0!important;flex-direction:column;flex-wrap:nowrap;align-items:stretch;gap:8px;padding:10px 12px;max-height:calc(var(--ih) - 62px);overflow:auto}
   .panel p,.gauge-wrap,.notes{flex:none}
   .result{flex-direction:column;align-items:flex-start;gap:6px}
   .stars{font-size:24px}
-  .kitchen{grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto;grid-template-areas:"board ticket" "board picker" "board actions";height:calc(100dvh - 58px);gap:6px 12px;align-items:stretch}
-  .board-wrap{grid-row:1/4;gap:2px;justify-content:center;width:min(calc(100dvh - 104px),44vw)}
+  .kitchen{grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto;grid-template-areas:"board ticket" "board picker" "board actions";height:calc(var(--ih) - 58px);gap:6px 12px;align-items:stretch}
+  .board-wrap{grid-row:1/4;gap:2px;justify-content:center;width:min(calc(var(--ih) - 104px),44vw)}
   #board,#cutC{width:100%;max-width:none}
   .ticket .recipe-note{font-size:13px;line-height:1.25;margin:0}
   .picker h3{display:none}
@@ -329,14 +337,14 @@ button:focus-visible{outline:3px solid var(--cini);outline-offset:2px}
   .hint{font-size:13px;min-height:1.2em;line-height:1.2}
   .bubble{padding:8px 12px;top:8%}
   .bubble p{font-size:15px}
-  .title-screen,.ovl{padding:10px}
-  .title-card{max-width:780px;display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:10px 22px;align-items:center;padding:16px 20px;max-height:calc(100dvh - 20px)}
+  .title-screen,.ovl{padding:max(10px,var(--sat)) max(10px,var(--sar)) max(10px,var(--sab)) max(10px,var(--sal))}
+  .title-card{max-width:780px;display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:10px 22px;align-items:center;padding:16px 20px;max-height:calc(var(--ih) - 20px)}
   .tc-head,.tc-body{gap:8px}
   .title-card h1{font-size:40px}
   .title-card svg{width:60px;height:60px}
   .title-card .btn.big{font-size:19px;padding:11px 18px}
   .awning{height:26px}
-  .ovl-card{max-height:calc(100dvh - 20px);padding:14px;gap:8px}
+  .ovl-card{max-height:calc(var(--ih) - 20px);padding:14px;gap:8px}
   .set-list{display:grid;grid-template-columns:1fr 1fr}
   .set-row.col{grid-column:span 1}
   .coach{width:min(400px,46vw);padding:10px 12px}
@@ -344,9 +352,34 @@ button:focus-visible{outline:3px solid var(--cini);outline-offset:2px}
   .coach .who{width:34px;height:34px;font-size:18px}
   .dayend{padding:16px}
   .day-banner b{font-size:56px}
-  .toast{top:auto;bottom:10px;left:max(12px,env(safe-area-inset-left));transform:none;max-width:42vw;font-size:14px;padding:8px 14px;border-radius:14px}
+  .toast{top:auto;bottom:10px;left:max(12px,var(--sal));bottom:max(10px,var(--sab));transform:none;max-width:42vw;font-size:14px;padding:8px 14px;border-radius:14px}
   .dough-row{grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:6px}
 }
+/* alçak yatay ekran (iPhone): mutfakta seçim alanına yer aç */
+@media (orientation:landscape) and (max-height:440px){
+  .ticket .gen-note{display:none}
+  .book-btn{padding:4px 10px;font-size:13px}
+  .dough canvas{max-height:50px}
+}
+/* dar yatay ekran (iPhone çentikli): üst şerit sığsın */
+@media (orientation:landscape) and (max-height:600px) and (max-width:960px){
+  .brand h1{display:none}
+  .chip{padding:2px 7px;font-size:13px}
+  .pat-bar{width:40px}
+  .hud{gap:6px}
+  .stats{gap:4px}
+}
+/* Yatay oyna uyarısı */
+.rotate{display:none}
+@media (orientation:portrait) and (max-width:600px){
+  .want-land .rotate{display:flex;position:fixed;inset:0;z-index:60;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:24px;text-align:center;background:var(--bg);background-image:radial-gradient(circle at 20px 20px, rgba(22,128,127,.10) 3px, transparent 4px);background-size:40px 40px}
+}
+.rotate .phone{width:64px;height:104px;border:6px solid var(--ink);border-radius:14px;background:#fff8ec;position:relative;animation:turn 2.4s ease-in-out infinite}
+.rotate .phone::after{content:"";position:absolute;bottom:6px;left:50%;width:16px;height:4px;margin-left:-8px;border-radius:2px;background:var(--ink)}
+.rotate b{font-family:var(--display);font-size:28px;line-height:1.1;color:var(--tomato-dark)}
+.rotate p{margin:0;font-weight:700;color:var(--ink-soft);max-width:300px}
+@keyframes turn{0%,25%{transform:rotate(0)}55%,85%{transform:rotate(-90deg)}100%{transform:rotate(0)}}
+@media (prefers-reduced-motion:reduce){.rotate .phone{animation:none;transform:rotate(-90deg)}}
 /* Sabah hazırlığı */
 .morning{background:var(--paper);border:4px solid var(--wood-dark);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:12px}
 .m-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
@@ -418,7 +451,7 @@ button:focus-visible{outline:3px solid var(--cini);outline-offset:2px}
   .m-card .btn{font-size:13px;padding:7px 6px}
 }
 @media (orientation:landscape) and (max-height:600px){
-  .morning{padding:10px 12px;gap:8px;max-height:calc(100dvh - 58px);overflow:auto}
+  .morning{padding:10px 12px;gap:8px;max-height:calc(var(--ih) - 58px);overflow:auto}
   .m-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:6px}
   .m-card{padding:6px;gap:4px}
   .m-card canvas{max-height:60px;width:auto;margin:0 auto}
@@ -630,7 +663,7 @@ button:focus-visible{outline:3px solid var(--cini);outline-offset:2px}
   </div>
   <div class="title-row"><button class="btn" id="sTut" type="button">🎓 Öğreticiyi tekrar oyna</button><button class="btn" id="sReset" type="button">🗑️ Kaydı sil</button></div>
   <div class="confirm" id="sResetConfirm" hidden>Bütün ilerlemen silinip 1. günden başlanacak. Emin misin?<div><button class="btn" id="sResetNo" type="button">Vazgeç</button><button class="btn primary" id="sResetYes" type="button">Evet, sil</button></div></div>
-  <p class="set-ver">Afiyet Olsun · sürüm 1.3.1<br>© 2026 Egemen (MaelStoorm) · Tüm hakları saklıdır.<br>İzinsiz kopyalanamaz ve yayınlanamaz.</p>
+  <p class="set-ver">Afiyet Olsun · sürüm 1.3.2<br>© 2026 Egemen (MaelStoorm) · Tüm hakları saklıdır.<br>İzinsiz kopyalanamaz ve yayınlanamaz.</p>
   <button class="btn go" id="setClose" type="button">Tamam</button>
 </div></div>
 <div class="ovl" id="rewardScr" hidden><div class="ovl-card" role="dialog" aria-labelledby="rwTtl">
@@ -652,6 +685,7 @@ button:focus-visible{outline:3px solid var(--cini);outline-offset:2px}
   <button class="btn go big" id="adDone" type="button" disabled>Ödülü al</button>
   <button class="btn" id="adSkip" type="button">Kapat (ödül yok)</button>
 </div></div>
+<div class="rotate" id="rotateHint" role="dialog" aria-label="Telefonu yan çevir"><div class="phone"></div><b>Telefonu yan çevir</b><p>Afiyet Olsun yatay oynanır. Ekran dönmüyorsa Denetim Merkezi'nden dikey yön kilidini kapat.</p><button class="btn" id="rotateNo" type="button">Dikey oynamak istiyorum</button></div>
 <div class="ovl" id="marketScr" hidden><div class="ovl-card market-card" role="dialog" aria-labelledby="mkTtl">
   <h2 id="mkTtl">🛒 Market</h2><p>Kasa: <b id="mkMoney">0₺</b> · Fiyatlar paket başına.</p>
   <div class="mk-sug" id="mkSug"></div>
@@ -2483,7 +2517,7 @@ function ticketHTML() {
   let body;
   if (o.fromBatch) body = `<p class="recipe-note">Sabah hazırladığın ${lower(D.name)} tepsisinden bir porsiyon ver. Mutfakta hazır yemekler yeşil kutularda.</p>`;
   else if (o.riddle && !o.asked) body = `<p class="quote">“${o.riddle}”</p>`;
-  else if (D.variants) body = '<p class="recipe-note">Malzemeleri tarifine göre koy. Hatırlamıyorsan tarif defterine bak.</p>';
+  else if (D.variants) body = '<p class="recipe-note gen-note">Malzemeleri tarifine göre koy. Hatırlamıyorsan tarif defterine bak.</p>';
   else if (o.half) body = `<ul>${o.items.map((i, n) => `<li><span class="half">${n + 1}. yarı</span><span>${ING[i.type].name}</span></li>`).join('')}</ul>`;
   else if (!o.items.length) body = '<ul><li><span>Malzemesiz, sade</span></li></ul>';
   else body = `<ul>${o.items.map(i => `<li><span>${ING[i.type].label || ING[i.type].name}</span><em class="${i.bol ? 'bol' : ''}">${i.bol ? 'bol' : 'normal'}</em></li>`).join('')}</ul>`;
@@ -3629,6 +3663,21 @@ $('#musicBtn').onclick = () => {
   if (musicOn) Music.start(); else Music.stop();
 };
 document.addEventListener('pointerdown', () => Music.start(), { once: false, passive: true });
+// iPhone sesi ancak dokunuş bitince (touchend/click) açar; arka plandan dönünce de uyandır
+function wakeAudio() {
+  try {
+    if (!AC && (SET.sfx || SET.mus)) ac();
+    if (AC && AC.state !== 'running') AC.resume();
+    if (AC && !wakeAudio.done) { const b = AC.createBuffer(1, 1, 22050), s = AC.createBufferSource(); s.buffer = b; s.connect(AC.destination); s.start(0); wakeAudio.done = true; }
+  } catch (e) {}
+  Music.start();
+}
+['touchend', 'click'].forEach(ev => document.addEventListener(ev, wakeAudio, { passive: true }));
+document.addEventListener('visibilitychange', () => { if (!document.hidden && AC && AC.state !== 'running') try { AC.resume(); } catch (e) {} });
+// iki parmakla yakınlaştırma oyunu bozmasın
+document.addEventListener('gesturestart', e => e.preventDefault());
+// kayıt silinmesin diye kalıcı depolama iste (Safari ana ekran uygulaması)
+try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
 document.addEventListener('keydown', () => Music.start(), { passive: true });
 
 // ---------- loop ----------
@@ -3912,7 +3961,12 @@ function updateCoach() {
 const togUI = (sel, on) => $(sel).setAttribute('aria-checked', on ? 'true' : 'false');
 const segUI = (sel, v) => document.querySelectorAll(sel + ' button').forEach(b => b.setAttribute('aria-pressed', b.dataset.v === v ? 'true' : 'false'));
 const pct = v => v ? `%${Math.round(v * 100)}` : 'Kapalı';
-function applyOrient() { try { const a = AND(); if (a && a.setOrientation) a.setOrientation(SET.orient); } catch (e) {} }
+function applyOrient() {
+  const a = AND();
+  document.documentElement.classList.toggle('want-land', !(a && a.setOrientation) && SET.orient === 'landscape');
+  try { if (a && a.setOrientation) a.setOrientation(SET.orient); } catch (e) {}
+}
+$('#rotateNo').onclick = () => { SET.orient = 'auto'; saveSet(); applyOrient(); try { setUI(); } catch (e) {} };
 function setUI() {
   $('#sSfx').value = Math.round(SET.sfx * 100); $('#sMus').value = Math.round(SET.mus * 100);
   $('#sSfxV').textContent = pct(SET.sfx); $('#sMusV').textContent = pct(SET.mus);
@@ -3922,7 +3976,7 @@ function setUI() {
 function openSettings() {
   const a = AND();
   $('#sNotifRow').hidden = !(a && a.setReminderOn);
-  $('#sOriRow').hidden = !(a && a.setOrientation);
+  $('#sOriRow').hidden = false;
   $('#sVibRow').hidden = !(a && a.vibrate) && !navigator.vibrate;
   $('#sResetConfirm').hidden = true;
   setUI(); $('#setScr').hidden = false; $('#setClose').focus();
