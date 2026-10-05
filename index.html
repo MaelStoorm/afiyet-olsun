@@ -9,10 +9,13 @@
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-512.png">
 <title>Afiyet Olsun</title>
-</head><body>
+<!-- Afiyet Olsun © 2026 Egemen (GitHub: MaelStoorm). Tüm hakları saklıdır. İzinsiz kopyalanamaz, değiştirilemez, yayınlanamaz. -->
+<meta name="author" content="Egemen (MaelStoorm)">
+<meta name="copyright" content="© 2026 Egemen (MaelStoorm). Tüm hakları saklıdır.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+</head><body>
 <style>
 /* Layout: one shop column. HUD strip on top, the active scene (dükkan, mutfak, fırın) under it, a paper slip panel below the scene. One warm world, same in light and dark. */
 :root{
@@ -284,6 +287,8 @@ button:focus-visible{outline:3px solid var(--cini);outline-offset:2px}
 .seg button+button{border-left:2px solid var(--ink)}
 .seg button[aria-pressed="true"]{background:var(--tomato);color:#fff8ec}
 .set-ver{font-size:12px}
+.owner{margin:0;font-size:12px;font-weight:800;color:var(--ink-soft);line-height:1.4}
+.owner b{color:var(--tomato-dark)}
 /* Yatay telefon ekranı: her şey tek ekrana sığsın, sayfa kaymasın */
 @media (orientation:landscape) and (max-height:600px){
   body{padding:max(6px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) 6px max(12px,env(safe-area-inset-left))}
@@ -474,6 +479,7 @@ button:focus-visible{outline:3px solid var(--cini);outline-offset:2px}
     <h1 id="ttl">Afiyet Olsun</h1>
     <p class="tag">Türk mutfağı lokanta oyunu</p>
     <p class="save-info" id="saveInfo" hidden></p>
+    <p class="owner">Yapımcı: <b>Egemen</b><br>© 2026 Egemen · Tüm hakları saklıdır</p>
   </div><div class="tc-body">
     <button class="btn go big" id="contBtn" type="button">Devam et</button>
     <button class="btn primary big" id="newBtn" type="button">Yeni oyun</button>
@@ -518,7 +524,7 @@ button:focus-visible{outline:3px solid var(--cini);outline-offset:2px}
   </div>
   <div class="title-row"><button class="btn" id="sTut" type="button">🎓 Öğreticiyi tekrar oyna</button><button class="btn" id="sReset" type="button">🗑️ Kaydı sil</button></div>
   <div class="confirm" id="sResetConfirm" hidden>Bütün ilerlemen silinip 1. günden başlanacak. Emin misin?<div><button class="btn" id="sResetNo" type="button">Vazgeç</button><button class="btn primary" id="sResetYes" type="button">Evet, sil</button></div></div>
-  <p class="set-ver">Afiyet Olsun · sürüm 1.2</p>
+  <p class="set-ver">Afiyet Olsun · sürüm 1.2.1<br>© 2026 Egemen (MaelStoorm) · Tüm hakları saklıdır.<br>İzinsiz kopyalanamaz ve yayınlanamaz.</p>
   <button class="btn go" id="setClose" type="button">Tamam</button>
 </div></div>
 <div class="ovl" id="rewardScr" hidden><div class="ovl-card" role="dialog" aria-labelledby="rwTtl">

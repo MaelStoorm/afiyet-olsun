@@ -14,3 +14,10 @@ Türk mutfağı temalı bir lokanta oyunu. Müşteri ne isterse onu yap: kısır
 - `index.html`: oyunun tamamı (tek dosya).
 - `AfiyetOlsun.apk`: Android sürümü.
 - `android/`: APK'nın kaynak kodu ve derleme betiği.
+
+## Telif hakkı
+
+© 2026 Egemen ([MaelStoorm](https://github.com/MaelStoorm)). **Tüm hakları saklıdır.**
+
+Bu oyun açık kaynak değildir. Oynayabilirsin, ama kodu, çizimleri, müziği ya da oyunun kendisini izin almadan kopyalamak, değiştirmek, kendi adınla yayınlamak veya satmak yasaktır. Ayrıntılar [LICENSE](LICENSE) dosyasında.
+
