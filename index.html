@@ -196,7 +196,7 @@ button:focus-visible{outline:3px solid var(--cini);outline-offset:2px}
 .confirm div{display:flex;gap:8px}.confirm .btn{flex:1}
 .help{text-align:left;margin:0;padding-left:20px;font-weight:700;color:var(--ink-soft);display:flex;flex-direction:column;gap:6px}
 .help b{color:var(--ink)}
-.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:30;background:var(--ink);color:#fff8ec;font-weight:800;border-radius:99px;padding:10px 18px;box-shadow:0 4px 0 rgba(0,0,0,.2);animation:pop .3s}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:30;pointer-events:none;background:var(--ink);color:#fff8ec;font-weight:800;border-radius:99px;padding:10px 18px;box-shadow:0 4px 0 rgba(0,0,0,.2);animation:pop .3s}
 .day-banner{position:fixed;inset:0;z-index:25;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:rgba(241,215,184,.92);text-align:center;padding:16px;animation:fadeout 1.9s forwards;cursor:pointer}
 .day-banner b{font-family:var(--display);font-size:clamp(46px,10vw,80px);line-height:1;color:var(--tomato-dark)}
 .day-banner span{font-weight:800;font-size:18px;color:var(--ink-soft);max-width:440px}
@@ -292,8 +292,10 @@ button:focus-visible{outline:3px solid var(--cini);outline-offset:2px}
 .tog::after{content:"";position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;background:#fff8ec;border:2px solid var(--ink);transition:left .15s}
 .tog[aria-checked="true"]{background:var(--good)}
 .tog[aria-checked="true"]::after{left:26px}
-.seg{display:flex;border:3px solid var(--ink);border-radius:12px;overflow:hidden;flex:1 1 220px}
-.seg button{flex:1;border:0;background:#fffdf6;padding:8px 6px;font-weight:800;font-size:14px}
+.seg{display:flex;border:3px solid var(--ink);border-radius:12px;overflow:hidden;flex:1 1 220px;min-width:0;max-width:100%}
+.set-row.col .seg{flex-basis:100%}
+.seg button{min-width:0;white-space:nowrap}
+.seg button{flex:1 1 auto;border:0;background:#fffdf6;padding:8px 6px;font-weight:800;font-size:14px}
 .seg button+button{border-left:2px solid var(--ink)}
 .seg button[aria-pressed="true"]{background:var(--tomato);color:#fff8ec}
 .set-ver{font-size:12px}
@@ -347,7 +349,9 @@ button:focus-visible{outline:3px solid var(--cini);outline-offset:2px}
   .title-card .btn.big{font-size:19px;padding:11px 18px}
   .awning{height:26px}
   .ovl-card{max-height:calc(var(--ih) - 20px);padding:14px;gap:8px}
-  .set-list{display:grid;grid-template-columns:1fr 1fr}
+  .set-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+  .set-row>*{min-width:0}
+  .seg button{font-size:13px;padding:8px 3px}
   .set-row.col{grid-column:span 1}
   .coach{width:min(400px,46vw);padding:10px 12px}
   .coach p{font-size:14px;margin-bottom:6px}
@@ -417,7 +421,7 @@ button:focus-visible{outline:3px solid var(--cini);outline-offset:2px}
 .cnt.zero{background:var(--tomato)}
 .bin.empty canvas,.jar.empty canvas{opacity:.35}
 .dough.prep{background:#e6f2e0;border-color:var(--good)}
-.rack{position:relative;perspective:700px;border-radius:12px;background:#6f421d;padding:8px;margin-top:8px}
+.rack{position:relative;perspective:700px;border-radius:12px;background:#6f421d;padding:8px;margin-top:8px;overflow:hidden}
 .rack-in{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;background:#4a2a12;border-radius:8px;padding:6px;box-shadow:inset 0 6px 10px rgba(0,0,0,.4)}
 .rack .door{position:absolute;top:0;bottom:0;width:50%;background:repeating-linear-gradient(90deg,#b07440 0 12px,#9a5f30 12px 14px);border:3px solid #6f421d;transition:transform .6s cubic-bezier(.3,1.35,.5,1);pointer-events:none;backface-visibility:hidden}
 .rack .door.l{left:0;transform-origin:left center;border-radius:12px 0 0 12px}
@@ -590,8 +594,8 @@ button:focus-visible{outline:3px solid var(--cini);outline-offset:2px}
       <button class="btn" id="deAdBtn" type="button" hidden>📺 Reklam izle, bugünkü kârı 2 katına çıkar</button>
       <p class="unlock" id="deUnlock" hidden></p>
       <div class="shop-list">
-        <h3>Perkler</h3>
-        <p class="recipe-note" style="margin-bottom:8px">Seviye atladıkça işin hızlanır.</p>
+        <h3>Ustalıklar</h3>
+        <p class="recipe-note" style="margin-bottom:8px">Seviye atladıkça işin kolaylaşır.</p>
         <div id="perks" class="upgrades"></div>
       </div>
       <div class="shop-list">
@@ -623,7 +627,7 @@ button:focus-visible{outline:3px solid var(--cini);outline-offset:2px}
     <button class="btn go big" id="contBtn" type="button">Devam et</button>
     <button class="btn primary big" id="newBtn" type="button">Yeni oyun</button>
     <div class="confirm" id="newConfirm" hidden>
-      Kayıtlı oyunun silinip 1. günden başlanacak. Emin misin?
+      Kayıtlı oyunun silinecek ve 1. günden başlayacaksın. Emin misin?
       <div><button class="btn" id="newNo" type="button">Vazgeç</button><button class="btn primary" id="newYes" type="button">Evet, sıfırla</button></div>
     </div>
     <div class="title-row"><button class="btn" id="badgeBtn" type="button">🏅 Rozetler</button><button class="btn" id="storeBtn" type="button">🛒 Mağaza</button></div>
@@ -636,7 +640,7 @@ button:focus-visible{outline:3px solid var(--cini);outline-offset:2px}
         <li><b>Doğru malzemeleri koy.</b> Bilmediğin yemekte mutfaktaki Tarif defterine bak.</li>
         <li><b>Pişir.</b> İbre yeşil bölgedeyken fırından ya da ocaktan al.</li>
         <li><b>Dilimle, sar ya da şekil ver,</b> sonra servis et.</li>
-        <li><b>Müşteriyi bekletme.</b> Üstteki sabır barı biterse memnuniyet düşer.</li>
+        <li><b>Müşteriyi bekletme.</b> Üstteki sabır çubuğu biterse memnuniyet düşer.</li>
         <li><b>Gün sonunda</b> kazandığınla dükkanı geliştir ve süsle.</li>
         <li><b>Oyun kendiliğinden kaydedilir.</b> Kapatıp açınca Devam et'e bas.</li>
       </ol>
@@ -661,11 +665,11 @@ button:focus-visible{outline:3px solid var(--cini);outline-offset:2px}
     <div class="set-row" id="sVibRow"><span><b>📳 Titreşim</b><small>Kasa, hata ve kesme anlarında</small></span><button class="tog" id="sVib" type="button" role="switch" aria-label="Titreşim"></button></div>
     <div class="set-row" id="sNotifRow"><span><b>⏰ Hatırlatmalar</b><small>Oynamadığında akşam bildirim gelsin</small></span><button class="tog" id="sNotif" type="button" role="switch" aria-label="Hatırlatmalar"></button></div>
     <div class="set-row col"><span><b>🎯 Zorluk</b><small id="sDiffNote"></small></span><div class="seg" id="sDiff"><button type="button" data-v="easy">Rahat</button><button type="button" data-v="normal">Normal</button><button type="button" data-v="hard">Usta</button></div></div>
-    <div class="set-row col" id="sOriRow"><span><b>📱 Ekran yönü</b><small>Telefonu çevirince ne olsun</small></span><div class="seg" id="sOri"><button type="button" data-v="auto">Otomatik</button><button type="button" data-v="portrait">Dikey</button><button type="button" data-v="landscape">Yatay</button></div></div>
+    <div class="set-row col" id="sOriRow"><span><b>📱 Ekran yönü</b><small>Telefonu çevirince ne olsun?</small></span><div class="seg" id="sOri"><button type="button" data-v="auto">Otomatik</button><button type="button" data-v="portrait">Dikey</button><button type="button" data-v="landscape">Yatay</button></div></div>
   </div>
   <div class="title-row"><button class="btn" id="sTut" type="button">🎓 Öğreticiyi tekrar oyna</button><button class="btn" id="sReset" type="button">🗑️ Kaydı sil</button></div>
-  <div class="confirm" id="sResetConfirm" hidden>Bütün ilerlemen silinip 1. günden başlanacak. Emin misin?<div><button class="btn" id="sResetNo" type="button">Vazgeç</button><button class="btn primary" id="sResetYes" type="button">Evet, sil</button></div></div>
-  <p class="set-ver">Afiyet Olsun · sürüm 1.3.3<br>© 2026 Egemen (MaelStoorm) · Tüm hakları saklıdır.<br>İzinsiz kopyalanamaz ve yayınlanamaz.</p>
+  <div class="confirm" id="sResetConfirm" hidden>Bütün ilerlemen silinecek ve oyun 1. günden başlayacak. Emin misin?<div><button class="btn" id="sResetNo" type="button">Vazgeç</button><button class="btn primary" id="sResetYes" type="button">Evet, sil</button></div></div>
+  <p class="set-ver">Afiyet Olsun · sürüm 1.3.4<br>© 2026 Egemen (MaelStoorm) · Tüm hakları saklıdır.<br>İzinsiz kopyalanamaz ve yayınlanamaz.</p>
   <button class="btn go" id="setClose" type="button">Tamam</button>
 </div></div>
 <div class="ovl" id="rewardScr" hidden><div class="ovl-card" role="dialog" aria-labelledby="rwTtl">
@@ -683,11 +687,11 @@ button:focus-visible{outline:3px solid var(--cini);outline-offset:2px}
 </div></div>
 <div class="ovl" id="adScr" hidden><div class="ovl-card" role="dialog" aria-labelledby="adTtl">
   <h2 id="adTtl">Reklam</h2>
-  <div class="ad-box"><b>Reklam alanı</b><span>Oyun Google Play'e çıkınca burada gerçek bir reklam oynayacak.</span><div class="ad-count" id="adCount">5</div></div>
+  <div class="ad-box"><b>Reklam alanı</b><span>Oyun Google Play'e çıkınca burada gerçek bir reklam gösterilecek.</span><div class="ad-count" id="adCount">5</div></div>
   <button class="btn go big" id="adDone" type="button" disabled>Ödülü al</button>
   <button class="btn" id="adSkip" type="button">Kapat (ödül yok)</button>
 </div></div>
-<div class="rotate" id="rotateHint" role="dialog" aria-label="Telefonu yan çevir"><div class="phone"></div><b>Telefonu yan çevir</b><p>Afiyet Olsun yatay oynanır. Ekran dönmüyorsa Denetim Merkezi'nden dikey yön kilidini kapat.</p><button class="btn" id="rotateNo" type="button">Dikey oynamak istiyorum</button></div>
+<div class="rotate" id="rotateHint" role="dialog" aria-label="Telefonu yan çevir"><div class="phone"></div><b>Telefonu yan çevir</b><p>Afiyet Olsun yatay oynanır. Ekran dönmüyorsa telefonda otomatik döndürmeyi aç (iPhone'da Denetim Merkezi'nden yön kilidini kapat).</p><button class="btn" id="rotateNo" type="button">Dikey oynamak istiyorum</button></div>
 <div class="ovl" id="marketScr" hidden><div class="ovl-card market-card" role="dialog" aria-labelledby="mkTtl">
   <h2 id="mkTtl">🛒 Market</h2><p>Kasa: <b id="mkMoney">0₺</b> · Fiyatlar paket başına.</p>
   <div class="mk-sug" id="mkSug"></div>
@@ -703,7 +707,7 @@ button:focus-visible{outline:3px solid var(--cini);outline-offset:2px}
   <h2 id="pfTtl">Usta kim?</h2><p>Lokantanın sahibini tanıyalım.</p>
   <div class="set-list">
     <label class="set-row col"><span><b>Adın</b><small>Tabelada ve müşterilerin dilinde</small></span><input class="txt" id="pfName" maxlength="14" autocomplete="off" placeholder="Adını yaz"></label>
-    <div class="set-row col"><span><b>Cinsiyet</b><small>Müşteriler sana nasıl seslensin?</small></span><div class="seg" id="pfG"><button type="button" data-v="k">Kadın</button><button type="button" data-v="e">Erkek</button><button type="button" data-v="x">Belirtme</button></div></div>
+    <div class="set-row col"><span><b>Cinsiyet</b><small>Müşteriler sana nasıl seslensin?</small></span><div class="seg" id="pfG"><button type="button" data-v="k">Kadın</button><button type="button" data-v="e">Erkek</button><button type="button" data-v="x">Fark etmez</button></div></div>
     <label class="set-row col"><span><b>Yaşın</b><small id="pfAgeV"></small></span><input type="range" id="pfAge" min="8" max="80" step="1"></label>
   </div>
   <button class="btn go big" id="pfOk" type="button">Başlayalım</button>
@@ -719,6 +723,7 @@ button:focus-visible{outline:3px solid var(--cini);outline-offset:2px}
 </div>
 
 <script>
+document.documentElement.lang = 'tr';
 (() => {
 const $ = s => document.querySelector(s);
 const rnd = (a, b) => a + Math.random() * (b - a);
@@ -726,7 +731,7 @@ const pick = a => a[Math.floor(Math.random() * a.length)];
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const shuffle = a => a.map(v => [Math.random(), v]).sort((x, y) => x[0] - y[0]).map(x => x[1]);
 const cap = s => s.charAt(0).toLocaleUpperCase('tr') + s.slice(1);
-const lower = s => s.toLocaleLowerCase('tr');
+const lower = s => s.toLocaleLowerCase('tr').replace(/\bantep/g, 'Antep');
 const round5 = v => Math.round(v / 5) * 5;
 function mulberry(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
 
@@ -834,26 +839,27 @@ DISH.mercimek = { kind: 'jam', look: 'soup', name: 'Mercimek çorbası', base: '
 DISH.karniyarik = { kind: 'tray', noCut: true, name: 'Karnıyarık', base: 'Karnıyarık tepsisi', price: 110, cost: 3, day: 3,
   phrase: () => 'bir porsiyon karnıyarık', unit: '1 porsiyon',
   texts: ['Patlıcanlar çiğ kalmış!', 'Biraz diri kalmış.', 'Biraz fazla pişmiş.', 'Karnıyarık yanmış!'],
-  how: 'Kızarmış patlıcanları tepsiye diz, üstüne kıymalı harcı koy, fırında pişir.',
+  how: 'Kızarmış patlıcanların karnını yar, içine kıymalı harcı doldur, fırında pişir.',
   variants: [{ id: 'klasik', label: '', req: ['patlican', 'kiyma', 'sogan', 'domates', 'biber', 'salca'], day: 1 }], optional: ['sarimsak', 'maydanoz', 'yag'],
   pool: ['patlican', 'patates', 'kiyma', 'sogan', 'sarimsak', 'domates', 'biber', 'salca', 'yag', 'peynir', 'maydanoz', 'yumurta'] };
 DISH.manti = { kind: 'manti', name: 'Mantı', base: 'Mantı iç harcı', price: 110, cost: 4, day: 4, count: 12, countOpts: [8, 10],
   phrase: () => 'bir porsiyon mantı', unit: null,
   texts: ['Mantının hamuru çiğ kalmış!', 'Biraz diri kalmış.', 'Biraz fazla haşlanmış.', 'Mantılar dağılmış!'],
   gauge: ['Su kaynıyor…', 'Mantılar haşlanıyor…', 'Pişti, süzgece al!', 'Fazla haşlanıyor!', 'Mantılar dağılıyor!'], labels: ['Diri', 'Dağıldı'],
-  how: 'İç harcı karıştır, hamur karelerine koyup kapat, kaynar suda haşla. Üstüne sarımsaklı yoğurt, tereyağı ve pul biber.',
+  how: 'İç harcı karıştır, hamur karelerine koyup kapat, kaynar suda haşla. Üstüne sarımsaklı yoğurt ve pul biberli tereyağı.',
   variants: [{ id: 'klasik', label: '', req: ['kiyma', 'sogan', 'karabiber', 'yogurt', 'sarimsak', 'tereyagi', 'pulbiber'], day: 1 }], optional: ['nane', 'salca'] };
 Object.assign(ING, {
   kadayif: { name: 'Tel kadayıf', style: 'shreds', colors: ['#f0d58a', '#e2bf68', '#f7e3a8'], cost: 2, main: true, mix: [235, 200, 120] },
   serbet:  { name: 'Şerbet', style: 'liquid', colors: ['rgba(240,180,60,.75)'], cost: .5 },
   antep:   { name: 'Antep fıstığı', style: 'dice', colors: ['#6f9f35', '#93c04f'], cost: 2, small: true },
 });
+ING.kpeynir = { name: 'Künefe peyniri', style: 'dice', colors: ['#fbf8ee', '#efe6cc'], cost: 1.5 };
 DISH.kunefe = { kind: 'tray', noCut: true, name: 'Künefe', base: 'Künefe tepsisi', price: 120, cost: 3, day: 5,
   phrase: () => 'bir porsiyon künefe', unit: '1 porsiyon',
   texts: ['Peyniri hiç erimemiş, künefe çiğ!', 'Biraz daha kızarsaydı.', 'Biraz fazla kızarmış.', 'Künefe yanmış!'],
-  how: 'Tel kadayıfı tereyağıyla tepsiye ser, ortasına peynir koy, fırında kızart. Üstüne şerbet dök, Antep fıstığı serp.',
-  variants: [{ id: 'klasik', label: '', req: ['kadayif', 'peynir', 'tereyagi', 'serbet', 'antep'], day: 1 }], optional: [],
-  pool: ['kadayif', 'yufka', 'peynir', 'tereyagi', 'serbet', 'antep', 'fistik', 'ceviz', 'seker', 'tarcin', 'su'] };
+  how: 'Tel kadayıfı tereyağıyla tepsiye ser, ortasına tuzsuz künefe peyniri koy, fırında kızart. Üstüne şerbet dök, Antep fıstığı serp.',
+  variants: [{ id: 'klasik', label: '', req: ['kadayif', 'kpeynir', 'tereyagi', 'serbet', 'antep'], day: 1 }], optional: [],
+  pool: ['kadayif', 'yufka', 'kpeynir', 'peynir', 'tereyagi', 'serbet', 'antep', 'fistik', 'ceviz', 'seker', 'tarcin', 'su'] };
 DISH.menemen = { kind: 'jam', look: 'pan', name: 'Menemen', base: 'Menemen sahanı', price: 70, cost: 2, day: 6,
   phrase: (o, V) => V.label ? `${V.label} bir menemen` : 'bir menemen', unit: '1 sahan', labels: ['Sulu', 'Kurudu'],
   gauge: ['Tereyağı eriyor…', 'Domatesler pişiyor…', 'Yumurtalar tam kıvamında, ocaktan al!', 'Yumurtalar kuruyor!', 'Dibi tutuyor!'],
@@ -867,7 +873,7 @@ const DRINKS = {
   ayran:    { name: 'Ayran', price: 15, ask: ['Yanında bir ayran da alayım.', 'Yanına köpüklü, beyaz, serin bir şey ver.'] },
   salgam:   { name: 'Şalgam', price: 15, ask: ['Yanında acılı bir şalgam olsun!', 'Yanına mor renkli, ekşi ve acı bir şey ver.'] },
   cay:      { name: 'Çay', price: 10, ask: ['Bir de çay alırım, ince belli bardakta.', 'Yanına tavşan kanı, demli bir şey ver.'] },
-  limonata: { name: 'Limonata', price: 15, ask: ['Bir de limonata!', 'Yanına sarı, ekşi tatlı, buzlu bir şey ver.'] },
+  limonata: { name: 'Limonata', price: 15, ask: ['Bir de limonata!', 'Yanına sarı, mayhoş, buzlu bir şey ver.'] },
 };
 POOL.garnish = ['yogurt', 'sarimsak', 'tereyagi', 'pulbiber', 'nane', 'salca', 'sut', 'limon', 'seker'];
 POOL.sweet = ['un', 'tereyagi', 'seker', 'esmerseker', 'pudra', 'yumurta', 'sut', 'elma', 'havuc', 'patates', 'portakal', 'tarcin', 'ceviz', 'su', 'limon'];
@@ -901,10 +907,41 @@ DISH.cigkofte = { kind: 'bowl', name: 'Etsiz çiğ köfte', base: 'Çiğ köfte 
 DISH.imambayildi = { kind: 'tray', noCut: true, name: 'İmam bayıldı', base: 'İmam bayıldı tepsisi', price: 55, cost: 3, day: 2,
   phrase: () => 'bir porsiyon imam bayıldı', unit: '1 porsiyon',
   texts: ['Patlıcanlar çiğ kalmış!', 'Biraz diri kalmış.', 'Biraz fazla pişmiş.', 'Patlıcanlar yanmış!'],
-  how: 'Patlıcanları tepsiye diz; soğan, sarımsak, domates ve biberi zeytinyağıyla üstüne koy, fırında pişir. İçinde et yok.',
+  how: 'Patlıcanların ortasını yar; zeytinyağında kavrulmuş soğan, sarımsak, domates ve biberi içine doldur, fırında pişir. İçinde et yok.',
   variants: [{ id: 'klasik', label: '', req: ['patlican', 'sogan', 'sarimsak', 'domates', 'biber', 'zeytinyagi'], day: 1 }], optional: ['maydanoz', 'karabiber'],
   pool: ['patlican', 'patates', 'kiyma', 'sogan', 'sarimsak', 'domates', 'biber', 'salca', 'zeytinyagi', 'yag', 'peynir', 'maydanoz'] };
 DISH.sarma.price = 50; DISH.borek.price = 40; DISH.mercimek.price = 35; DISH.karniyarik.price = 70;
+// vegan ve vejetaryen seçenekler
+Object.assign(ING, {
+  nohut:     { name: 'Nohut', style: 'peas', colors: ['#e9cd92', '#d8b676', '#f2dcab'], cost: 1, main: true, mix: [228, 200, 150] },
+  tahin:     { name: 'Tahin', style: 'liquid', colors: ['rgba(190,150,96,.92)'], cost: 2, mix: [200, 165, 110], mw: 1.5 },
+  salatalik: { name: 'Salatalık', style: 'cuke', colors: ['#3f7d2a', '#d7e9a8'], cost: .5, mix: [150, 190, 100], mw: .5 },
+});
+DISH.coban = { kind: 'bowl', toss: true, name: 'Çoban salatası', base: 'Salata kasesi', price: 40, cost: 2, day: 2,
+  phrase: () => 'bir çoban salatası', unit: '1 kase',
+  how: 'Domates, salatalık, sivri biber ve soğanı doğra, maydanozu ekle. Zeytinyağı ve limonla hafifçe karıştır. Tamamen bitkisel!',
+  variants: [{ id: 'klasik', label: '', req: ['domates', 'salatalik', 'biber', 'sogan', 'maydanoz', 'zeytinyagi', 'limon'], day: 1 }],
+  optional: ['nar', 'pulbiber', 'nane', 'karabiber'],
+  pool: ['domates', 'salatalik', 'biber', 'sogan', 'yesilsogan', 'maydanoz', 'nane', 'zeytinyagi', 'limon', 'nar', 'peynir', 'patates', 'pulbiber', 'karabiber', 'kimyon'] };
+DISH.humus = { kind: 'bowl', name: 'Humus', base: 'Humus kasesi', price: 50, cost: 2, day: 3,
+  phrase: (o, V) => V.label ? `${V.label} bir humus` : 'bir kase humus', unit: '1 kase',
+  how: 'Haşlanmış nohudu tahin, limon, sarımsak ve zeytinyağıyla pürüzsüz olana kadar ez. Tamamen bitkisel!',
+  variants: [
+    { id: 'klasik', label: '', req: ['nohut', 'tahin', 'limon', 'sarimsak', 'zeytinyagi'], day: 1 },
+    { id: 'pulbiberli', label: 'pul biberli', req: ['nohut', 'tahin', 'limon', 'sarimsak', 'zeytinyagi', 'pulbiber'], day: 1 },
+  ], optional: ['kimyon', 'maydanoz', 'pulbiber'],
+  pool: ['nohut', 'mercimek', 'tahin', 'yogurt', 'limon', 'sarimsak', 'sogan', 'zeytinyagi', 'tereyagi', 'maydanoz', 'nane', 'pulbiber', 'kimyon', 'karabiber'] };
+DISH.mercimekkoftesi = { kind: 'bowl', name: 'Mercimek köftesi', base: 'Köfte harcı kasesi', price: 55, cost: 2, day: 4,
+  phrase: (o, V) => V.label ? `bir porsiyon ${V.label} mercimek köftesi` : 'bir porsiyon mercimek köftesi', unit: '1 porsiyon',
+  how: 'Haşlanmış kırmızı mercimeği bulgurla karıştır; soğan, salça, zeytinyağı ve kimyonu ekle, taze soğan ve maydanozla yoğur. İçinde et yok!',
+  variants: [
+    { id: 'klasik', label: '', req: ['mercimek', 'bulgur', 'sogan', 'salca', 'zeytinyagi', 'kimyon', 'yesilsogan', 'maydanoz'], day: 1 },
+    { id: 'acili', label: 'acılı', req: ['mercimek', 'bulgur', 'sogan', 'salca', 'zeytinyagi', 'kimyon', 'yesilsogan', 'maydanoz', 'pulbiber'], day: 1 },
+  ], optional: ['limon', 'nar', 'pulbiber', 'karabiber'],
+  pool: ['mercimek', 'bulgur', 'pirinc', 'sogan', 'salca', 'zeytinyagi', 'tereyagi', 'yesilsogan', 'maydanoz', 'nane', 'limon', 'nar', 'kiyma', 'yumurta', 'kimyon', 'pulbiber', 'karabiber'] };
+DISH.kurabiye.variants.push({ id: 'tahinli', label: 'tahinli', req: ['un', 'tahin', 'seker', 'yag'], day: 3 });
+DISH.kurabiye.optional.push('tarcin');
+POOL.sweet.push('yag', 'tahin');
 // sabah hazırlanan yemekler: tencere ya da tepsi bir kez yapılır, gün boyu porsiyon porsiyon satılır
 const PREP = {
   sarma: { yield: d => Math.max(1, Math.floor(rolledCount(d) / 2)), unit: 'porsiyon', count: 12 },
@@ -916,12 +953,12 @@ const PREP = {
 const isPrep = k => !!PREP[k];
 // beslenme: vegan hiç hayvansal ürün yemez, vejetaryen et yemez
 const MEAT = ['kiyma', 'sucuk', 'pastirma'];
-const ANIMAL = MEAT.concat(['kasar', 'peynir', 'yumurta', 'tereyagi', 'sut', 'yogurt']);
+const ANIMAL = MEAT.concat(['kasar', 'peynir', 'kpeynir', 'yumurta', 'tereyagi', 'sut', 'yogurt']);
 const dietBad = (diet, t) => diet === 'vegan' ? ANIMAL.includes(t) : diet === 'vejetaryen' ? MEAT.includes(t) : false;
 const DIET_TAG = { vegan: '🌱 Vegan', vejetaryen: '🧀 Vejetaryen' };
 const DIET_WORD = { vegan: 'vegan', vejetaryen: 'vejetaryen' };
 // market: [reyon, birim, kaç porsiyon, fiyat, (ad)]
-const MCATS = [['manav', '🥬 Manav'], ['kasap', '🥩 Kasap'], ['sut', '🧀 Şarküteri'], ['bakkal', '🛒 Bakkal'], ['baharat', '🌶️ Baharat']];
+const MCATS = [['manav', '🥬 Manav'], ['kasap', '🥩 Kasap'], ['sut', '🧀 Şarküteri'], ['bakkal', '🛒 Bakkal'], ['baharat', '🌶️ Aktar']];
 const MARKET = {
   domates: ['manav', '1 kg', 8, 12], biber: ['manav', '500 g', 8, 8], maydanoz: ['manav', '1 demet', 8, 6], yesilsogan: ['manav', '1 demet', 6, 6],
   sogan: ['manav', '1 kg', 10, 8], sarimsak: ['manav', '2 baş', 10, 8], patates: ['manav', '1 kg', 8, 8], ispanak: ['manav', '1 bağ', 6, 10],
@@ -929,13 +966,14 @@ const MARKET = {
   portakal: ['manav', '1 kg', 6, 14], nane: ['manav', '1 demet', 8, 5], mantar: ['manav', '250 g', 6, 15],
   kiyma: ['kasap', '1 kg', 8, 90], sucuk: ['kasap', '250 g', 6, 30], pastirma: ['kasap', '200 g', 5, 45],
   kasar: ['sut', '500 g', 8, 35], peynir: ['sut', '500 g', 8, 30], yumurta: ['sut', '10 adet', 10, 25], tereyagi: ['sut', '250 g', 8, 25],
-  sut: ['sut', '1 litre', 8, 12], yogurt: ['sut', '1 kg', 8, 18],
+  sut: ['sut', '1 litre', 8, 12], yogurt: ['sut', '1 kg', 8, 18], kpeynir: ['sut', '500 g', 6, 40],
   beze: ['bakkal', '10 adet', 10, 30, 'Hamur bezesi'], caypaketi: ['bakkal', '1 paket (3 demlik)', 3, 15, 'Çay'],
   yufka: ['bakkal', '6 yaprak', 6, 18], bulgur: ['bakkal', '1 kg', 10, 12], pirinc: ['bakkal', '1 kg', 10, 14], mercimek: ['bakkal', '1 kg', 10, 14],
   un: ['bakkal', '2 kg', 12, 8], seker: ['bakkal', '1 kg', 12, 8], esmerseker: ['bakkal', '500 g', 8, 8], pudra: ['bakkal', '250 g', 8, 5],
   salca: ['bakkal', '1 kavanoz', 10, 14], zeytinyagi: ['bakkal', '1 litre', 10, 30], yag: ['bakkal', '1 litre', 12, 15], nar: ['bakkal', '1 şişe', 8, 18],
   kusuzumu: ['bakkal', '100 g', 8, 10], fistik: ['bakkal', '100 g', 8, 20], ceviz: ['bakkal', '250 g', 8, 20], kadayif: ['bakkal', '500 g', 6, 20],
-  serbet: ['bakkal', '1 şişe', 8, 6], antep: ['bakkal', '100 g', 8, 25],
+  serbet: ['bakkal', '1 şişe', 8, 6], antep: ['bakkal', '100 g', 8, 25], nohut: ['bakkal', '1 kg', 10, 16], tahin: ['bakkal', '1 kavanoz', 10, 28],
+  salatalik: ['manav', '1 kg', 8, 10],
   pulbiber: ['baharat', '1 paket', 20, 8], karabiber: ['baharat', '1 paket', 20, 8], tarcin: ['baharat', '1 paket', 20, 8], kimyon: ['baharat', '1 paket', 20, 8],
 };
 const mName = k => MARKET[k] && MARKET[k][4] || (ING[k] ? ING[k].name : k);
@@ -1329,12 +1367,11 @@ function makeCustomer() {
     const free = Object.keys(FRIENDS).filter(id => !S.friendsDay.ids.includes(id));
     if (free.length) {
       const id = pick(free), f = makeFriend(id), pid = FRIENDS[id].pair;
-      S.friendsDay.ids.push(id);
-      if (pid && !S.friendsDay.ids.includes(pid) && Math.random() < .55) { f.partner = makeFriend(pid); S.friendsDay.ids.push(pid); }
+      if (pid && !S.friendsDay.ids.includes(pid) && Math.random() < .55) f.partner = makeFriend(pid);
       return f;
     }
   }
-  if (S.day >= 2 && S.ev.gicikDay !== S.day && Math.random() < .1) { S.ev.gicikDay = S.day; return Object.assign({}, pick(GICIK), { mood: 'idle', seed: Math.random() * 100 }); }
+  if (S.day >= 2 && S.ev.gicikDay !== S.day && Math.random() < .1) { return Object.assign({}, pick(GICIK), { mood: 'idle', seed: Math.random() * 100 }); }
   if (S.regulars.length && Math.random() < .35) { const r = pick(S.regulars); return Object.assign({}, r.look, { mood: 'idle', seed: Math.random() * 100, regular: r }); }
   const c = makeStranger();
   if (S.day >= 2 && Math.random() < .12) c.diet = Math.random() < .5 ? 'vegan' : 'vejetaryen';
@@ -1345,16 +1382,16 @@ const HAYRIYE = { name: 'Hayriye Teyze', hair: 'scarf', hairColor: '#8b5a2b', sk
 // Egemen'in arkadaşları (çizgi karakter olarak)
 const FRIENDS = {
   bilge: { name: 'Bilge', diet: 'vegan', polite: true, pair: 'tan', hair: 'bob', hairColor: '#4a2e1c', skin: '#f6d2b4', skinDark: '#e2b48f', shirt: '#fbf6e8', stripes: '#f2c23a', tee: true, trim: '#f2c23a', necklace: 'beads', mustache: false, glasses: false,
-    hi: p => `Merhaba, kolay gelsin! Rica etsem ${p} hazırlar mısınız? Bugün atölyede çömlek çarkından kalkamadım, çok acıktım.`,
+    hi: p => `Merhaba, kolay gelsin! Rica etsem ${p} hazırlar mısınız? Veganım, içinde hayvansal hiçbir şey olmasın lütfen. Atölyede çömlek çarkından kalkamadım, çok acıktım.`,
     happy: ['Çok teşekkür ederim, ellerinize sağlık! Size kendi yaptığım bir çömlek tabak getireceğim.', 'Harika olmuş, gerçekten çok teşekkürler!'],
     meh: i => `Çok naziksiniz, teşekkür ederim. Sadece… ${i}`,
     olay: t => `Ah… Bunun içinde ${t} var. Veganım demiştim, gerçekten çok üzüldüm. Bunu yiyemem, kusura bakmayın.` },
   tan: { name: 'Tan', easy: true, pair: 'bilge', hair: 'messy', hairColor: '#4a2e1c', skin: '#eac09a', skinDark: '#d09f75', shirt: '#a9d2ea', stripes: '#7a5534', tee: true, trim: '#7a5534', beard: 'stubble', earring: 'stud', strap: '#24345c', mustache: false, glasses: false,
     hi: p => `Selam usta! Ne yaparsan yerim, sen bilirsin. Mesela ${p}?`,
-    happy: ['Oha, efsane olmuş! Eline sağlık usta.', 'Bayıldım! Yine geleceğiz.'], meh: () => 'Olsun usta, ben yine de yerim, afiyet olsun bana!' },
+    happy: ['Oha, efsane olmuş! Eline sağlık usta.', 'Bayıldım! Yine gelirim.'], meh: () => 'Olsun usta, ben yine de yerim, afiyet olsun bana!' },
   idil: { name: 'İdil', diet: 'vejetaryen', polite: true, pair: 'goksu', hair: 'shoulder', hairColor: '#a8582a', skin: '#f6d2b4', skinDark: '#e2b48f', shirt: '#fbf8f0', glassArt: true, tee: true, trim: '#2a2420', jacket: '#2b2d33', strap: '#c7302a', mustache: false, glasses: false,
     hi: p => `Merhaba! Etsiz bir şey rica edebilir miyim? ${cap(p)} çok güzel olur.`,
-    happy: ['Ellerinize sağlık! Renkleri o kadar güzel ki vitraya çevirmek istedim.', 'Çok teşekkür ederim, nefis olmuş!'],
+    happy: ['Ellerinize sağlık! Renkleri öyle güzel ki vitrayını yapasım geldi.', 'Çok teşekkür ederim, nefis olmuş!'],
     meh: i => `Teşekkür ederim, çok tatlısınız. Ama… ${i}`,
     olay: t => `Bunun içinde ${t} var… Ben vejetaryenim, söylemiştim. Açıkçası çok üzüldüm.` },
   goksu: { name: 'Göksu', easy: true, pair: 'idil', hair: 'wavyshort', hairColor: '#3b2618', skin: '#f2cba8', skinDark: '#dcae86', shirt: '#1d1d22', collar: '#34343c', earring: 'hoop', mustache: false, glasses: false,
@@ -1374,14 +1411,15 @@ const GICIK = [
 const daDe = w => { const v = (lower(w).match(/[aıoueiöü]/g) || ['a']).pop(); return 'aıou'.includes(v) ? 'da' : 'de'; };
 const criticDay = d => d === 3 || (d > 3 && (d - 3) % 4 === 0);
 const DIET_HI = {
-  vegan: ['Ben veganım usta, içinde hayvansal hiçbir şey olmasın: et, peynir, yumurta, tereyağı, süt yok!', 'Veganım, dikkat et lütfen: et de süt ürünü de yumurta da olmasın.'],
-  vejetaryen: ['Ben vejetaryenim usta, et olmasın lütfen.', 'Etsiz olsun ama, vejetaryenim.'],
+  vegan: ['Ben veganım, içinde hayvansal hiçbir şey olmasın: et, peynir, yumurta, tereyağı, süt yok!', 'Veganım, dikkat et lütfen: et de süt ürünü de yumurta da olmasın.'],
+  vejetaryen: ['Ben vejetaryenim, et olmasın lütfen.', 'Etsiz olsun ama, vejetaryenim.'],
 };
-const DIET_OLAY = ['NE?! Bunun içinde {t} var! {d} olduğumu söyledim! Rezalet! Paramı geri ver, bir daha adım atmam!', 'Usta sen ciddi misin?! {t}! Ben {d}im dedim! Herkes duysun, bu lokantada {d} müşteriye {t} yediriyorlar!'];
+const DIET_SELF = { vegan: 'veganım', vejetaryen: 'vejetaryenim' };
+const DIET_OLAY = [(t, d) => `NE?! Bunun içinde ${t} var! ${cap(d)} olduğumu söyledim! Rezalet! Paramı geri ver, bir daha adım atmam!`, (t, d) => `Usta, sen ciddi misin?! ${cap(t)}! Ben ${DIET_SELF[d]} dedim! Herkes duysun, bu lokantada ${d} müşteriye ${t} yediriyorlar!`];
 function makeStranger() {
-  const T = pick(TYPES), sk = pick(SKINS);
+  const T = pick(TYPES), sk = pick(SKINS), free = T.names.filter(n => !S.regulars.some(r => r.look.name === n));
   return {
-    name: pick(T.names), hair: pick(T.hair), hairColor: pick(T.colors), skin: sk[0], skinDark: sk[1],
+    name: pick(free.length ? free : T.names), hair: pick(T.hair), hairColor: pick(T.colors), skin: sk[0], skinDark: sk[1],
     shirt: pick(T.shirt), scarf: T.scarf ? pick(T.scarf) : null,
     mustache: Math.random() < (T.mustache || 0), glasses: Math.random() < T.glasses,
     mood: 'idle', seed: Math.random() * 100,
@@ -1596,16 +1634,18 @@ function drawShop(ctx, t) {
   ctx.fillStyle = '#2f4a3a'; roundRect(ctx, 34, 68, 166, 160, 6); ctx.fill();
   ctx.fillStyle = '#f6efe0'; ctx.textAlign = 'center'; ctx.font = '800 26px "Baloo 2", sans-serif'; ctx.fillText('MENÜ', 117, 100);
   const menu = Object.keys(DISH).filter(k => (!DISH[k].learn && !DISH[k].day) || dishOpen(k));
-  const SHORT = { sarma: 'Sarma', kurabiye: 'Kurabiye', recel: 'Reçel', mercimek: 'Mercimek', cigkofte: 'Çiğ köfte', imambayildi: 'İmam bayıldı', karniyarik: 'Karnıyarık' };
+  const SHORT = { sarma: 'Sarma', kurabiye: 'Kurabiye', recel: 'Reçel', mercimek: 'Çorba', cigkofte: 'Çiğ köfte', imambayildi: 'İmam bayıldı', karniyarik: 'Karnıyarık', coban: 'Çoban salata', mercimekkoftesi: 'Mercimek köfte' };
   if (menu.length > 7) {
     ctx.font = '700 9.5px "Nunito", sans-serif';
     const rows = Math.ceil(menu.length / 2), step = Math.min(16, 88 / Math.max(1, rows - 1));
     menu.forEach((k, i) => {
       const D = DISH[k], locked = !dishOpen(k), x = i < rows ? 41 : 119, y = 116 + (i % rows) * step;
+      const nm = SHORT[k] || D.name, pr = locked ? '—' : soldOut(k) ? 'bitti' : D.price + '₺';
+      const room = 75 - ctx.measureText(pr).width - 3, w = ctx.measureText(nm).width;
       ctx.fillStyle = locked ? 'rgba(246,239,224,.35)' : '#f6efe0'; ctx.textAlign = 'left';
-      ctx.fillText(SHORT[k] || D.name, x, y);
+      if (w > room) { ctx.save(); ctx.translate(x, y); ctx.scale(room / w, 1); ctx.fillText(nm, 0, 0); ctx.restore(); } else ctx.fillText(nm, x, y);
       ctx.fillStyle = locked ? 'rgba(246,239,224,.35)' : '#f2c14e'; ctx.textAlign = 'right';
-      ctx.fillText(locked ? '—' : soldOut(k) ? 'bitti' : D.price + '₺', x + 75, y);
+      ctx.fillText(pr, x + 75, y);
     });
     ctx.textAlign = 'left';
   } else {
@@ -1776,6 +1816,30 @@ function flame(ctx, x, y, w, h) {
   ctx.bezierCurveTo(x - w, y - h * .4, x - w * .2, y - h * .7, x, y - h);
   ctx.bezierCurveTo(x + w * .2, y - h * .7, x + w, y - h * .4, x, y); ctx.fill();
 }
+// gözleme sacı: odun ateşinin üstünde kubbeli demir sac
+function drawSac(ctx, t) {
+  ctx.fillStyle = '#f3e3c6'; ctx.fillRect(0, 0, 800, 450);
+  ctx.fillStyle = '#e6cfa6'; for (let i = 0; i < 9; i++) ctx.fillRect(0, 40 + i * 44, 800, 3);
+  ctx.fillStyle = '#7b4a22'; ctx.fillRect(0, 392, 800, 58);
+  const g = ctx.createRadialGradient(400, 380, 10, 400, 380, 230);
+  g.addColorStop(0, `rgba(255,170,70,${.55 + .1 * Math.sin(t * 6)})`); g.addColorStop(1, 'rgba(255,170,70,0)');
+  ctx.fillStyle = g; ctx.fillRect(150, 200, 500, 250);
+  for (let i = 0; i < 9; i++) {
+    const fx = 290 + i * 28, h = 50 + Math.sin(t * 9 + i * 1.9) * 14 + (i % 3) * 10;
+    ctx.fillStyle = '#e8541c'; flame(ctx, fx, 392, 18, h); ctx.fillStyle = '#ffc23d'; flame(ctx, fx, 392, 10, h * .6);
+  }
+  for (const [lx, ly, a] of [[330, 392, -.12], [470, 392, .12], [400, 400, 0]]) { ctx.save(); ctx.translate(lx, ly); ctx.rotate(a); ctx.fillStyle = '#5a3418'; roundRect(ctx, -70, -9, 140, 18, 9); ctx.fill(); ctx.fillStyle = '#c99358'; ellipse(ctx, 70, 0, 6, 9); ctx.fill(); ctx.restore(); }
+  ctx.fillStyle = '#2b2622'; ctx.beginPath(); ctx.ellipse(400, 330, 250, 52, 0, Math.PI, 0); ctx.ellipse(400, 330, 250, 22, 0, 0, Math.PI); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,.12)'; ellipse(ctx, 340, 300, 120, 12, -.05); ctx.fill();
+  ctx.fillStyle = '#1a1714'; ellipse(ctx, 400, 334, 250, 20); ctx.fill();
+  if (K && K.dough) {
+    ctx.save(); ctx.translate(400, 300); ctx.scale(.62, .2); ctx.translate(-250, -250); renderAny(ctx, K, true); ctx.restore();
+    if (K.bake > .75) {
+      ctx.fillStyle = `rgba(70,60,55,${clamp((K.bake - .75) * 2, 0, .5)})`;
+      for (let i = 0; i < 4; i++) { const k = (t * .6 + i / 4) % 1; circle(ctx, 380 + i * 20 + Math.sin(t + i) * 10, 270 - k * 150, 14 + k * 26); ctx.fill(); }
+    }
+  }
+}
 function drawOven(ctx, t) {
   ctx.fillStyle = '#b4523a'; ctx.fillRect(0, 0, 800, 450);
   const br = mulberry(3);
@@ -1893,6 +1957,25 @@ function drawPortion(ctx, type, x, y, seed) {
       ctx.globalAlpha = .85; ctx.fillStyle = cols[0]; ellipse(ctx, 0, 0, 20, 14); ctx.fill(); ctx.globalAlpha = 1;
       for (let i = 0; i < 60; i++) { const a = r() * 6.283, d = Math.sqrt(r()) * 28; ctx.fillStyle = cols[i % 2]; circle(ctx, Math.cos(a) * d, Math.sin(a) * d * .8, 1.2 + r() * 1.1); ctx.fill(); }
       break;
+    case 'peas':
+      ctx.fillStyle = 'rgba(0,0,0,.10)'; ellipse(ctx, 2, 6, 32, 25); ctx.fill();
+      for (let i = 0; i < 18; i++) {
+        const a = r() * 6.283, dd = Math.sqrt(r()) * 22, px = Math.cos(a) * dd, py = Math.sin(a) * dd * .85;
+        ctx.fillStyle = cols[i % cols.length]; circle(ctx, px, py, 6); ctx.fill();
+        ctx.strokeStyle = 'rgba(120,80,30,.35)'; ctx.lineWidth = 1; ctx.stroke();
+        ctx.beginPath(); ctx.arc(px + 1, py, 3.4, -.7, .9); ctx.stroke();
+        ctx.fillStyle = 'rgba(255,255,255,.4)'; circle(ctx, px - 2, py - 2.2, 1.7); ctx.fill();
+      }
+      break;
+    case 'cuke':
+      for (let i = 0; i < 7; i++) {
+        const px = (r() - .5) * 46, py = (r() - .5) * 40;
+        ctx.fillStyle = cols[0]; circle(ctx, px, py, 9.5); ctx.fill();
+        ctx.fillStyle = cols[1]; circle(ctx, px, py, 7.8); ctx.fill();
+        ctx.fillStyle = '#bcd98a'; circle(ctx, px, py, 4); ctx.fill();
+        ctx.fillStyle = '#f6f9e6'; for (let j = 0; j < 3; j++) { const a = j * 2.09 + i; ellipse(ctx, px + Math.cos(a) * 2.6, py + Math.sin(a) * 2.6, 1.3, .8, a); ctx.fill(); }
+      }
+      break;
     case 'peel':
       ctx.lineCap = 'round'; ctx.lineWidth = 6;
       for (let i = 0; i < 8; i++) { ctx.strokeStyle = cols[i % 2]; const px = (r() - .5) * 60, py = (r() - .5) * 60, a = r() * 6.28; ctx.beginPath(); ctx.arc(px, py, 10, a, a + 1.8); ctx.stroke(); }
@@ -1935,8 +2018,8 @@ function renderBowl(ctx, d, noShadow, copper) {
   }
   ctx.fillStyle = '#f3ead8'; circle(ctx, 250, 250, 180); ctx.fill();
   ctx.save(); ctx.clip(PATHS.kisir);
-  const st = d.stir || 0, n = d.portions.length;
-  if (st > 0 && n) {
+  const st = d.stir || 0, n = d.portions.length, toss = !!(DISH[d.dough] && DISH[d.dough].toss);
+  if (st > 0 && n && !toss) {
     const c = mixRGB(d), rad = 70 + Math.min(1, n / 8) * 100, r = mulberry(11);
     ctx.globalAlpha = st; ctx.fillStyle = rgb(c);
     ctx.beginPath(); for (let i = 0; i <= 20; i++) { const a = i / 20 * 6.283, q = rad + (i % 20 ? r() * 14 : 0); if (i) ctx.lineTo(250 + Math.cos(a) * q, 250 + Math.sin(a) * q); else ctx.moveTo(250 + q, 250); } ctx.closePath(); ctx.fill();
@@ -1944,8 +2027,14 @@ function renderBowl(ctx, d, noShadow, copper) {
     ctx.globalAlpha = 1;
   }
   for (const p of d.portions) {
-    ctx.save(); ctx.translate(250, 250); ctx.rotate(st * 5); ctx.scale(1 - st * .35, 1 - st * .35); ctx.translate(-250, -250);
-    ctx.globalAlpha = 1 - .85 * st; drawPortion(ctx, p.type, p.x, p.y, p.seed); ctx.restore();
+    const sc = 1 - st * (toss ? .22 : .35);
+    ctx.save(); ctx.translate(250, 250); ctx.rotate(st * (toss ? 1.6 : 5)); ctx.scale(sc, sc); ctx.translate(-250, -250);
+    ctx.globalAlpha = toss ? 1 : 1 - .85 * st; drawPortion(ctx, p.type, p.x, p.y, p.seed); ctx.restore();
+  }
+  // salata harmanlanınca malzemeler kaseye dağılır
+  if (toss && st > 0) for (const p of d.portions) {
+    ctx.save(); ctx.globalAlpha = st; ctx.translate(250, 250); ctx.rotate(2.4 + st); ctx.scale(.8, .8); ctx.translate(-250, -250);
+    drawPortion(ctx, p.type, 500 - p.x, 500 - p.y, p.seed + 7); ctx.restore();
   }
   ctx.restore();
 }
@@ -2190,7 +2279,7 @@ function drawSpiceJar(x, k) {
   x.fillStyle = ING[k].colors[1] || col; for (let i = 0; i < 14; i++) { circle(x, 44 + (i * 7) % 25, 33 + (i * 5) % 26, 1.3); x.fill(); }
   x.fillStyle = '#c0392b'; roundRect(x, 36, 10, 40, 9, 3); x.fill();
   x.fillStyle = '#fff8ec'; roundRect(x, 44, 38, 24, 12, 3); x.fill();
-  x.fillStyle = '#3a2216'; x.font = '800 8px "Nunito", sans-serif'; x.textAlign = 'center'; x.fillText(ING[k].name.slice(0, 5), 56, 47);
+  x.fillStyle = '#3a2216'; x.textAlign = 'center'; const jn = ING[k].name; x.font = `800 ${jn.length > 7 ? 6.5 : 8}px "Nunito", sans-serif`; x.fillText(jn, 56, 47, 34);
 }
 const ICON = {
   portakal(x) {
@@ -2373,7 +2462,7 @@ function slicesOf(d) {
   if (how === 'grid') { const v = cuts.filter(k => Math.abs(k.x2 - k.x1) < Math.abs(k.y2 - k.y1)).length; return (v + 1) * (c - v + 1); }
   return c + 1;
 }
-const slicesText = n => n === 1 ? 'Kesilmeyecek' : n + ' dilim';
+const slicesText = n => n === 1 ? 'Bütün' : n + ' dilim';
 function dishCost(d) {
   if (!d || !d.dough) return 0;
   let c = DISH[d.dough].cost;
@@ -2390,7 +2479,7 @@ const bubble = $('#bubble'), panel = $('#panel'), hint = $('#hint');
 function show(id) { for (const s of ['shop', 'morning', 'kitchen', 'oven', 'cut', 'dayend']) $('#' + s).hidden = s !== id; }
 function hud() {
   $('#hDay').textContent = S.day;
-  const closed = S.phase === 'open' && S.time >= closeTime();
+  const closed = S.phase === 'open' && (S.time >= closeTime() || S.closed === S.day);
   const ck = $('#hClock'); ck.textContent = S.phase !== 'open' ? 'Sabah' : closed ? 'Kapanış' : clockText(S.time); ck.style.color = closed || closeTime() - S.time < 45 ? 'var(--tomato)' : '';
   $('#hRep').textContent = Math.round(S.rep);
   $('.brand small').textContent = S.player ? shopName() : 'Lokanta oyunu';
@@ -2407,14 +2496,17 @@ const RIDDLES = [
   { day: 2, text: 'Sade olsun usta, hamurdan başka bir şey istemem. Pide lütfen.', dish: 'pide', items: [] },
   { day: 2, text: 'Peyniri ipek gibi uzayan bir pide! Ama başka hiçbir şey koyma.', dish: 'pide', items: [['kasar', 1]] },
   { day: 2, text: 'Etli bir pide olsun ama kıymalı değil. Kahvaltıda yediğimiz et!', dish: 'pide', items: [['sucuk']] },
-  { day: 3, text: 'Her şeyli pide! Dolapta ne varsa koy.', dish: 'pide', items: 'all' },
+  { day: 3, text: 'Karışık bir pide! Dolapta ne varsa koy.', dish: 'pide', items: 'all' },
   { day: 2, need: 'sac', text: 'Temel Reis gibi güçlü olmak istiyorum. Bir gözleme lütfen!', dish: 'gozleme', items: [['ispanak']] },
-  { day: 2, need: 'sac', text: 'Köy kahvaltısı gibi bir gözleme: beyazı da olsun, sarısı da.', dish: 'gozleme', items: [['peynir'], ['patates']] },
-  { day: 2, need: 'pastirma', text: 'Kayseri\'den geldim, memleket kokan bir pide isterim. Yanında da güneş gibi bir şey olsun.', dish: 'pide', items: [['pastirma'], ['yumurta']] },
+  { day: 2, need: 'sac', text: 'Köy kahvaltısı gibi bir gözleme: beyazı tuzlu olsun, sarısı topraktan çıkma.', dish: 'gozleme', items: [['peynir'], ['patates']] },
+  { day: 2, need: 'pastirma', text: 'Kayseri\'den geldim, memleket kokan bir pide isterim. Üstünde de güneş gibi bir şey olsun.', dish: 'pide', items: [['pastirma'], ['yumurta']] },
   { day: 2, text: 'Bulgurlu, nar ekşili o güzel salatadan istiyorum ama ağzım yansın!', dish: 'kisir', variant: 'acili' },
   { day: 2, text: 'Ege\'den geldim, zeytinyağlı bir şey isterim. Yapraklısından, 8 tane!', dish: 'sarma', variant: 'zeytinyagli', count: 8 },
   { day: 2, text: 'Annemin yaptığı gibi, içi etli yapraklardan 10 tane lütfen.', dish: 'sarma', variant: 'etli', count: 10 },
   { day: 2, text: 'Çay saatine kat kat bir şey, içinde beyaz peynir olsun.', dish: 'borek', variant: 'peynirli' },
+  { day: 2, text: 'Yaylada çobanların yaptığı o ferah salatadan bir kase lütfen.', dish: 'coban', variant: 'klasik' },
+  { day: 3, text: 'Nohutla tahinden yapılan o pürüzsüz mezeden istiyorum, üstüne biraz da pul biber.', dish: 'humus', variant: 'pulbiberli' },
+  { day: 4, text: 'Kırmızı mercimekle bulgurdan, elde sıkılan o köftelerden olsun. Acısı da olsun!', dish: 'mercimekkoftesi', variant: 'acili' },
 ];
 const dishOpts = k => DISH[k].opts.filter(ingOpen);
 const variantOf = o => DISH[o.dish].variants ? DISH[o.dish].variants.find(v => v.id === o.variant) : null;
@@ -2423,10 +2515,13 @@ function dishTitle(o) {
   return V && V.label ? cap(V.label) + ' ' + lower(D.name) : D.name;
 }
 const dietOK = (k, diet) => !diet || (DISH[k].kind === 'flat' ? k !== 'lahmacun' : DISH[k].variants.some(v => v.day <= S.day && !v.req.some(t => dietBad(diet, t))));
-const batchOK = (b, diet) => !diet || !b.ings.some(t => dietBad(diet, t));
+const batchOK = (b, diet) => { if (!diet) return true; const V = DISH[b.dish] && DISH[b.dish].variants.find(v => v.id === b.variant); return !(b.ings || []).some(t => dietBad(diet, t)) && !(V && V.req.some(t => dietBad(diet, t))); };
+const stocked = V => V.req.every(t => t === 'su' || stock(t) > 0);
+const orderable = (k, diet) => DISH[k].variants.filter(v => v.day <= S.day && !v.req.some(t => dietBad(diet, t)));
 function canOrder(k, diet) {
   if (!dishOpen(k) || !dietOK(k, diet)) return false;
-  return !isPrep(k) || batchesOf(k).some(b => batchOK(b, diet));
+  if (isPrep(k)) return batchesOf(k).some(b => batchOK(b, diet));
+  return DISH[k].kind === 'flat' || orderable(k, diet).some(stocked);
 }
 function makeOrder(forced, diet) {
   const pool = Object.keys(DISH).filter(k => canOrder(k, diet));
@@ -2441,7 +2536,8 @@ function makeOrder(forced, diet) {
     if (r.variant) { o.variant = r.variant; if (r.count) o.count = r.count; }
     else o.items = r.items === 'all' ? dishOpts('pide').map(t => ({ type: t, bol: false })) : r.items.map(([t, b]) => ({ type: t, bol: !!b }));
   } else if (D.variants) {
-    o = { dish, items: [], variant: pick(D.variants.filter(v => v.day <= S.day && !v.req.some(t => dietBad(diet, t)))).id };
+    const vs = orderable(dish, diet), vs2 = vs.filter(stocked);
+    o = { dish, items: [], variant: pick(vs2.length ? vs2 : vs).id };
   } else if (dish === 'pide' && S.day >= 2 && Math.random() < .3 && okOpts('pide').filter(t => t !== 'yumurta' && t !== 'kiyma').length >= 2) {
     const [a, b] = shuffle(okOpts('pide').filter(t => t !== 'yumurta' && t !== 'kiyma')).slice(0, 2);
     o = { dish, half: true, items: [{ type: a, bol: false, half: 'A' }, { type: b, bol: false, half: 'B' }] };
@@ -2488,17 +2584,16 @@ function orderExtras(o) {
   let pre = '';
   // müşteri dilimi her zaman söyler: kesilecek mi kesilmeyecek mi belli olsun
   if (o.slices && DISH[o.dish].kind === 'flat') { if (o.slices === 1) pre = ' Kesme, bütün olsun.'; else parts.push(o.slices + ' dilim'); }
-  if (o.wellDone) parts.push('iyi pişmiş');
   if (DISH[o.dish].kind === 'manti' && o.count !== DISH[o.dish].count) parts.push(o.count + ' tane');
   const drink = o.drink ? ' ' + DRINKS[o.drink].ask[o.drinkRiddle && !o.asked ? 1 : 0] : '';
-  return pre + (parts.length ? ` ${cap(parts.join(' ve '))} olsun.` : '') + drink;
+  return pre + (parts.length ? ` ${cap(parts.join(' ve '))} olsun.` : '') + (o.wellDone ? ' İyi pişsin.' : '') + drink;
 }
 const GREET = [
   (p, h) => `Merhaba ${h}! ${cap(p)} alabilir miyim?`,
   (p, h) => `Kolay gelsin ${h}! Bana ${p} yapar mısın?`,
   (p, h) => `${cap(p)} lütfen ${h}, çok acıktım.`,
   (p, h) => `Hayırlı işler ${h}. ${cap(p)} rica ediyorum.`,
-  (p, h) => `Selam! ${cap(p)} olsun, eline sağlık.`,
+  (p, h) => `Selam ${h}! ${cap(p)} olsun, zahmet olmazsa.`,
 ];
 // müşteriler ustaya nasıl seslenir: abla, abi, usta; yaşlılar gençlere evladım der
 function hitap(c) {
@@ -2514,16 +2609,16 @@ function ticketHTML() {
     const V = variantOf(o);
     return `<div class="ticket-head"><span>Sabah hazırlığı</span><span>${PREP[o.dish].unit}</span></div>
       <div class="ticket-dish">${dishTitle(o)}</div><p class="recipe-note">${V.req.map(t => ING[t].name).join(', ')}</p>
-      <span class="tag">${o.count ? o.count + ' yaprak sar' : o.slices ? o.slices + ' dilim kes' : 'Bir tencere ya da tepsi'}</span>`;
+      <span class="tag">${o.count ? o.count + ' yaprak sar' : o.slices ? o.slices + ' dilim kes' : kindOf(o.dish) === 'tray' ? 'Bir tepsi' : 'Bir tencere'}</span>`;
   }
   let body;
-  if (o.fromBatch) body = `<p class="recipe-note">Sabah hazırladığın ${lower(D.name)} tepsisinden bir porsiyon ver. Mutfakta hazır yemekler yeşil kutularda.</p>`;
+  if (o.fromBatch) body = `<p class="recipe-note">Bu yemeği sabah hazırladın. Mutfaktaki yeşil kutudan bir ${PREP[o.dish].unit} ver.</p>`;
   else if (o.riddle && !o.asked) body = `<p class="quote">“${o.riddle}”</p>`;
   else if (D.variants) body = '<p class="recipe-note gen-note">Malzemeleri tarifine göre koy. Hatırlamıyorsan tarif defterine bak.</p>';
   else if (o.half) body = `<ul>${o.items.map((i, n) => `<li><span class="half">${n + 1}. yarı</span><span>${ING[i.type].name}</span></li>`).join('')}</ul>`;
   else if (!o.items.length) body = '<ul><li><span>Malzemesiz, sade</span></li></ul>';
   else body = `<ul>${o.items.map(i => `<li><span>${ING[i.type].label || ING[i.type].name}</span><em class="${i.bol ? 'bol' : ''}">${i.bol ? 'bol' : 'normal'}</em></li>`).join('')}</ul>`;
-  const tag = o.fromBatch ? '1 porsiyon' : D.kind === 'sarma' || D.kind === 'cookie' || D.kind === 'manti' ? `${o.count} tane` : D.unit ? D.unit : D.kind === 'jam' ? '1 kavanoz' : D.kind === 'bowl' ? '1 porsiyon' : slicesText(o.slices) + (o.wellDone ? ' · iyi pişmiş' : '');
+  const tag = o.fromBatch ? '1 ' + PREP[o.dish].unit : D.kind === 'sarma' || D.kind === 'cookie' || D.kind === 'manti' ? `${o.count} tane` : D.unit ? D.unit : D.kind === 'jam' ? '1 kavanoz' : D.kind === 'bowl' ? '1 porsiyon' : (o.slices === 1 ? 'Kesilmesin' : slicesText(o.slices)) + (o.wellDone ? ' · iyi pişmiş' : '');
   const title = o.riddle && !o.asked ? D.name : dishTitle(o);
   const drink = o.drink ? `<span class="tag" style="margin-left:10px">+ İçecek: ${o.drinkRiddle && !o.asked ? '?' : DRINKS[o.drink].name}</span>` : '';
   return `<div class="ticket-head"><span>Sipariş</span><span>${cust.name}</span></div>
@@ -2535,7 +2630,7 @@ function bookHTML() {
     const D = DISH[k];
     if (D.kind === 'flat') {
       const what = k === 'lahmacun' ? 'Hamur ve kıymalı harç. İsteğe göre maydanoz, domates ya da sivri biber.' : `Hamur, üstüne müşteri ne isterse: ${dishOpts(k).map(t => lower(ING[t].name)).join(', ')}.`;
-      return `<section><h3>${D.name}</h3><p>${what}</p><p class="how">Fırında pişir, ${D.slices === 1 ? 'kesmeden ver' : D.slices + ' dilim kes'}.</p></section>`;
+      return `<section><h3>${D.name}</h3><p>${what}</p><p class="how">${k === 'gozleme' ? 'Sacda' : 'Fırında'} pişir, ${D.slices === 1 ? 'kesmeden ver' : D.slices + ' dilim kes'}.</p></section>`;
     }
     const how = { bowl: 'Kasede iyice karıştır ve servis et.', tray: 'En az 3 kat yufka ser, iç harcı ve sosu ekle. Fırında pişir, 9 dilim kes.', sarma: 'İç harcı kasede karıştır, yapraklara sar, tencerede pişir.', cookie: 'Hamuru kasede yoğur, kurabiyelere şekil ver, fırında pişir. Üstüne istersen pudra şekeri.', jam: 'Malzemeleri tencereye koy, kıvamını tutturana kadar kaynat.' }[D.kind];
     const how2 = (D.how || how) + (D.learn ? ' (Hayriye Teyze\'nin tarifi)' : '') + (isPrep(k) ? ' Sabah hazırlanır, gün boyu porsiyon porsiyon satılır.' : '');
@@ -2555,6 +2650,7 @@ function sliceScore(d, want, issues) {
   return got === 1 || want === 1 ? .4 : .65;
 }
 function finish(o, total, issues, ok, d) {
+  if (!Number.isFinite(total)) total = 0;
   if (cust && cust.tea) total += .05;
   if (cust && cust.gicik) total -= .08;
   if (cust && cust.critic) total -= .04;
@@ -2572,6 +2668,9 @@ function finish(o, total, issues, ok, d) {
     if (d && d.drink === o.drink) { total += .03; dprice = DRINKS[o.drink].price; drinkOk = true; }
     else { total -= .15; issues.push({ w: .5, t: d && d.drink ? `Ben ${lower(DRINKS[o.drink].name)} istemiştim, ${lower(DRINKS[d.drink].name)} gelmiş!` : `${DRINKS[o.drink].name} unutulmuş!` }); }
   }
+  // en ağır şikayet yıldızın üst sınırını belirler: eksik ana malzeme 2, eksik tarif malzemesi 3, istenmeyen şey 4 yıldız
+  const worst = issues.reduce((m, i) => i.w > .12 ? Math.max(m, i.w) : m, 0);
+  if (ok) total = Math.min(total, worst >= .95 ? .48 : worst >= .75 ? .66 : worst >= .4 ? .8 : worst > .12 ? .89 : 1);
   const price = DISH[o.dish].price, refund = !ok || total < .3;
   const pay = refund ? 0 : round5(price * clamp(total, 0, 1)) + dprice;
   const tip = !refund && total >= .85 ? round5(price * .25 * (has('masa') ? 1.6 : 1) * (DIFF[SET.diff] || DIFF.normal).tip * (1 + .25 * perk('bahsis')) * (cust && cust.gicik && total >= .92 ? 2 : 1)) : 0;
@@ -2618,23 +2717,24 @@ function evalRecipe(o, d) {
   if (D.kind === 'manti') {
     const n = rolledCount(d);
     let cs = 1;
-    if (n !== o.count) { cs = Math.max(0, 1 - Math.abs(n - o.count) / o.count); issues.push({ w: .4, t: `${o.count} tane istemiştim, ${n} tane olmuş.` }); }
+    if (o.count && n !== o.count) { cs = Math.max(0, 1 - Math.abs(n - o.count) / o.count); issues.push({ w: .4, t: `${o.count} tane istemiştim, ${n} tane olmuş.` }); }
     proc = bakeScore(d.bake, .5, .72, D.texts, issues) * .6 + cs * .4;
   }
   if (D.kind === 'sarma') {
     const n = rolledCount(d);
     let cs = 1;
-    if (n !== o.count && !o.prep) { cs = Math.max(0, 1 - Math.abs(n - o.count) / o.count); issues.push({ w: .4, t: `${o.count} tane istemiştim, ${n} tane olmuş.` }); }
+    if (o.count && n !== o.count && !o.prep) { cs = Math.max(0, 1 - Math.abs(n - o.count) / o.count); issues.push({ w: .4, t: `${o.count} tane istemiştim, ${n} tane olmuş.` }); }
     proc = bakeScore(d.bake, .5, .72, ['Pirinç çiğ kalmış!', 'Pirinç biraz diri kalmış.', 'Biraz fazla pişmiş.', 'Lapa olmuş!'], issues) * .6 + cs * .4;
   }
   if (D.kind === 'cookie') {
     const n = rolledCount(d);
     let cs = 1;
-    if (n !== o.count) { cs = Math.max(0, 1 - Math.abs(n - o.count) / o.count); issues.push({ w: .4, t: `${o.count} tane istemiştim, ${n} tane olmuş.` }); }
+    if (o.count && n !== o.count) { cs = Math.max(0, 1 - Math.abs(n - o.count) / o.count); issues.push({ w: .4, t: `${o.count} tane istemiştim, ${n} tane olmuş.` }); }
     proc = bakeScore(d.bake, .5, .72, ['Kurabiyeler çiğ kalmış!', 'Biraz hamur kalmış.', 'Biraz fazla pişmiş.', 'Kurabiyeler yanmış!'], issues) * .6 + cs * .4;
   }
   if (D.kind === 'jam') proc = bakeScore(d.bake, .5, .72, D.texts || ['Reçel sulu kalmış!', 'Biraz sulu olmuş.', 'Fazla koyulaşmış.', 'Şekeri yanmış!'], issues);
   const ing = sc.length ? sc.reduce((a, c) => a + c, 0) / sc.length : 1;
+  if (!ok) issues.length = 1;
   return finish(o, (ing * .6 + proc * .4) * (ok ? 1 : .25) - extra - missing, issues, ok, d);
 }
 function evalFlat(o, d) {
@@ -2661,7 +2761,7 @@ function evalFlat(o, d) {
     const c = cnt[it.type] || 0, need = I.target[it.bol ? 1 : 0];
     const s = Math.min(1, c / need);
     if (c === 0) return { s, issue: { w: 1, t: `${nm} hiç yok!` } };
-    if (s < .8) return { s, issue: { w: 1 - s, t: it.bol ? `Bol ${lower(nm)} demiştim, az olmuş.` : `${nm} az olmuş.` } };
+    if (s < .8) return { s, issue: { w: 1 - s, t: it.bol ? `${cap(I.bolAdj || 'bol ' + I.adj)} demiştim, ${lower(nm)} az olmuş.` : `${nm} az olmuş.` } };
     if (!it.bol && c > I.target[1] * 1.7) return { s: s * .85, issue: { w: .15, t: `${nm} biraz fazla olmuş.` } };
     return { s };
   }
@@ -2678,7 +2778,7 @@ function evalFlat(o, d) {
     scores.push(best.ra.s, best.rb.s);
     if (best.ra.issue) issues.push(best.ra.issue);
     if (best.rb.issue) issues.push(best.rb.issue);
-    if (best.mixed) { scores.push(.5); issues.push({ w: .5, t: 'Yarımlar birbirine karışmış.' }); }
+    if (best.mixed) { scores.push(.5); issues.push({ w: .5, t: 'İki yarı birbirine karışmış.' }); }
   } else {
     for (const it of o.items) { const r = itemScore(it, counts.all); scores.push(r.s); if (r.issue) issues.push(r.issue); }
   }
@@ -2705,10 +2805,10 @@ const BAD = ['Bu ne böyle?!', 'Usta, olmamış bu.', 'Hiç beğenmedim.'];
 
 // ---------- sabah hazırlığı, market, depo ----------
 const batchesOf = k => S.batches.filter(b => b.dish === k && b.left > 0);
-const soldOut = k => isPrep(k) && S.phase === 'open' && !batchesOf(k).length;
+const soldOut = k => S.phase === 'open' && (isPrep(k) ? !batchesOf(k).length : DISH[k].kind !== 'flat' && dishOpen(k) && !DISH[k].variants.some(v => v.day <= S.day && stocked(v)));
 function shopName() { return S.player && S.player.name ? `${S.player.name} Usta'nın Lokantası` : 'Afiyet Olsun Lokantası'; }
 const mPrice = k => Math.max(1, Math.round(MARKET[k][3] * (perk('toptanci') ? .85 : 1)));
-const lowMark = k => Math.max(2, Math.ceil(MARKET[k][2] / 3));
+const lowMark = k => Math.max((ING[k] && ING[k].main) || k === 'yufka' ? 6 : 2, Math.ceil(MARKET[k][2] / 3));
 function buyPack(k, mult = 1) { const p = mPrice(k) * mult; S.money -= p; S.dayCost += p; S.inv[k] = (S.inv[k] || 0) + MARKET[k][2]; return p; }
 function takeInv(k, n = 1) { if (MARKET[k]) S.inv[k] = Math.max(0, (S.inv[k] || 0) - n); }
 function giveInv(k, n = 1) { if (MARKET[k]) S.inv[k] = (S.inv[k] || 0) + n; }
@@ -2717,12 +2817,13 @@ let emerg = null;
 function ensureStock(k) {
   if (stock(k) > 0) return true;
   const p = mPrice(k) * 2;
-  if (emerg && emerg.k === k && performance.now() - emerg.t < 5000) {
+  if (S.money < p) { setHint(`${mName(k)} bitti. Acil getirtmek ${p}₺, kasada yeterli para yok.`, true); sfx.bad(); return false; }
+  if (emerg && emerg.k === k && emerg.K === K && performance.now() - emerg.t < 5000) {
     emerg = null; buyPack(k, 2); save(); hud(); sfx.coin(); refreshCounts();
     toast(`🛵 Acil ${lower(mName(k))} geldi: −${p}₺`);
     return true;
   }
-  emerg = { k, t: performance.now() };
+  emerg = { k, t: performance.now(), K };
   setHint(`${mName(k)} bitti! Acil getirtmek için tekrar dokun (${p}₺, iki kat fiyat).`, true); sfx.bad();
   return false;
 }
@@ -2823,7 +2924,7 @@ function renderMarket() {
   $('#mkMoney').textContent = S.money + '₺';
   const sug = suggested(), total = sug.reduce((a, k) => a + mPrice(k), 0);
   $('#mkSug').innerHTML = sug.length
-    ? `<span>📝 Bugün lazım olanlar: ${sug.map(k => mName(k)).join(', ')}</span><button class="btn go" id="mkAll" type="button">Önerilenleri al · ${total}₺</button>`
+    ? `<span>📝 Bugün lazım olanlar: ${sug.map(k => lower(mName(k))).join(', ')}</span><button class="btn go" id="mkAll" type="button">Önerilenleri al · ${total}₺</button>`
     : '<span>✓ Bugünkü menü için depo yeterli.</span>';
   if (sug.length) {
     const all = $('#mkAll'); all.disabled = S.money < Math.min(...sug.map(mPrice));
@@ -2976,8 +3077,7 @@ function nextCustomer() {
   }
   const critic = !ev && criticDay(S.day) && S.dayServed >= 2 && !(S.critic && S.critic.day === S.day);
   cust = ev === 'rival2' ? Object.assign({}, KAMIL, { mood: 'meh', seed: 1, special: 'rival2' }) : critic ? Object.assign({}, FIKRET, { mood: 'idle', seed: 2 }) : makeCustomer();
-  if (critic) S.critic = { day: S.day, stars: 0 };
-  if (!S.tut && !ev) {
+  if (!S.tut && !ev && !cust.diet && !cust.gicik && !cust.critic) {
     order = { dish: 'lahmacun', items: [{ type: 'kiyma', bol: false }, { type: 'maydanoz', bol: false }], slices: 2, tutorial: true };
     tutStep = 0;
   } else {
@@ -2993,9 +3093,9 @@ function nextCustomer() {
     phase = 'order'; sfx.bell();
     if (has('cay') && S.cay > 0) { S.cay--; cust.tea = true; }
     cust.pat = 1; cust.patT = patienceSeconds();
-    const intro = cust.special === 'rival2' ? 'Yine ben, Kâmil. Bakalım yemeklerin övüldüğü kadar var mı? '
+    const intro = cust.special === 'rival2' ? 'Yine ben, Kâmil. Bakalım yemeklerin övüldüğü kadar iyi mi? '
       : cust.regular ? pick(['Yine ben geldim usta! ', 'Selam usta, beni hatırladın mı? ', 'Geçen sefer çok beğenmiştim, yine geldim! ']) : '';
-    let line = cust.hi ? cust.hi(orderPhrase(order)) + orderExtras(order) : intro + (order.riddle || pick(GREET)(orderPhrase(order), hitap(cust))) + orderExtras(order);
+    let line = cust.hi ? cust.hi(orderPhrase(order)) + orderExtras(order) : intro + (order.riddle || (intro ? `${cap(orderPhrase(order))} alabilir miyim?` : pick(GREET)(orderPhrase(order), hitap(cust)))) + orderExtras(order);
     if (cust.critic) line = `İyi günler. Gurme Fikret, Lezzet Gazetesi. ${cap(orderPhrase(order))} rica edeyim.${orderExtras(order)} Not alacağım, haberiniz olsun.`;
     if (cust.gicik) line = pick(['Of, neyse… ', 'Hıh. ', 'Çabuk ol bakalım! ']) + line;
     if (cust.diet && !cust.hi) line += ' ' + pick(DIET_HI[cust.diet]);
@@ -3006,7 +3106,7 @@ function nextCustomer() {
 }
 
 function renderPanel() {
-  if (phase === 'enter') { panel.innerHTML = `<p>Kapı çaldı, biri geliyor…${S.goal && S.goal.day === S.day ? `<br>🎯 Günün hedefi: ${S.goal.done ? 'tamamlandı ✓' : goalText()}` : ''}</p>`; return; }
+  if (phase === 'enter') { panel.innerHTML = `<p>Kapının zili çaldı, biri geliyor…${S.goal && S.goal.day === S.day ? `<br>🎯 Günün hedefi: ${S.goal.done ? 'tamamlandı ✓' : goalText()}` : ''}</p>`; return; }
   if (phase === 'talk') {
     const E = EVENTS[talk.ev], last = talk.i >= E.lines.length - 1;
     let info = '';
@@ -3078,17 +3178,21 @@ function partnerTurn() {
 // huysuz müşteri mutfaktayken fikrini değiştirir
 let gicikT = 0;
 function gicikTick(dt) {
-  if (!cust || !cust.gicik || !order || order.changed || order.fromBatch || phase !== 'order' || $('#kitchen').hidden || !K || K.stage !== 'build') return;
+  if (!cust || !cust.gicik || !order || order.changed || order.fromBatch || order.tutorial || phase !== 'order' || $('#kitchen').hidden || !K || K.stage !== 'build') return;
   gicikT += dt;
   if (gicikT < 5) return;
   let o = null;
-  for (let i = 0; i < 6; i++) { o = makeOrder(order.dish, cust.diet); if (orderPhrase(o) + orderExtras(o) !== orderPhrase(order) + orderExtras(order)) break; }
-  if (!o || o.fromBatch) { order.changed = true; return; }
-  delete o.riddle; o.drink = order.drink; o.drinkRiddle = order.drinkRiddle; o.asked = true; o.changed = true;
+  for (let i = 0; i < 6 && !o; i++) {
+    const c = makeOrder(order.dish, cust.diet);
+    delete c.riddle; c.drink = order.drink; c.drinkRiddle = order.drinkRiddle; c.asked = order.asked;
+    if (!c.fromBatch && c.dish === order.dish && orderPhrase(c) + orderExtras(c) !== orderPhrase(order) + orderExtras(order)) o = c;
+  }
+  if (!o) { order.changed = true; return; }
+  o.changed = true;
   order = o; gicikT = 0;
   $('#ticket').innerHTML = ticketHTML();
   sfx.grumble(); setHint(`${cust.name} siparişi değiştirdi! Fişe bak.`, true);
-  toast(`😤 ${cust.name}: "Usta, fikrimi değiştirdim! ${cap(orderPhrase(o))}.${orderExtras(o)}"`);
+  toast(`😤 ${cust.name}: "Usta, fikrimi değiştirdim! ${cap(orderPhrase(o))} olsun.${orderExtras(o)}"`);
 }
 function adaptOrder(dd) {
   const D = DISH[dd.dough], o = { dish: dd.dough, items: [], easy: true, drink: order.drink, drinkRiddle: order.drinkRiddle, asked: order.asked };
@@ -3133,10 +3237,10 @@ function chooseDough(type) {
   sfx.plop();
   buildBins(kind);
   $('#doughPick').hidden = true; $('#binPick').hidden = false;
-  $('#binTitle').textContent = kind === 'flat' ? '2. Malzemeleri ekle' : kind === 'tray' ? '2. Tepsiye ekle' : kind === 'jam' ? '2. Tencereye ekle' : '2. Kaseye ekle';
+  $('#binTitle').textContent = kind === 'flat' ? '2. Malzemeleri ekle' : kind === 'tray' ? '2. Tepsiye ekle' : kind === 'jam' ? (DISH[K.dough].look === 'pan' ? '2. Sahana ekle' : '2. Tencereye ekle') : '2. Kaseye ekle';
   setHint(kind === 'flat'
-    ? (order.half ? 'Yarım sipariş: bir malzemeyi sol yarıya, diğerini sağ yarıya koy.' : 'Bir malzeme seç, sonra hamura dokun ya da parmağını sürükle.')
-    : kind === 'tray' ? 'Malzemenin kabına dokun, tepsiye eklensin. Her yufka bir kat.' : kind === 'jam' ? 'Malzemenin kabına dokun, tencereye eklensin. Bitince ocağa koy.'
+    ? (order.half ? 'Yarım yarım pide: bir malzemeyi sol yarıya, diğerini sağ yarıya koy.' : 'Bir malzeme seç, sonra hamura dokun ya da parmağını sürükle.')
+    : kind === 'tray' ? 'Malzemenin kabına dokun, tepsiye eklensin. Her yufka bir kat.' : kind === 'jam' ? `Malzemenin kabına dokun, ${DISH[K.dough].look === 'pan' ? 'sahana' : 'tencereye'} eklensin. Bitince ocağa koy.`
     : kind === 'cookie' ? 'Malzemenin kabına dokun, kaseye eklensin. Bitince hamuru yoğur.' : 'Malzemenin kabına dokun, kaseye eklensin. Bitince karıştır.');
   updateActions();
 }
@@ -3177,7 +3281,7 @@ function discardDish() {
   const had = K && K.dough;
   newDish();
   if (order && order.prep) chooseDough(order.dish);
-  if (had) setHint('Çöpe gitti, malzemeler boşa gitti. Baştan başla.');
+  if (had) setHint('Yemek çöpe gitti, malzemeler ziyan oldu. Baştan başla.');
   save(); tone(300, .1, 'triangle', .04);
 }
 function updateActions() {
@@ -3185,7 +3289,7 @@ function updateActions() {
   $('#undoBtn').hidden = !kind || (K.stage !== 'build' && K.stage !== 'garnish');
   btn.disabled = false;
   if (K && K.stage === 'garnish') { btn.textContent = 'Servis et'; return; }
-  if (!kind || kind === 'flat' || kind === 'tray') { btn.textContent = 'Fırına ver'; return; }
+  if (!kind || kind === 'flat' || kind === 'tray') { btn.textContent = K.dough === 'gozleme' ? 'Saca koy' : 'Fırına ver'; return; }
   if (kind === 'jam') { btn.textContent = 'Ocağa koy'; return; }
   if (K.stage === 'build') { btn.textContent = kind === 'cookie' ? 'Yoğur' : 'Karıştır'; return; }
   btn.textContent = kind === 'bowl' ? 'Servis et' : kind === 'cookie' ? 'Şekil ver' : kind === 'manti' ? 'Hamura koy' : 'Yaprağa sar';
@@ -3196,7 +3300,7 @@ function kitchenNext() {
   if (K.stage === 'garnish') return serve();
   const kind = kindOf(K.dough);
   if (kind === 'flat' || kind === 'tray') return startBake();
-  if (!K.portions.length) { setHint(kind === 'jam' ? 'Tencere boş, önce malzeme ekle.' : 'Kase boş, önce malzeme ekle.', true); sfx.bad(); return; }
+  if (!K.portions.length) { setHint(kind === 'jam' ? (DISH[K.dough].look === 'pan' ? 'Sahan boş, önce malzeme ekle.' : 'Tencere boş, önce malzeme ekle.') : 'Kase boş, önce malzeme ekle.', true); sfx.bad(); return; }
   if (kind === 'jam') return startBake();
   if (K.stage === 'build') {
     K.stage = 'stir'; $('#binPick').hidden = true;
@@ -3229,7 +3333,7 @@ function startBake() {
   if (!K.dough) { setHint('Önce ne hazırlayacağını seç.', true); sfx.bad(); return; }
   K.bake = 0; baking = true; sfx.whoosh();
   const kd = kindOf(K.dough), pot = kd === 'sarma' || kd === 'jam' || kd === 'manti', lab = DISH[K.dough].labels;
-  $('#pullBtn').disabled = false; $('#pullBtn').textContent = pot ? 'Ocaktan al' : 'Fırından çıkar';
+  $('#pullBtn').disabled = false; $('#pullBtn').textContent = pot ? 'Ocaktan al' : K.dough === 'gozleme' ? 'Sacdan al' : 'Fırından çıkar';
   $('#gl1').textContent = lab ? lab[0] : kd === 'jam' ? 'Sulu' : pot ? 'Diri' : 'Çiğ'; $('#gl3').textContent = lab ? lab[1] : kd === 'jam' ? 'Karamel' : pot ? 'Lapa' : 'Yanık';
   show('oven'); updateGauge();
 }
@@ -3246,7 +3350,7 @@ function updateGauge() {
     $('#ovenTag').textContent = b < .3 ? 'Tencere kaynıyor…' : b < .5 ? 'Pişiyor…' : b <= .72 ? 'Tam kıvamında, ocaktan al!' : b <= .86 ? 'Pirinç dağılıyor!' : 'Lapa oluyor!';
     return;
   }
-  $('#ovenTag').textContent = b < .3 ? 'Fırında…' : b < .5 ? 'Pişiyor…' : b <= .72 ? (order.wellDone ? 'Pişti, iyi pişmiş için biraz daha…' : 'Tam kıvamında, çıkar!') : b <= .86 ? (order.wellDone ? 'İyi pişmiş, çıkar!' : 'Fazla pişiyor!') : 'Yanıyor!';
+  $('#ovenTag').textContent = b < .3 ? (K.dough === 'gozleme' ? 'Sacda…' : 'Fırında…') : b < .5 ? 'Pişiyor…' : b <= .72 ? (order.wellDone ? 'Pişti ama iyi pişmiş istendi, biraz daha bekle…' : 'Tam kıvamında, çıkar!') : b <= .86 ? (order.wellDone ? 'İyi pişmiş, çıkar!' : 'Fazla pişiyor!') : 'Yanıyor!';
 }
 function pull() {
   if (!baking) return;
@@ -3278,11 +3382,11 @@ function updateCutInfo() {
     return;
   }
   const n = slicesOf(K), want = order.slices || 1;
-  $('#cutInfo').innerHTML = `<b>${slicesText(n)}</b>İstenen: ${lower(slicesText(want))}`;
+  $('#cutInfo').innerHTML = `<b>${slicesText(n)}</b>İstenen: ${want === 1 ? 'kesilmesin' : want + ' dilim'}`;
   const how = DISH[K.dough].cut;
   $('#cutHint').textContent = how === 'radial' ? 'Ortadan geçen bir çizgiyle kes. Her kesik 2 dilim yapar.'
     : how === 'grid' ? 'Önce dikine, sonra enine kes. 2 dikine + 2 enine kesik 9 dilim yapar.'
-    : 'Enine kes: parmağını bir kenardan öbür kenara sürükle.';
+    : 'Enine kes: parmağını üst kenardan alt kenara sürükle.';
 }
 function serve() {
   if (order && order.prep && K && K.dough) { finishPrep(); return; }
@@ -3300,7 +3404,11 @@ function openDrinks() {
     const sp = document.createElement('span'); sp.textContent = k === 'cay' ? (S.cay > 0 ? `Çay · ${S.cay}` : 'Çay · demlik boş') : DRINKS[k].name; b.appendChild(sp);
     b.onclick = () => {
       if (k === 'cay' && S.cay <= 0) {
-        if (!stock('caypaketi')) buyPack('caypaketi', 2);
+        if (!stock('caypaketi')) {
+          const cp = mPrice('caypaketi') * 2;
+          if (S.money < cp) { toast('Çay bitti, acil çay almaya para yetmiyor.'); sfx.bad(); return; }
+          buyPack('caypaketi', 2); toast(`🛵 Acil çay geldi: −${cp}₺`);
+        }
         takeInv('caypaketi'); S.cay = has('cay') ? 30 : 24; toast('🫖 Hemen bir demlik çay demlendi');
       }
       K.drink = k; $('#drinkScr').hidden = true; sfx.pour(); serveNow();
@@ -3319,7 +3427,13 @@ function serveNow() {
   let extraLine = '', olay = '';
   result.notes = [];
   if (reg && result.tip) result.tip += Math.min(30, 10 * reg.visits);
-  if (cust.fid) { S.friendsMet = S.friendsMet || {}; S.friendsMet[cust.fid] = true; }
+  if (cust.fid) {
+    S.friendsMet = S.friendsMet || {}; S.friendsMet[cust.fid] = true;
+    if (!S.friendsDay || S.friendsDay.day !== S.day) S.friendsDay = { day: S.day, ids: [] };
+    for (const id of [cust.fid, cust.partner && cust.partner.fid]) if (id && !S.friendsDay.ids.includes(id)) S.friendsDay.ids.push(id);
+  }
+  if (cust.gicik) S.ev.gicikDay = S.day;
+  if (cust.critic) S.critic = { day: S.day, stars: 0 };
   if (bad.length) {
     // vegan ya da vejetaryen müşteriye et veya hayvansal ürün: olay çıkar
     olay = lower(ING[bad[0]].name);
@@ -3329,7 +3443,7 @@ function serveNow() {
     result.notes.push({ t: `Olay çıktı! ${cust.name} ${DIET_WORD[cust.diet]}, yemekte ${olay} vardı. Ün −${cust.fid ? 6 : 10}`, bad: true });
   } else if (cust.critic) {
     S.critic = { day: S.day, stars: result.stars, dish: order.dish };
-    if (result.stars >= 5) { S.rep += 12; S.boost.crowd = S.day + 1; S.stats.critic5 = true; result.notes.push({ t: 'Eleştirmen bayıldı! Yarın gazetede övgü çıkacak.' }); }
+    if (result.stars >= 5) { S.rep += 12; S.boost.crowd = S.day + 1; S.stats.critic5 = true; result.notes.push({ t: 'Eleştirmen bayıldı! Gün sonunda gazetede övgü çıkacak.' }); }
     else if (result.stars >= 3) { S.rep += 3; result.notes.push({ t: 'Eleştirmen not aldı. Gün sonunda gazetede okursun.' }); }
     else { S.rep -= 10; result.notes.push({ t: 'Eleştirmen hiç beğenmedi, gazetede kötü yazacak.', bad: true }); }
   } else if (cust.special === 'rival2') {
@@ -3337,7 +3451,7 @@ function serveNow() {
     if (result.stars >= 4) { S.rep += 10; extraLine = 'Hmm… İtiraf edeyim, benimkinden güzel olmuş.'; result.notes.push({ t: 'Kâmil bile beğendi, ünün arttı!' }); }
     else { S.rep -= 5; extraLine = 'Hah! Bunu mu övüyorlar? Benim dükkanım daha iyi.'; result.notes.push({ t: 'Kâmil mahallede kötü konuşacak.', bad: true }); }
   } else if (cust.fid || cust.gicik) {
-    if (cust.gicik && result.stars === 5) { S.stats.gicik5 = true; result.notes.push({ t: `${cust.name} bile güldü, bahşiş iki katı!` }); }
+    if (cust.gicik && result.total >= .92) { S.stats.gicik5 = true; result.notes.push({ t: `${cust.name} bile güldü, iki kat bahşiş!` }); }
   } else if (result.total >= .85) {
     if (reg) { reg.visits++; reg.fav = order.dish; }
     else { S.regulars.push({ look: lookOf(cust), visits: 1, fav: order.dish }); if (S.regulars.length > 8) S.regulars.shift(); S.rep += 2; result.notes.push({ t: `${cust.name} müdavimin oldu, yine gelecek!` }); }
@@ -3345,7 +3459,7 @@ function serveNow() {
     S.regulars = S.regulars.filter(r => r !== reg); S.rep -= 3;
     extraLine = 'Eskisi gibi değil, bir daha gelmem.'; result.notes.push({ t: `${cust.name} artık müdavimin değil.`, bad: true });
   }
-  S.rep = clamp(S.rep + (result.stars - 3) * 1.5, 0, 100);
+  S.rep = clamp(S.rep + (olay ? 0 : (result.stars - 3) * 1.5), 0, 100);
   const earned = result.pay + result.tip;
   S.money += earned - result.cost; S.dayEarn += earned; S.dayCost += result.cost; S.dayStars += result.stars; S.dayServed++;
   result.fast = cust.pat == null || cust.pat >= .5;
@@ -3355,7 +3469,7 @@ function serveNow() {
   if (result.stars >= 4 && order.dish === K.dough) S.mastered[order.dish] = true;
   progressGoal(result); checkBadges(); save();
   phase = 'serve';
-  cust.mood = olay ? 'angry' : result.total >= (cust.gicik ? .92 : .85) ? 'happy' : result.total >= .55 ? 'meh' : 'angry';
+  cust.mood = olay ? 'angry' : result.total >= (cust.gicik ? .92 : .85) && !result.issues.length ? 'happy' : result.stars >= 3 ? 'meh' : 'angry';
   const issue = result.issues[0] ? ' ' + result.issues[0].t : '';
   let line = cust.mood === 'happy' ? pick(HAPPY) : (cust.mood === 'meh' ? pick(OK) : pick(BAD)) + issue;
   if (cust.fid) line = cust.mood === 'happy' ? pick(cust.happy) : cust.meh(result.issues[0] ? result.issues[0].t : 'Biraz eksik olmuş.');
@@ -3363,7 +3477,7 @@ function serveNow() {
   if (cust.critic) line = result.stars >= 5 ? 'Mükemmel. Bunu gazetede yazacağım.' : result.stars >= 3 ? 'Hmm. Fena değil, not ettim.' + issue : 'Hayal kırıklığı. Okurlarımı uyarmam gerekecek.' + issue;
   if (result.refund && !cust.polite && !olay) line += ' Paramı geri ver!';
   if (olay) {
-    line = cust.olay ? cust.olay(olay) : pick(DIET_OLAY).replace(/\{t\}/g, olay).replace(/\{d\}/g, DIET_WORD[cust.diet]);
+    line = cust.olay ? cust.olay(olay) : pick(DIET_OLAY)(olay, DIET_WORD[cust.diet]);
     const st = $('#stage'); st.classList.remove('quake'); void st.offsetWidth; st.classList.add('quake');
     setTimeout(() => sfx.grumble(), 300); toast(`😱 Olay çıktı! ${cust.name} ${DIET_WORD[cust.diet]}.`);
   }
@@ -3379,18 +3493,19 @@ function serveNow() {
 }
 
 function endDay() {
+  S.closed = S.day;
   show('dayend'); hud();
   $('#deTitle').textContent = `${S.day}. gün bitti!`;
   $('#deServed').textContent = S.dayServed;
   $('#deEarn').textContent = S.dayEarn + '₺';
-  $('#deCost').textContent = '−' + S.dayCost + '₺';
-  $('#deStars').textContent = (S.dayServed ? S.dayStars / S.dayServed : 0).toFixed(1) + '★';
-  $('#deProfit').textContent = (S.dayEarn - S.dayCost) + '₺';
+  $('#deCost').textContent = (S.dayCost ? '−' : '') + S.dayCost + '₺';
+  $('#deStars').textContent = (S.dayServed ? S.dayStars / S.dayServed : 0).toFixed(1).replace('.', ',') + '★';
+  $('#deProfit').textContent = String(S.dayEarn - S.dayCost).replace('-', '−') + '₺';
   const u = $('#deUnlock'), next = S.day + 1;
-  const msg = next === 2 ? 'Yarın mahallede hareketli bir gün: yeni komşular, bilmeceli siparişler, huysuz müşteriler. Sabah hazırlığına mercimek çorbası, imam bayıldı, peynirli ve ıspanaklı börek, etli sarma geliyor.'
-    : next === 3 ? 'Yarın sabah hazırlığına karnıyarık geliyor. Bir de duyduk ki gazeteden bir yemek eleştirmeni uğrayacakmış!'
-    : next === 4 ? 'Yarın menüye mantı geliyor: harcı karıştır, hamura kapat, haşla, sosunu yap.'
-    : next === 5 ? 'Yarın menüye künefe geliyor: tel kadayıf, peynir, şerbet ve Antep fıstığı.'
+  const msg = next === 2 ? 'Yarın mahallede hareketli bir gün: yeni komşular, bilmeceli siparişler, huysuz müşteriler. Menüye çoban salatası, sabah hazırlığına mercimek çorbası, imam bayıldı, peynirli ve ıspanaklı börek, etli sarma geliyor.'
+    : next === 3 ? `Yarın menüye humus${S.learned && S.learned.kurabiye ? ' ve tahinli kurabiye' : ''}, sabah hazırlığına karnıyarık geliyor. Bir de duyduk ki gazeteden bir yemek eleştirmeni uğrayacakmış!`
+    : next === 4 ? 'Yarın menüye mantı ve mercimek köftesi geliyor. Mantıda harcı karıştır, hamura kapat, haşla, sosunu yap.'
+    : next === 5 ? 'Yarın menüye künefe geliyor: tel kadayıf, künefe peyniri, şerbet ve Antep fıstığı.'
     : next === 6 ? 'Yarın menüye menemen geliyor. Soğanlı mı soğansız mı? Müşteri ne derse!' : '';
   u.hidden = !msg; u.textContent = msg;
   const nw = $('#deNews'), cr = S.critic && S.critic.day === S.day && S.critic.stars ? S.critic : null;
@@ -3413,12 +3528,13 @@ function endDay() {
     else if (S.rep >= 85 && S.day >= 5) { S.ev.rivalWin = true; t = 'Büyük haber: Kebapçı Kâmil dükkanını kapattı! Mahallenin bir numarası artık sensin.'; }
     else if (S.rep >= 65) t = 'Kâmil\'in dükkanı bomboş, müşteriler senden yana.';
     else if (S.rep >= 45) t = 'Kâmil ile başa baş gidiyorsunuz.';
-    else t = 'Kâmil müşterilerini kapıyor. Daha çok yıldız topla!';
+    else t = 'Kâmil senin müşterilerini kapıyor. Daha çok yıldız topla!';
     $('#deRival').textContent = `${t} Müdavim sayın: ${S.regulars.length}.`;
     save();
   }
   sfx.coin();
 }
+let perkT = 0;
 function renderPerks() {
   const wrap = $('#perks'); wrap.innerHTML = '';
   for (const p of PERKS) {
@@ -3426,7 +3542,7 @@ function renderPerks() {
     const el = document.createElement('div'); el.className = 'upg' + (lv >= max ? ' owned' : '');
     el.innerHTML = `<b>${p.icon} ${p.name}</b><span>${p.desc}</span><span class="perk-lv">${'★'.repeat(lv)}${'☆'.repeat(max - lv)}</span>` + (lv >= max ? '<em>En üst seviye ✓</em>' : `<button class="btn" type="button" ${S.money < price ? 'disabled' : ''}>${lv ? 'Seviye atlat' : 'Satın al'} · ${price}₺</button>`);
     const btn = el.querySelector('button');
-    if (btn) btn.onclick = () => { if (S.money < price) return; S.money -= price; S.perks[p.id] = lv + 1; save(); sfx.coin(); renderUpgrades(); renderDecor(); hud(); };
+    if (btn) btn.onclick = () => { if (S.money < price || performance.now() - perkT < 450) return; perkT = performance.now(); S.money -= price; S.perks[p.id] = lv + 1; save(); sfx.coin(); renderUpgrades(); renderDecor(); hud(); };
     wrap.appendChild(el);
   }
 }
@@ -3450,7 +3566,7 @@ function renderDecor() {
     const el = document.createElement('div'); el.className = 'upg' + (using ? ' using' : owned ? ' owned' : '');
     let act;
     if (using) act = '<em>Duvarda ✓</em>';
-    else if (owned && d.group === 'boya') act = '<button class="btn" type="button">Duvara sür</button>';
+    else if (owned && d.group === 'boya') act = '<button class="btn" type="button">Duvarı boya</button>';
     else if (owned) act = '<em>Dükkanda ✓</em>';
     else act = `<button class="btn" type="button" ${S.money < d.price ? 'disabled' : ''}>Satın al · ${d.price}₺</button>`;
     el.innerHTML = `<b>${d.name}</b><span>${d.desc}</span>${act}`;
@@ -3472,7 +3588,7 @@ $('#newDayBtn').onclick = () => {
   const left = S.batches.reduce((a, b) => a + b.left, 0), lost = had - left;
   ensureGoal(); checkBadges(); save(); syncReminder(); showDayBanner(); openMorning();
   if (left) setTimeout(() => toast(`🧊 Dünkü ${left} porsiyon buzdolabında duruyor`), 2100);
-  else if (lost > 0) setTimeout(() => toast(`Dünden kalan ${lost} porsiyon bozuldu. Buzdolabı perki bunu önler.`), 2100);
+  else if (lost > 0) setTimeout(() => toast(`Dünden kalan ${lost} porsiyon bozuldu. Buzdolabı alırsan bu olmaz.`), 2100);
 };
 
 // ---------- kitchen widgets ----------
@@ -3495,6 +3611,12 @@ function buildDoughButtons() {
       if (k === 'kunefe') { x.fillStyle = '#c4703a'; ellipse(x, 56, 40, 40, 22); x.fill(); drawPortion(x, 'kadayif', 56, 38, 5); drawPortion(x, 'antep', 56, 38, 3); return; }
       if (D.kind === 'cookie') { x.translate(56, 38); x.scale(.55, .55); drawCookie(x, -32, 0, .45, { tarcin: true }); drawCookie(x, 32, 0, .45, { pudra: true }); return; }
       if (D.kind === 'jam') { drawJar(x, 56, 42, .55, .38); return; }
+      if (D.kind === 'bowl') {
+        x.translate(56, 38); x.scale(.17, .17); x.translate(-250, -250);
+        renderAny(x, { dough: k, toppings: [], portions: [], bake: 0 }, true);
+        D.variants[0].req.slice(0, 3).forEach((t, i) => { x.save(); x.translate([195, 305, 250][i], [215, 215, 300][i]); x.scale(1.9, 1.9); drawPortion(x, t, 0, 0, 31 + i * 17); x.restore(); });
+        return;
+      }
       x.translate(56, 38); x.scale(.17, .17); x.translate(-250, -250);
       renderAny(x, { dough: k, toppings: [], portions: [], bake: 0 }, true);
     }));
@@ -3631,7 +3753,12 @@ cutC.addEventListener('pointerup', () => {
   if (len < (perk('bicak') ? 50 : 120)) { $('#cutHint').textContent = 'Kesik çok kısa. Bir ucundan öbür ucuna sürükle.'; return; }
   if (perk('bicak')) { const ang = Math.atan2(c.y2 - c.y1, c.x2 - c.x1), snap = Math.round(ang / (Math.PI / 4)) * (Math.PI / 4), mx = (c.x1 + c.x2) / 2, my = (c.y1 + c.y2) / 2; c.x1 = mx - Math.cos(snap) * len / 2; c.y1 = my - Math.sin(snap) * len / 2; c.x2 = mx + Math.cos(snap) * len / 2; c.y2 = my + Math.sin(snap) * len / 2; }
   // kesiği kenarların dışına kadar uzat, düzgün dursun
-  const ux = (c.x2 - c.x1) / len, uy = (c.y2 - c.y1) / len;
+  const ux = (c.x2 - c.x1) / len, uy = (c.y2 - c.y1) / len, how = DISH[K.dough].cut, P = PATHS[K.dough] || PATHS.borek;
+  let over = false;
+  for (let s = -700; s <= 700 && !over; s += 8) over = hit.isPointInPath(P, c.x1 + ux * s, c.y1 + uy * s);
+  if (!over) { $('#cutHint').textContent = 'Kesik hamurun üstünden geçmeli.'; sfx.bad(); return; }
+  if (how === 'radial' && Math.abs((250 - c.x1) * uy - (250 - c.y1) * ux) > 48) { $('#cutHint').textContent = 'Lahmacunu tam ortasından geçecek şekilde kes.'; sfx.bad(); return; }
+  if (how === 'cross' && Math.abs(ux) > Math.abs(uy)) { $('#cutHint').textContent = 'Enine kes: parmağını yukarıdan aşağıya sürükle.'; sfx.bad(); return; }
   K.cuts.push({ x1: c.x1 - ux * 400, y1: c.y1 - uy * 400, x2: c.x2 + ux * 400, y2: c.y2 + uy * 400 });
   sfx.knife(); updateCutInfo();
 });
@@ -3685,10 +3812,14 @@ document.addEventListener('keydown', () => Music.start(), { passive: true });
 // ---------- loop ----------
 let lastT = performance.now(), lastHud = 0, lastAmb = 0, lastAutoSave = 0;
 function frame(now) {
+  try { frameBody(now); } catch (e) { console.error(e); }
+  requestAnimationFrame(frame);
+}
+function frameBody(now) {
   const dt = Math.min(.05, (now - lastT) / 1000); lastT = now;
   const t = now / 1000;
   if (!paused()) updateWalk(now); else if (walk) walk.start += dt * 1000;
-  if (!begun || paused()) { if (!$('#shop').hidden) drawShop(fit(stageC, 800, 450), t); updateCoach(); requestAnimationFrame(frame); return; }
+  if (!begun || paused()) { if (!$('#shop').hidden) drawShop(fit(stageC, 800, 450), t); updateCoach(); return; }
   updatePatience(dt);
   gicikTick(dt);
   updateCoach();
@@ -3705,16 +3836,16 @@ function frame(now) {
   if (!$('#kitchen').hidden) drawBoard(boardC, 'build');
   if (!$('#cut').hidden) drawBoard(cutC, cutMode);
   if (!$('#oven').hidden) {
-    if (baking) { const pot = ['sarma', 'jam', 'manti'].includes(kindOf(K.dough)); K.bake = Math.min(1, K.bake + dt / (7 * SPEED[Math.min(3, perk(pot ? 'ocak' : 'firin'))])); updateGauge(); if (K.bake >= 1) pull(); }
+    if (baking) { const pot = ['sarma', 'jam', 'manti'].includes(kindOf(K.dough)); K.bake = Math.min(1, K.bake + dt / (7 * (K.bake >= .46 && K.bake <= .76 ? 1 : SPEED[Math.min(3, perk(pot ? 'ocak' : 'firin'))]))); updateGauge(); if (K.bake >= 1) pull(); }
     const ctx = fit(ovenC, 800, 450);
-    if (K && K.dough && ['sarma', 'jam', 'manti'].includes(kindOf(K.dough))) drawPot(ctx, t); else drawOven(ctx, t);
+    if (K && K.dough && ['sarma', 'jam', 'manti'].includes(kindOf(K.dough))) drawPot(ctx, t); else if (K && K.dough === 'gozleme') drawSac(ctx, t); else drawOven(ctx, t);
   }
-  requestAnimationFrame(frame);
 }
 
 // ---------- başlangıç ekranı, kayıt, öğretici ----------
 let begun = false, tutStep = -1, tutCovT = 0, tutCovV = 0;
-const paused = () => !$('#titleScr').hidden || !$('#setScr').hidden || !$('#rewardScr').hidden || !$('#storeScr').hidden || !$('#badgeScr').hidden || !$('#adScr').hidden || !$('#profScr').hidden || !$('#marketScr').hidden;
+const rotOn = () => getComputedStyle($('#rotateHint')).display !== 'none';
+const paused = () => rotOn() || !$('#titleScr').hidden || !$('#setScr').hidden || !$('#rewardScr').hidden || !$('#storeScr').hidden || !$('#badgeScr').hidden || !$('#adScr').hidden || !$('#profScr').hidden || !$('#marketScr').hidden;
 const toastQ = [];
 function toast(msg) { toastQ.push(msg); if (toastQ.length === 1) showToast(); }
 function showToast() {
@@ -3728,7 +3859,7 @@ function openTitle() {
   $('#newBtn').textContent = fresh ? 'Oyuna başla' : 'Yeni oyun';
   $('#newBtn').className = 'btn big ' + (fresh ? 'go' : 'primary');
   const si = $('#saveInfo'); si.hidden = fresh;
-  si.textContent = `Kayıtlı oyun: ${S.day}. gün · ${S.phase !== 'open' ? 'sabah hazırlığı' : S.time >= closeTime() ? 'gün sonu' : clockText(S.time)} · Kasa ${S.money}₺`;
+  si.textContent = `Kayıtlı oyun: ${S.day}. gün · ${S.phase !== 'open' ? 'sabah hazırlığı' : S.time >= closeTime() || S.closed === S.day ? 'gün sonu' : clockText(S.time)} · Kasa ${S.money}₺`;
   $('#newConfirm').hidden = true; $('#helpBox').hidden = true;
   $('#titleScr').classList.toggle('over', begun);
   $('#titleScr').hidden = false;
@@ -3741,7 +3872,7 @@ function begin() {
   begun = true; hadSave = true;
   ensureGoal(); checkBadges(); syncReminder();
   if (S.phase !== 'open') { showDayBanner(); openMorning(); }
-  else if (S.time >= closeTime()) endDay(); else { showDayBanner(); nextCustomer(); }
+  else if (S.time >= closeTime() || S.closed === S.day) endDay(); else { showDayBanner(); nextCustomer(); }
   setTimeout(maybeDailyReward, 2000);
 }
 function newGame() {
@@ -3799,13 +3930,13 @@ function progressGoal(r) {
 const BADGES = [
   { id: 'ilk', icon: '🍽️', name: 'İlk Lokma', desc: 'İlk müşterine servis yap', ok: () => S.stats.served >= 1 },
   { id: 'yildiz10', icon: '⭐', name: 'Yıldız Usta', desc: '10 kez 5 yıldız al', ok: () => S.stats.five >= 10 },
-  { id: 'yildiz50', icon: '🌟', name: 'Usta-i Âzam', desc: '50 kez 5 yıldız al', ok: () => S.stats.five >= 50 },
+  { id: 'yildiz50', icon: '🌟', name: 'Ustalar Ustası', desc: '50 kez 5 yıldız al', ok: () => S.stats.five >= 50 },
   { id: 'mudavim5', icon: '❤️', name: 'Mahallenin Sevgilisi', desc: '5 müdavim edin', ok: () => S.regulars.length >= 5 },
-  { id: 'zengin', icon: '💰', name: 'Kasa Dolu', desc: 'Kasada 1000₺ biriktir', ok: () => S.money >= 1000 },
+  { id: 'zengin', icon: '💰', name: 'Kasa Dolu', desc: 'Kasada 1.000₺ biriktir', ok: () => S.money >= 1000 },
   { id: 'teyze', icon: '👵', name: 'Teyzenin Gözdesi', desc: 'Hayriye Teyze\'nin iki tarifini öğren', ok: () => !!(S.learned.kurabiye && S.learned.recel) },
   { id: 'kamil', icon: '🏆', name: 'Rakipsiz', desc: 'Kebapçı Kâmil\'i yen', ok: () => !!S.ev.rivalWin },
   { id: 'icecek', icon: '🥛', name: 'Ayrancı', desc: '10 içeceği doğru ver', ok: () => S.stats.drinks >= 10 },
-  { id: 'susler', icon: '🪴', name: 'Göz Nuru Dükkan', desc: '5 süs satın al', ok: () => decorCount() >= 5 },
+  { id: 'susler', icon: '🪴', name: 'Göz Alıcı Dükkan', desc: '5 süs satın al', ok: () => decorCount() >= 5 },
   { id: 'hafta', icon: '📅', name: 'Bir Haftalık Esnaf', desc: '7. güne ulaş', ok: () => S.day >= 7 },
   { id: 'seri7', icon: '🔥', name: 'Sadık Usta', desc: '7 gün üst üste oyuna gir', ok: () => !!(S.login && S.login.streak >= 7) },
   { id: 'dost', icon: '🤝', name: 'Dostlar Sofrası', desc: 'Bütün arkadaşlarını doyur', ok: () => Object.keys(FRIENDS).every(k => S.friendsMet && S.friendsMet[k]) },
@@ -3832,7 +3963,7 @@ $('#badgeBtn').onclick = openBadges;
 $('#bgClose').onclick = () => { $('#badgeScr').hidden = true; };
 
 // ---------- reklam (yer tutucu) ----------
-// Android uygulamasında window.AfiyetAndroid.showRewardedAd varsa gerçek reklam oradan oynar; yoksa yer tutucu gösterilir.
+// Gerçek reklam (AdMob) henüz bağlı değil: şimdilik 5 saniyelik yer tutucu gösterilir.
 let adCb = null, adTimer = null;
 function watchAd(onReward) {
   adCb = onReward;
@@ -3852,9 +3983,9 @@ function openStore() {
   $('#stMoney').textContent = S.money + '₺';
   const left = adsLeft();
   const item = (icon, name, desc, btn, id, disabled) => `<div class="store-item"><i>${icon}</i><div><b>${name}</b><span>${desc}</span></div><button class="btn ${disabled ? '' : 'go'}" type="button" data-id="${id}" ${disabled ? 'disabled' : ''}>${btn}</button></div>`;
-  $('#stBody').innerHTML = `<div class="store-sec"><h3>Reklam izle, ödül kazan</h3><p>Bugün ${left} reklam hakkın kaldı.</p>
+  $('#stBody').innerHTML = `<div class="store-sec"><h3>Reklam izle, ödül kazan</h3><p>${left ? `Bugün ${left} reklam hakkın kaldı.` : 'Bugünlük reklam hakkın bitti.'}</p>
     ${item('💰', '+75₺', 'Kısa bir reklam izle, kasana 75₺ girsin.', '📺 İzle', 'cash', !left)}
-    ${item('⏳', 'Sabır şerbeti', `Sıradaki 3 müşteri yarı yarıya daha sabırlı olur.${S.boost.patience ? ` (Kalan: ${S.boost.patience})` : ''}`, '📺 İzle', 'pat', !left)}
+    ${item('⏳', 'Sabır şerbeti', `Sıradaki 3 müşteri %50 daha sabırlı olur.${S.boost.patience ? ` (Kalan: ${S.boost.patience})` : ''}`, '📺 İzle', 'pat', !left)}
     </div>
     <div class="store-sec"><h3>Paketler</h3>
     ${item('🪙', 'Avuç dolusu', 'Kasana 500₺', '19,99 TL', 'p1', true)}
@@ -3886,7 +4017,7 @@ function maybeDailyReward() {
   if (S.login.last === today) return;
   const streak = S.login.last === todayStr(-1) ? Math.min(S.login.streak || 0, 6) + 1 : 1;
   const amount = STREAK[streak - 1];
-  $('#rwText').textContent = streak === 1 ? 'Hoş geldin usta! Her gün gel, ödülün büyüsün.' : `🔥 ${streak}. gün üst üste geldin! Seriyi bozma.`;
+  $('#rwText').textContent = streak === 1 ? 'Hoş geldin usta! Her gün gel, ödülün büyüsün.' : `🔥 ${streak} gündür üst üste geliyorsun! Seriyi bozma.`;
   $('#rwStreak').innerHTML = STREAK.map((v, i) => `<div class="${i + 1 < streak ? 'got' : i + 1 === streak ? 'now' : ''}">${i + 1}. gün<b>${v}₺</b></div>`).join('');
   $('#rwTake').textContent = `Al · +${amount}₺`;
   const give = mult => {
@@ -3904,14 +4035,14 @@ function syncReminder() {
     if (!window.AfiyetAndroid || !window.AfiyetAndroid.setReminder) return;
     if (window.AfiyetAndroid.setReminderOn) window.AfiyetAndroid.setReminderOn(!!SET.notif);
     const msgs = ['Müşteriler kapıda bekliyor, dükkanı aç usta! 🍽️', 'Günlük ödülün hazır, serini bozma! 🔥', 'Hayriye Teyze uğradı mı acaba? 👵'];
-    if (S.ev.rival1 && !S.ev.rivalWin) msgs.push('Kebapçı Kâmil müşterilerini kapıyor! 😠');
+    if (S.ev.rival1 && !S.ev.rivalWin) msgs.push('Kebapçı Kâmil senin müşterilerini kapıyor! 😠');
     if (S.regulars.length) msgs.push(`${S.regulars[S.regulars.length - 1].look.name} yine geldi, seni soruyor! 😊`);
     window.AfiyetAndroid.setReminder('Afiyet Olsun', msgs.join('|'));
   } catch (e) {}
 }
 
 const TUT = [
-  { el: '#takeBtn', text: 'Hoş geldin usta! Ben Hayriye Teyze, sana dükkanı göstereceğim. Müşterinin ne istediği balonda yazıyor. Başlamak için Siparişi al\'a bas.', done: () => !$('#kitchen').hidden },
+  { el: '#takeBtn', text: 'Hoş geldin usta! Sana dükkanı göstereyim. Müşterinin ne istediği balonda yazıyor. Başlamak için Siparişi al\'a bas.', done: () => !$('#kitchen').hidden },
   { el: '.dough', text: 'Burası mutfak. Fişte sipariş yazıyor: lahmacun. Önce lahmacun hamurunu seç.', done: () => K && K.dough === 'lahmacun' },
   { el: '.bin[data-type="kiyma"]', text: 'Malzemeler bu kaplarda. Kıymalı harcı seç.', done: () => sel === 'kiyma' },
   { el: '#board', text: 'Parmağını hamurun üstünde gezdirerek harcı kenarlara kadar sür.', done: () => tutCoverage() >= ING.kiyma.need[0] + .05 },
@@ -3919,7 +4050,7 @@ const TUT = [
   { el: '#board', text: 'Hamurun üstünde birkaç yere dokunarak maydanoz serp.', done: () => K.toppings.filter(p => p.type === 'maydanoz').length >= 5 },
   { el: '#bakeBtn', text: 'Hazır! Şimdi fırına ver.', done: () => !$('#oven').hidden },
   { el: '#pullBtn', text: 'Alttaki ibreyi izle. Yeşil bölgeye gelince Fırından çıkar\'a bas. Çok beklersen yanar!', done: () => !$('#cut').hidden },
-  { el: '#cutC', text: 'Müşteri 2 dilim istedi. Parmağını lahmacunun bir kenarından ortasından geçirip öbür kenarına sürükle.', done: () => K.cuts.length >= 1 },
+  { el: '#cutC', text: 'Müşteri 2 dilim istedi. Parmağını lahmacunun bir kenarından öbür kenarına, ortasından geçecek şekilde sürükle.', done: () => K.cuts.length >= 1 },
   { el: '#serveBtn', text: 'Afiyet olsun! Servis et.', done: () => phase === 'serve' },
   { el: '#panel', text: 'Yıldızlar ve kazancın burada. Akşam 19:00\'da dükkan kapanır. Gün sonunda parayla dükkanı geliştirir ve süslersin. Bilmediğin yemekte mutfaktaki Tarif defterine bak. Oyun kendiliğinden kaydedilir. Kolay gelsin!', ok: true },
 ];
