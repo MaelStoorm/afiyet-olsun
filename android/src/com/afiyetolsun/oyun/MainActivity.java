@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
+import android.view.View;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -68,6 +69,7 @@ public class MainActivity extends Activity {
         web.setWebViewClient(new WebViewClient());
         web.addJavascriptInterface(new Bridge(), "AfiyetAndroid");
         setContentView(web);
+        hideBars();
         if (state != null) web.restoreState(state);
         else web.loadUrl("file:///android_asset/index.html");
         askNotificationPermission();
@@ -80,6 +82,20 @@ public class MainActivity extends Activity {
         if (p.getBoolean("asked", false)) return;
         p.edit().putBoolean("asked", true).apply();
         requestPermissions(new String[] { NOTIF_PERMISSION }, 1);
+    }
+
+    /** Oyun tam ekran: üst çubuk ve alt tuşlar gizli, kenardan kaydırınca kısa süre görünür. */
+    @SuppressWarnings("deprecation")
+    private void hideBars() {
+        getWindow().getDecorView().setSystemUiVisibility(
+            View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY | View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+            | View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) hideBars();
     }
 
     @Override

@@ -38,8 +38,9 @@
   --body:"Nunito",system-ui,-apple-system,"Segoe UI",sans-serif;
   color-scheme:light;
   --sat:env(safe-area-inset-top,0px);--sar:env(safe-area-inset-right,0px);--sab:env(safe-area-inset-bottom,0px);--sal:env(safe-area-inset-left,0px);
-  --ih:calc(100dvh - max(0px,var(--sab) - 6px) - max(0px,var(--sat) - 6px));
+  --ih:calc(100vh - max(0px,var(--sab) - 6px) - max(0px,var(--sat) - 6px));
 }
+@supports (height:100dvh){:root{--ih:calc(100dvh - max(0px,var(--sab) - 6px) - max(0px,var(--sat) - 6px))}}
 html,body{min-height:100%}
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%;touch-action:manipulation}
 body{-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;overscroll-behavior:none}
@@ -208,6 +209,7 @@ button:focus-visible{outline:3px solid var(--cini);outline-offset:2px}
 .coach .row{display:flex;gap:8px;justify-content:flex-end}
 .coach .btn{font-size:14px;padding:8px 12px}
 .ovl{position:fixed;inset:0;z-index:22;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(58,34,22,.6)}
+.ovl-card,.title-card,.morning,.panel{box-sizing:border-box}
 .ovl-card{background:var(--paper);border:4px solid var(--wood-dark);border-radius:20px;max-width:520px;width:100%;max-height:90vh;overflow:auto;padding:20px;display:flex;flex-direction:column;gap:12px;text-align:center}
 .ovl-card h2{font-family:var(--display);font-size:30px;line-height:1;margin:0;color:var(--tomato-dark)}
 .ovl-card p{margin:0;font-weight:700;color:var(--ink-soft)}
@@ -663,7 +665,7 @@ button:focus-visible{outline:3px solid var(--cini);outline-offset:2px}
   </div>
   <div class="title-row"><button class="btn" id="sTut" type="button">🎓 Öğreticiyi tekrar oyna</button><button class="btn" id="sReset" type="button">🗑️ Kaydı sil</button></div>
   <div class="confirm" id="sResetConfirm" hidden>Bütün ilerlemen silinip 1. günden başlanacak. Emin misin?<div><button class="btn" id="sResetNo" type="button">Vazgeç</button><button class="btn primary" id="sResetYes" type="button">Evet, sil</button></div></div>
-  <p class="set-ver">Afiyet Olsun · sürüm 1.3.2<br>© 2026 Egemen (MaelStoorm) · Tüm hakları saklıdır.<br>İzinsiz kopyalanamaz ve yayınlanamaz.</p>
+  <p class="set-ver">Afiyet Olsun · sürüm 1.3.3<br>© 2026 Egemen (MaelStoorm) · Tüm hakları saklıdır.<br>İzinsiz kopyalanamaz ve yayınlanamaz.</p>
   <button class="btn go" id="setClose" type="button">Tamam</button>
 </div></div>
 <div class="ovl" id="rewardScr" hidden><div class="ovl-card" role="dialog" aria-labelledby="rwTtl">
@@ -1358,7 +1360,7 @@ const FRIENDS = {
   goksu: { name: 'Göksu', easy: true, pair: 'idil', hair: 'wavyshort', hairColor: '#3b2618', skin: '#f2cba8', skinDark: '#dcae86', shirt: '#1d1d22', collar: '#34343c', earring: 'hoop', mustache: false, glasses: false,
     hi: p => `Selam! Fark etmez, ne varsa. ${cap(p)} olsun.`,
     happy: ['Harika, eline sağlık!', 'Süper olmuş, teşekkürler!'], meh: () => 'Olsun, sorun değil. Yerim ben.' },
-  egemen: { name: 'Egemen', maker: true, fav: ['sarma', 'manti'], hair: 'short', hairColor: '#141210', skin: '#eac09a', skinDark: '#d09f75', shirt: '#7d8a4e', tee: true, trim: '#22305a', print: 'eye', mustache: true, necklace: 'cord', glasses: 'clear',
+  egemen: { name: 'Egemen', maker: true, fav: ['sarma', 'manti'], hair: 'short', hairColor: '#141210', skin: '#eac09a', skinDark: '#d09f75', shirt: '#7d8a4e', tee: true, trim: '#22305a', print: 'eye', mustache: false, necklace: 'cord', glasses: 'clear',
     hi: p => `Bu dükkanı ben kurdum sayılır! Bana ${p} yap usta, en sevdiğim.`,
     happy: ['İşte bu! Oyunu yaparken tam böyle hayal etmiştim.', 'Mükemmel, ellerine sağlık usta!'],
     meh: i => `Hmm, idare eder. ${i}` },
