@@ -2,6 +2,8 @@
 
 Türk mutfağı temalı bir lokanta oyunu. Müşteri ne isterse onu yap: kısır, lahmacun, mantı, yaprak sarma, mercimek çorbası… Doğru malzemeleri koy, pişir, servis et, dükkanını büyüt.
 
+Her gün sabah hazırlığıyla başlar: marketten malzeme al, çayı demle, sarma, börek, mercimek gibi yemekleri önceden hazırla, sonra dükkanı aç. Lahmacun ve pide siparişle sıcak yapılır. Vegan ve vejetaryen müşteriler, huysuz müşteriler, gazeteden bir yemek eleştirmeni ve dükkanı hızlandıran perkler var.
+
 ## Oyna
 
 - **Telefonda veya bilgisayarda:** https://maelstoorm.github.io/afiyet-olsun/
