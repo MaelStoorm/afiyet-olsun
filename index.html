@@ -595,7 +595,7 @@ button:focus-visible{outline:3px solid var(--cini);outline-offset:2px}
       </div>
       <div class="news" id="deNews" hidden></div>
       <p class="goal-line" id="deGoal" hidden></p>
-      <button class="btn" id="deAdBtn" type="button" hidden>📺 Reklam izle, bugünkü kârı 2 katına çıkar</button>
+      <button class="btn" id="deAdBtn" type="button" hidden>🎁 Hediye: bugünkü kârı 2 katına çıkar</button>
       <p class="unlock" id="deUnlock" hidden></p>
       <div class="shop-list">
         <h3>Ustalıklar</h3>
@@ -634,7 +634,7 @@ button:focus-visible{outline:3px solid var(--cini);outline-offset:2px}
       Kayıtlı oyunun silinecek ve 1. günden başlayacaksın. Emin misin?
       <div><button class="btn" id="newNo" type="button">Vazgeç</button><button class="btn primary" id="newYes" type="button">Evet, sıfırla</button></div>
     </div>
-    <div class="title-row"><button class="btn" id="badgeBtn" type="button">🏅 Rozetler</button><button class="btn" id="storeBtn" type="button">🛒 Mağaza</button></div>
+    <div class="title-row"><button class="btn" id="badgeBtn" type="button">🏅 Rozetler</button><button class="btn" id="storeBtn" type="button">🎁 Hediyeler</button></div>
     <div class="title-row"><button class="btn" id="profBtn" type="button">🧑‍🍳 Profilim</button></div>
     <div class="title-row"><button class="btn" id="setBtn" type="button">⚙️ Ayarlar</button><button class="btn" id="helpBtn" type="button">❓ Nasıl oynanır?</button></div>
     <div id="helpBox" hidden>
@@ -673,25 +673,26 @@ button:focus-visible{outline:3px solid var(--cini);outline-offset:2px}
   </div>
   <div class="title-row"><button class="btn" id="sTut" type="button">🎓 Öğreticiyi tekrar oyna</button><button class="btn" id="sReset" type="button">🗑️ Kaydı sil</button></div>
   <div class="confirm" id="sResetConfirm" hidden>Bütün ilerlemen silinecek ve oyun 1. günden başlayacak. Emin misin?<div><button class="btn" id="sResetNo" type="button">Vazgeç</button><button class="btn primary" id="sResetYes" type="button">Evet, sil</button></div></div>
-  <p class="set-ver">Afiyet Olsun · sürüm 1.3.5<br>© 2026 Egemen (MaelStoorm) · Tüm hakları saklıdır.<br>İzinsiz kopyalanamaz ve yayınlanamaz.</p>
+  <p class="set-ver">🔒 Oyun kişisel veri toplamaz; ilerlemen yalnızca bu cihazda saklanır. <a href="https://maelstoorm.github.io/afiyet-olsun/gizlilik.html" target="_blank" rel="noopener">Gizlilik politikası</a></p>
+  <p class="set-ver">Afiyet Olsun · sürüm 1.4.0<br>© 2026 Egemen (MaelStoorm) · Tüm hakları saklıdır.<br>İzinsiz kopyalanamaz ve yayınlanamaz.</p>
   <button class="btn go" id="setClose" type="button">Tamam</button>
 </div></div>
 <div class="ovl" id="rewardScr" hidden><div class="ovl-card" role="dialog" aria-labelledby="rwTtl">
   <h2 id="rwTtl">Günlük ödül</h2><p id="rwText"></p><div class="streak" id="rwStreak"></div>
   <button class="btn go big" id="rwTake" type="button">Al</button>
-  <button class="btn" id="rwAd" type="button">📺 Reklam izle, 2 katını al</button>
+  <button class="btn" id="rwAd" type="button">🎁 Hediyeyle 2 katını al</button>
 </div></div>
 <div class="ovl" id="badgeScr" hidden><div class="ovl-card" role="dialog" aria-labelledby="bgTtl">
   <h2 id="bgTtl">Rozetler</h2><p id="bgStats"></p><div class="badges" id="bgList"></div>
   <button class="btn" id="bgClose" type="button">Kapat</button>
 </div></div>
 <div class="ovl" id="storeScr" hidden><div class="ovl-card" role="dialog" aria-labelledby="stTtl">
-  <h2 id="stTtl">Mağaza</h2><p>Kasa: <b id="stMoney">0₺</b></p><div id="stBody"></div>
+  <h2 id="stTtl">🎁 Hediyeler</h2><p>Kasa: <b id="stMoney">0₺</b></p><div id="stBody"></div>
   <button class="btn" id="stClose" type="button">Kapat</button>
 </div></div>
 <div class="ovl" id="adScr" hidden><div class="ovl-card" role="dialog" aria-labelledby="adTtl">
-  <h2 id="adTtl">Reklam</h2>
-  <div class="ad-box"><b>Reklam alanı</b><span>Oyun Google Play'e çıkınca burada gerçek bir reklam gösterilecek.</span><div class="ad-count" id="adCount">5</div></div>
+  <h2 id="adTtl">🎁 Hediye</h2>
+  <div class="ad-box"><b>Hayriye Teyze hediyeni hazırlıyor</b><span>Birkaç saniye bekle, hemen geliyor…</span><div class="ad-count" id="adCount">5</div></div>
   <button class="btn go big" id="adDone" type="button" disabled>Ödülü al</button>
   <button class="btn" id="adSkip" type="button">Kapat (ödül yok)</button>
 </div></div>
@@ -4328,7 +4329,7 @@ $('#badgeBtn').onclick = openBadges;
 $('#bgClose').onclick = () => { $('#badgeScr').hidden = true; };
 
 // ---------- reklam (yer tutucu) ----------
-// Gerçek reklam (AdMob) henüz bağlı değil: şimdilik 5 saniyelik yer tutucu gösterilir.
+// Gerçek reklam yok: oyuncu 5 saniye bekleyip günde 3 hediye alır (Google Play'de "reklam yok" beyanıyla uyumlu).
 let adCb = null, adTimer = null;
 function watchAd(onReward) {
   adCb = onReward;
@@ -4348,15 +4349,10 @@ function openStore() {
   $('#stMoney').textContent = S.money + '₺';
   const left = adsLeft();
   const item = (icon, name, desc, btn, id, disabled) => `<div class="store-item"><i>${icon}</i><div><b>${name}</b><span>${desc}</span></div><button class="btn ${disabled ? '' : 'go'}" type="button" data-id="${id}" ${disabled ? 'disabled' : ''}>${btn}</button></div>`;
-  $('#stBody').innerHTML = `<div class="store-sec"><h3>Reklam izle, ödül kazan</h3><p>${left ? `Bugün ${left} reklam hakkın kaldı.` : 'Bugünlük reklam hakkın bitti.'}</p>
-    ${item('💰', '+75₺', 'Kısa bir reklam izle, kasana 75₺ girsin.', '📺 İzle', 'cash', !left)}
-    ${item('⏳', 'Sabır şerbeti', `Sıradaki 3 müşteri %50 daha sabırlı olur.${S.boost.patience ? ` (Kalan: ${S.boost.patience})` : ''}`, '📺 İzle', 'pat', !left)}
-    </div>
-    <div class="store-sec"><h3>Paketler</h3>
-    ${item('🪙', 'Avuç dolusu', 'Kasana 500₺', '19,99 TL', 'p1', true)}
-    ${item('💎', 'Çuval dolusu', 'Kasana 1.500₺ ve tüm boyalar', '49,99 TL', 'p2', true)}
-    ${item('🚫', 'Reklamsız oyun', 'Reklam izlemeden tüm ödüller', '39,99 TL', 'p3', true)}
-    <p>Gerçek parayla satın alma, oyun Google Play'e çıkınca açılacak.</p></div>`;
+  $('#stBody').innerHTML = `<div class="store-sec"><h3>Hayriye Teyze'nin hediyeleri</h3><p>${left ? `Bugün ${left} hediye hakkın kaldı.` : 'Bugünlük hediyeler bitti, yarın yine gel.'}</p>
+    ${item('💰', '+75₺', 'Kasana 75₺ girsin.', '🎁 Al', 'cash', !left)}
+    ${item('⏳', 'Sabır şerbeti', `Sıradaki 3 müşteri %50 daha sabırlı olur.${S.boost.patience ? ` (Kalan: ${S.boost.patience})` : ''}`, '🎁 Al', 'pat', !left)}
+    </div>`;
   $('#stBody').querySelectorAll('button[data-id]').forEach(b => {
     b.onclick = () => {
       const id = b.dataset.id;

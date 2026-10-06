@@ -3,21 +3,26 @@ package com.afiyetolsun.oyun;
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.view.View;
+import android.view.WindowInsets;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import java.util.Locale;
 
 public class MainActivity extends Activity {
     private static final String NOTIF_PERMISSION = "android.permission.POST_NOTIFICATIONS";
     private WebView web;
+    private int cutL, cutT, cutR, cutB;
 
     /** Oyunun JavaScript tarafından çağrılır (window.AfiyetAndroid). */
     public class Bridge {
@@ -66,7 +71,27 @@ public class MainActivity extends Activity {
         s.setAllowFileAccess(true);
         s.setMediaPlaybackRequiresUserGesture(false);
         s.setTextZoom(100);
-        web.setWebViewClient(new WebViewClient());
+        web.setWebViewClient(new WebViewClient() {
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView v, String url) {
+                // gizlilik politikası gibi internet bağlantıları tarayıcıda açılsın, oyun kaybolmasın
+                if (url != null && (url.startsWith("https://") || url.startsWith("http://"))) {
+                    try { startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url))); } catch (Exception e) { }
+                    return true;
+                }
+                return false;
+            }
+
+            @Override
+            public void onPageFinished(WebView v, String url) { pushInsets(); }
+        });
+        web.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
+            @Override
+            public WindowInsets onApplyWindowInsets(View v, WindowInsets in) {
+                readCutout(in);
+                return v.onApplyWindowInsets(in);
+            }
+        });
         web.addJavascriptInterface(new Bridge(), "AfiyetAndroid");
         setContentView(web);
         hideBars();
@@ -82,6 +107,38 @@ public class MainActivity extends Activity {
         if (p.getBoolean("asked", false)) return;
         p.edit().putBoolean("asked", true).apply();
         requestPermissions(new String[] { NOTIF_PERMISSION }, 1);
+    }
+
+    /**
+     * Android 15+ oyunu ekranın kenarına kadar, kamera deliğinin altına da çizer.
+     * Deliğin payını oyunun CSS değişkenlerine (--sal/--sat/--sar/--sab) bildir ki düğmeler deliğin altında kalmasın.
+     * DisplayCutout API 28'de geldi; derleme API 23'e karşı yapıldığı için yansıma ile okunuyor.
+     */
+    private void readCutout(WindowInsets in) {
+        int l = 0, t = 0, r = 0, b = 0;
+        if (Build.VERSION.SDK_INT >= 28) {
+            try {
+                Object dc = WindowInsets.class.getMethod("getDisplayCutout").invoke(in);
+                if (dc != null) {
+                    Class<?> c = dc.getClass();
+                    l = (Integer) c.getMethod("getSafeInsetLeft").invoke(dc);
+                    t = (Integer) c.getMethod("getSafeInsetTop").invoke(dc);
+                    r = (Integer) c.getMethod("getSafeInsetRight").invoke(dc);
+                    b = (Integer) c.getMethod("getSafeInsetBottom").invoke(dc);
+                }
+            } catch (Exception e) { }
+        }
+        if (l != cutL || t != cutT || r != cutR || b != cutB) { cutL = l; cutT = t; cutR = r; cutB = b; pushInsets(); }
+    }
+
+    private void pushInsets() {
+        if (web == null) return;
+        float d = getResources().getDisplayMetrics().density;
+        String js = String.format(Locale.US,
+            "(function(){var s=document.documentElement.style,v={'--sal':%d,'--sat':%d,'--sar':%d,'--sab':%d};"
+            + "for(var k in v){if(v[k]>0)s.setProperty(k,v[k]+'px');else s.removeProperty(k);}})()",
+            Math.round(cutL / d), Math.round(cutT / d), Math.round(cutR / d), Math.round(cutB / d));
+        web.evaluateJavascript(js, null);
     }
 
     /** Oyun tam ekran: üst çubuk ve alt tuşlar gizli, kenardan kaydırınca kısa süre görünür. */

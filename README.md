@@ -16,6 +16,7 @@ Her gün sabah hazırlığıyla başlar: marketten malzeme al (sabah aldıkları
 - `index.html`: oyunun tamamı (tek dosya).
 - `AfiyetOlsun.apk`: Android sürümü.
 - `android/`: APK'nın kaynak kodu ve derleme betiği.
+- `gizlilik.html`: gizlilik politikası (oyun kişisel veri toplamaz): https://maelstoorm.github.io/afiyet-olsun/gizlilik.html
 
 ## Telif hakkı
 
