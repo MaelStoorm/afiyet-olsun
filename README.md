@@ -15,8 +15,19 @@ Her gün sabah hazırlığıyla başlar: marketten malzeme al (sabah aldıkları
 
 - `index.html`: oyunun tamamı (tek dosya).
 - `AfiyetOlsun.apk`: Android sürümü.
-- `android/`: APK'nın kaynak kodu ve derleme betiği.
+- `android/`: Android uygulamasının Gradle projesi.
+- `admob.properties`: Android uygulamasının AdMob reklam kimlikleri.
 - `gizlilik.html`: gizlilik politikası (oyun kişisel veri toplamaz): https://maelstoorm.github.io/afiyet-olsun/gizlilik.html
+
+## Android (Google Play)
+
+- `android/` normal bir Gradle projesidir (Android Gradle Plugin 8.13, Gradle 8.14.3, Java 17). Paket adı `com.afiyetolsun.oyun`.
+- Derleme sırasında kökteki `index.html` uygulamaya kopyalanır (Google Fonts bağlantıları yerine uygulamanın içindeki `fonts.css` kullanılır). Yani uygulama her zaman oyunun son hâlini taşır; `index.html`'i ayrıca kopyalamak gerekmez.
+- `main` dalına her gönderimde GitHub Actions imzasız bir paket derler ve `builds` dalına `afiyet-olsun-unsigned.aab` olarak koyar. `commit.txt` hangi commit'ten derlendiğini yazar. Derleme bozulursa aynı dala `build-log.txt` eklenir.
+- Play Console'a yüklemeden önce paketi yükleme anahtarıyla imzala (anahtar ve parolası asla depoya konmaz):
+  `jarsigner -sigalg SHA256withRSA -digestalg SHA-256 -keystore key.jks afiyet-olsun-unsigned.aab afiyet`
+- Hediyeler Android'de ödüllü reklamla (Google AdMob) verilir; reklam yüklenemezse ya da web sürümündeyse eski 5 saniyelik bekleme kullanılır. Reklam kimlikleri kökteki `admob.properties` dosyasına yazılır (`appId=`, `rewardedId=`). Boş kalırsa Google'ın test reklamları çıkar.
+- Bilgisayarda derlemek için (Android SDK gerekir): `cd android && ./gradlew bundleRelease`
 
 ## Telif hakkı
 

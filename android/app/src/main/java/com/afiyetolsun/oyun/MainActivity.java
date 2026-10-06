@@ -1,5 +1,6 @@
 package com.afiyetolsun.oyun;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.content.Context;
@@ -11,6 +12,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
+import android.view.DisplayCutout;
 import android.view.View;
 import android.view.WindowInsets;
 import android.webkit.JavascriptInterface;
@@ -20,9 +22,11 @@ import android.webkit.WebViewClient;
 import java.util.Locale;
 
 public class MainActivity extends Activity {
-    private static final String NOTIF_PERMISSION = "android.permission.POST_NOTIFICATIONS";
     private WebView web;
     private int cutL, cutT, cutR, cutB;
+    private RewardedAds ads;
+    private boolean resumed;
+    private String pendingAdResult;
 
     /** Oyunun JavaScript tarafından çağrılır (window.AfiyetAndroid). */
     public class Bridge {
@@ -55,6 +59,32 @@ public class MainActivity extends Activity {
                     setRequestedOrientation(o);
                 }
             });
+        }
+    }
+
+    /**
+     * Ödüllü reklam köprüsü (window.AndroidAds). Oyun showRewarded() der; sonuç
+     * window.onAndroidAd('rewarded' | 'dismissed' | 'failed') ile oyuna geri bildirilir.
+     */
+    public class AdsBridge {
+        @JavascriptInterface
+        public void showRewarded() {
+            runOnUiThread(new Runnable() { public void run() { ads.show(); } });
+        }
+
+        @JavascriptInterface
+        public void cancelRewarded() {
+            runOnUiThread(new Runnable() { public void run() { ads.cancel(); } });
+        }
+
+        @JavascriptInterface
+        public boolean privacyOptionsRequired() {
+            return ads.privacyOptionsRequired();
+        }
+
+        @JavascriptInterface
+        public void showPrivacyOptions() {
+            runOnUiThread(new Runnable() { public void run() { ads.showPrivacyOptions(); } });
         }
     }
 
@@ -92,41 +122,57 @@ public class MainActivity extends Activity {
                 return v.onApplyWindowInsets(in);
             }
         });
+        ads = new RewardedAds(this, BuildConfig.ADMOB_REWARDED_ID, new RewardedAds.ResultListener() {
+            @Override
+            public void onAdResult(String status) { sendAdResult(status); }
+        });
         web.addJavascriptInterface(new Bridge(), "AfiyetAndroid");
+        web.addJavascriptInterface(new AdsBridge(), "AndroidAds");
         setContentView(web);
         hideBars();
         if (state != null) web.restoreState(state);
         else web.loadUrl("file:///android_asset/index.html");
-        askNotificationPermission();
+        // Önce reklam izni (gerekiyorsa Google'ın izin penceresi), ardından bildirim izni sorulur; iki pencere üst üste binmesin.
+        ads.gatherConsent(new Runnable() {
+            @Override
+            public void run() { askNotificationPermission(); }
+        });
+    }
+
+    /** Reklam sonucu oyuna bildirilir. Reklam ekranı kapanırken oyun henüz duraklatılmış olabilir; o zaman dönüşte iletilir. */
+    private void sendAdResult(String status) {
+        if (resumed) runAdResult(status);
+        else pendingAdResult = status;
+    }
+
+    private void runAdResult(String status) {
+        if (web == null) return;
+        web.evaluateJavascript("window.onAndroidAd&&window.onAndroidAd('" + status + "')", null);
     }
 
     private void askNotificationPermission() {
-        if (Build.VERSION.SDK_INT < 33) return;
-        if (checkSelfPermission(NOTIF_PERMISSION) == PackageManager.PERMISSION_GRANTED) return;
+        if (Build.VERSION.SDK_INT < 33 || isFinishing()) return;
+        if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) return;
         SharedPreferences p = getSharedPreferences(ReminderReceiver.PREFS, MODE_PRIVATE);
         if (p.getBoolean("asked", false)) return;
         p.edit().putBoolean("asked", true).apply();
-        requestPermissions(new String[] { NOTIF_PERMISSION }, 1);
+        requestPermissions(new String[] { Manifest.permission.POST_NOTIFICATIONS }, 1);
     }
 
     /**
      * Android 15+ oyunu ekranın kenarına kadar, kamera deliğinin altına da çizer.
      * Deliğin payını oyunun CSS değişkenlerine (--sal/--sat/--sar/--sab) bildir ki düğmeler deliğin altında kalmasın.
-     * DisplayCutout API 28'de geldi; derleme API 23'e karşı yapıldığı için yansıma ile okunuyor.
      */
     private void readCutout(WindowInsets in) {
         int l = 0, t = 0, r = 0, b = 0;
         if (Build.VERSION.SDK_INT >= 28) {
-            try {
-                Object dc = WindowInsets.class.getMethod("getDisplayCutout").invoke(in);
-                if (dc != null) {
-                    Class<?> c = dc.getClass();
-                    l = (Integer) c.getMethod("getSafeInsetLeft").invoke(dc);
-                    t = (Integer) c.getMethod("getSafeInsetTop").invoke(dc);
-                    r = (Integer) c.getMethod("getSafeInsetRight").invoke(dc);
-                    b = (Integer) c.getMethod("getSafeInsetBottom").invoke(dc);
-                }
-            } catch (Exception e) { }
+            DisplayCutout dc = in.getDisplayCutout();
+            if (dc != null) {
+                l = dc.getSafeInsetLeft();
+                t = dc.getSafeInsetTop();
+                r = dc.getSafeInsetRight();
+                b = dc.getSafeInsetBottom();
+            }
         }
         if (l != cutL || t != cutT || r != cutR || b != cutB) { cutL = l; cutT = t; cutR = r; cutB = b; pushInsets(); }
     }
@@ -163,6 +209,7 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onPause() {
+        resumed = false;
         web.onPause();
         web.pauseTimers();
         ReminderReceiver.schedule(this, true);
@@ -172,14 +219,22 @@ public class MainActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
+        resumed = true;
         web.resumeTimers();
         web.onResume();
         ReminderReceiver.cancel(this);
+        if (pendingAdResult != null) {
+            String status = pendingAdResult;
+            pendingAdResult = null;
+            runAdResult(status);
+        }
     }
 
     @Override
     protected void onDestroy() {
+        ads.destroy();
         web.destroy();
+        web = null;
         super.onDestroy();
     }
 }

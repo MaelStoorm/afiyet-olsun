@@ -2,6 +2,7 @@ package com.afiyetolsun.oyun;
 
 import android.app.AlarmManager;
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -17,7 +18,6 @@ public class ReminderReceiver extends BroadcastReceiver {
     static final String PREFS = "afiyet_reminder";
     private static final String CHANNEL = "hatirlatma";
     private static final int MAX_IN_A_ROW = 3;
-    private static final int FLAG_IMMUTABLE = 0x04000000;
 
     @Override
     public void onReceive(Context ctx, Intent intent) {
@@ -55,7 +55,7 @@ public class ReminderReceiver extends BroadcastReceiver {
 
     private static PendingIntent pending(Context ctx) {
         Intent i = new Intent(ctx, ReminderReceiver.class);
-        return PendingIntent.getBroadcast(ctx, 7, i, PendingIntent.FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE);
+        return PendingIntent.getBroadcast(ctx, 7, i, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
     }
 
     @SuppressWarnings("deprecation")
@@ -64,17 +64,14 @@ public class ReminderReceiver extends BroadcastReceiver {
             NotificationManager nm = (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
             Notification.Builder b;
             if (Build.VERSION.SDK_INT >= 26) {
-                // NotificationChannel API 26'da geldi; derleme API 23'e karşı yapıldığı için yansıma ile kullanılıyor
-                Class<?> chCls = Class.forName("android.app.NotificationChannel");
-                Object ch = chCls.getConstructor(String.class, CharSequence.class, int.class).newInstance(CHANNEL, "Hatırlatmalar", 3);
-                NotificationManager.class.getMethod("createNotificationChannel", chCls).invoke(nm, ch);
-                b = Notification.Builder.class.getConstructor(Context.class, String.class).newInstance(ctx, CHANNEL);
+                nm.createNotificationChannel(new NotificationChannel(CHANNEL, "Hatırlatmalar", NotificationManager.IMPORTANCE_DEFAULT));
+                b = new Notification.Builder(ctx, CHANNEL);
             } else {
                 b = new Notification.Builder(ctx);
             }
             Intent open = new Intent(ctx, MainActivity.class);
             open.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            PendingIntent pi = PendingIntent.getActivity(ctx, 8, open, PendingIntent.FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE);
+            PendingIntent pi = PendingIntent.getActivity(ctx, 8, open, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
             b.setSmallIcon(R.drawable.ic_notif).setContentTitle(title).setContentText(text)
                 .setStyle(new Notification.BigTextStyle().bigText(text))
                 .setColor(0xFF1D4FA0).setAutoCancel(true).setContentIntent(pi);

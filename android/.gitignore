@@ -1,5 +1,11 @@
-key.jks
-gen/
-obj/
-bin/
-assets/index.html
+.gradle/
+build/
+local.properties
+.idea/
+*.iml
+.cxx/
+captures/
+# İmza anahtarları ve parolalar asla depoya girmez.
+*.jks
+*.keystore
+keystore.properties

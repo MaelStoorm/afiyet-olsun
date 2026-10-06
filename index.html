@@ -299,6 +299,7 @@ button:focus-visible{outline:3px solid var(--cini);outline-offset:2px}
 .seg button+button{border-left:2px solid var(--ink)}
 .seg button[aria-pressed="true"]{background:var(--tomato);color:#fff8ec}
 .set-ver{font-size:12px}
+.set-row .btn{font-size:14px;padding:8px 12px;white-space:nowrap}
 .owner{margin:0;font-size:12px;font-weight:800;color:var(--ink-soft);line-height:1.4}
 .owner b{color:var(--tomato-dark)}
 /* Yatay telefon ekranı: her şey tek ekrana sığsın, sayfa kaymasın */
@@ -669,12 +670,13 @@ button:focus-visible{outline:3px solid var(--cini);outline-offset:2px}
     <div class="set-row" id="sVibRow"><span><b>📳 Titreşim</b><small>Kasa, hata ve kesme anlarında</small></span><button class="tog" id="sVib" type="button" role="switch" aria-label="Titreşim"></button></div>
     <div class="set-row" id="sNotifRow"><span><b>⏰ Hatırlatmalar</b><small>Oynamadığında akşam bildirim gelsin</small></span><button class="tog" id="sNotif" type="button" role="switch" aria-label="Hatırlatmalar"></button></div>
     <div class="set-row col"><span><b>🎯 Zorluk</b><small id="sDiffNote"></small></span><div class="seg" id="sDiff"><button type="button" data-v="easy">Rahat</button><button type="button" data-v="normal">Normal</button><button type="button" data-v="hard">Usta</button></div></div>
+    <div class="set-row" id="sAdPrivRow" hidden><span><b>📺 Reklam izinleri</b><small>Reklamlar için verdiğin izni değiştir</small></span><button class="btn" id="sAdPriv" type="button">Değiştir</button></div>
     <div class="set-row col" id="sOriRow"><span><b>📱 Ekran yönü</b><small>Telefonu çevirince ne olsun?</small></span><div class="seg" id="sOri"><button type="button" data-v="auto">Otomatik</button><button type="button" data-v="portrait">Dikey</button><button type="button" data-v="landscape">Yatay</button></div></div>
   </div>
   <div class="title-row"><button class="btn" id="sTut" type="button">🎓 Öğreticiyi tekrar oyna</button><button class="btn" id="sReset" type="button">🗑️ Kaydı sil</button></div>
   <div class="confirm" id="sResetConfirm" hidden>Bütün ilerlemen silinecek ve oyun 1. günden başlayacak. Emin misin?<div><button class="btn" id="sResetNo" type="button">Vazgeç</button><button class="btn primary" id="sResetYes" type="button">Evet, sil</button></div></div>
-  <p class="set-ver">🔒 Oyun kişisel veri toplamaz; ilerlemen yalnızca bu cihazda saklanır. <a href="https://maelstoorm.github.io/afiyet-olsun/gizlilik.html" target="_blank" rel="noopener">Gizlilik politikası</a></p>
-  <p class="set-ver">Afiyet Olsun · sürüm 1.4.0<br>© 2026 Egemen (MaelStoorm) · Tüm hakları saklıdır.<br>İzinsiz kopyalanamaz ve yayınlanamaz.</p>
+  <p class="set-ver">🔒 <span id="sPrivTxt">Oyun kişisel veri toplamaz; ilerlemen yalnızca bu cihazda saklanır.</span> <a href="https://maelstoorm.github.io/afiyet-olsun/gizlilik.html" target="_blank" rel="noopener">Gizlilik politikası</a></p>
+  <p class="set-ver">Afiyet Olsun · sürüm 1.5.0<br>© 2026 Egemen (MaelStoorm) · Tüm hakları saklıdır.<br>İzinsiz kopyalanamaz ve yayınlanamaz.</p>
   <button class="btn go" id="setClose" type="button">Tamam</button>
 </div></div>
 <div class="ovl" id="rewardScr" hidden><div class="ovl-card" role="dialog" aria-labelledby="rwTtl">
@@ -692,7 +694,7 @@ button:focus-visible{outline:3px solid var(--cini);outline-offset:2px}
 </div></div>
 <div class="ovl" id="adScr" hidden><div class="ovl-card" role="dialog" aria-labelledby="adTtl">
   <h2 id="adTtl">🎁 Hediye</h2>
-  <div class="ad-box"><b>Hayriye Teyze hediyeni hazırlıyor</b><span>Birkaç saniye bekle, hemen geliyor…</span><div class="ad-count" id="adCount">5</div></div>
+  <div class="ad-box"><b id="adMsg">Hayriye Teyze hediyeni hazırlıyor</b><span id="adSub">Birkaç saniye bekle, hemen geliyor…</span><div class="ad-count" id="adCount">5</div></div>
   <button class="btn go big" id="adDone" type="button" disabled>Ödülü al</button>
   <button class="btn" id="adSkip" type="button">Kapat (ödül yok)</button>
 </div></div>
@@ -4328,18 +4330,54 @@ function openBadges() {
 $('#badgeBtn').onclick = openBadges;
 $('#bgClose').onclick = () => { $('#badgeScr').hidden = true; };
 
-// ---------- reklam (yer tutucu) ----------
-// Gerçek reklam yok: oyuncu 5 saniye bekleyip günde 3 hediye alır (Google Play'de "reklam yok" beyanıyla uyumlu).
-let adCb = null, adTimer = null;
-function watchAd(onReward) {
+// ---------- ödüllü reklam ----------
+// Android uygulamasında (window.AndroidAds) hediye kısa bir ödüllü reklamla (Google AdMob) verilir.
+// Uygulama sonucu window.onAndroidAd('rewarded' | 'dismissed' | 'failed') ile bildirir.
+// Web sürümünde ya da reklam yüklenemezse eski davranış sürer: oyuncu 5 saniye bekleyip hediyesini alır.
+let adCb = null, adTimer = null, adNativeWait = false;
+const adNative = () => !!(window.AndroidAds && window.AndroidAds.showRewarded);
+function adBox(native) {
+  $('#adMsg').textContent = native ? 'Reklam yükleniyor' : 'Hayriye Teyze hediyeni hazırlıyor';
+  $('#adSub').textContent = native ? 'Reklamı sonuna kadar izle, hediyen hemen gelsin.' : 'Birkaç saniye bekle, hemen geliyor…';
+  $('#adCount').textContent = native ? '⏳' : 5;
+  $('#adDone').hidden = native;
+  $('#adSkip').textContent = native ? 'Vazgeç' : 'Kapat (ödül yok)';
+}
+function adWait(onReward) {
   adCb = onReward;
+  adBox(false);
   let n = 5; const btn = $('#adDone'); btn.disabled = true; $('#adCount').textContent = n;
   $('#adScr').hidden = false;
   clearInterval(adTimer);
   adTimer = setInterval(() => { n--; $('#adCount').textContent = n > 0 ? n : '✓'; if (n <= 0) { clearInterval(adTimer); btn.disabled = false; btn.focus(); } }, 1000);
 }
+function watchAd(onReward) {
+  if (!adNative()) return adWait(onReward);
+  if (adNativeWait) return;
+  adNativeWait = true; adCb = onReward;
+  clearInterval(adTimer); adBox(true);
+  $('#adScr').hidden = false; $('#adSkip').focus();
+  try { window.AndroidAds.showRewarded(); } catch (e) { window.onAndroidAd('failed'); }
+}
+window.onAndroidAd = status => {
+  if (!adNativeWait) return;
+  adNativeWait = false;
+  const cb = adCb;
+  if (status === 'failed') { adWait(cb); return; } // reklam yoksa oyuncu eli boş dönmesin
+  $('#adScr').hidden = true; adCb = null;
+  if (status === 'rewarded') { if (cb) cb(); }
+  else toast('Reklam bitmeden kapandı, hediye verilmedi.');
+};
 $('#adDone').onclick = () => { $('#adScr').hidden = true; const cb = adCb; adCb = null; if (cb) cb(); };
-$('#adSkip').onclick = () => { clearInterval(adTimer); $('#adScr').hidden = true; adCb = null; };
+$('#adSkip').onclick = () => {
+  clearInterval(adTimer);
+  if (adNativeWait) { adNativeWait = false; try { window.AndroidAds.cancelRewarded(); } catch (e) {} }
+  $('#adScr').hidden = true; adCb = null;
+};
+if (adNative()) {
+  $('#rwAd').textContent = '📺 Reklam izle, 2 katını al';
+  $('#deAdBtn').textContent = '📺 Reklam izle: bugünkü kârı 2 katına çıkar';
+}
 const todayStr = (off = 0) => { const d = new Date(Date.now() + off * 864e5); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); };
 const adsLeft = () => S.ads.day === todayStr() ? Math.max(0, 3 - S.ads.n) : 3;
 const useAd = () => { if (S.ads.day !== todayStr()) S.ads = { day: todayStr(), n: 0 }; S.ads.n++; };
@@ -4349,9 +4387,10 @@ function openStore() {
   $('#stMoney').textContent = S.money + '₺';
   const left = adsLeft();
   const item = (icon, name, desc, btn, id, disabled) => `<div class="store-item"><i>${icon}</i><div><b>${name}</b><span>${desc}</span></div><button class="btn ${disabled ? '' : 'go'}" type="button" data-id="${id}" ${disabled ? 'disabled' : ''}>${btn}</button></div>`;
-  $('#stBody').innerHTML = `<div class="store-sec"><h3>Hayriye Teyze'nin hediyeleri</h3><p>${left ? `Bugün ${left} hediye hakkın kaldı.` : 'Bugünlük hediyeler bitti, yarın yine gel.'}</p>
-    ${item('💰', '+75₺', 'Kasana 75₺ girsin.', '🎁 Al', 'cash', !left)}
-    ${item('⏳', 'Sabır şerbeti', `Sıradaki 3 müşteri %50 daha sabırlı olur.${S.boost.patience ? ` (Kalan: ${S.boost.patience})` : ''}`, '🎁 Al', 'pat', !left)}
+  const take = adNative() ? '📺 İzle, al' : '🎁 Al';
+  $('#stBody').innerHTML = `<div class="store-sec"><h3>Hayriye Teyze'nin hediyeleri</h3><p>${left ? `${adNative() ? 'Kısa bir reklam izle, hediyeni al. ' : ''}Bugün ${left} hediye hakkın kaldı.` : 'Bugünlük hediyeler bitti, yarın yine gel.'}</p>
+    ${item('💰', '+75₺', 'Kasana 75₺ girsin.', take, 'cash', !left)}
+    ${item('⏳', 'Sabır şerbeti', `Sıradaki 3 müşteri %50 daha sabırlı olur.${S.boost.patience ? ` (Kalan: ${S.boost.patience})` : ''}`, take, 'pat', !left)}
     </div>`;
   $('#stBody').querySelectorAll('button[data-id]').forEach(b => {
     b.onclick = () => {
@@ -4472,6 +4511,10 @@ function openSettings() {
   $('#sNotifRow').hidden = !(a && a.setReminderOn);
   $('#sOriRow').hidden = false;
   $('#sVibRow').hidden = !(a && a.vibrate) && !navigator.vibrate;
+  let adPriv = false;
+  try { adPriv = !!(window.AndroidAds && window.AndroidAds.privacyOptionsRequired && window.AndroidAds.privacyOptionsRequired()); } catch (e) {}
+  $('#sAdPrivRow').hidden = !adPriv;
+  $('#sPrivTxt').textContent = adNative() ? 'İlerlemen yalnızca bu cihazda saklanır. Hediye reklamlarını Google AdMob gösterir.' : 'Oyun kişisel veri toplamaz; ilerlemen yalnızca bu cihazda saklanır.';
   $('#sResetConfirm').hidden = true;
   setUI(); $('#setScr').hidden = false; $('#setClose').focus();
 }
@@ -4491,6 +4534,7 @@ $('#sVib').onclick = () => { SET.vib = !SET.vib; saveSet(); setUI(); buzz(40); }
 $('#sNotif').onclick = () => { SET.notif = !SET.notif; saveSet(); setUI(); syncReminder(); };
 document.querySelectorAll('#sDiff button').forEach(b => b.onclick = () => { SET.diff = b.dataset.v; saveSet(); setUI(); });
 document.querySelectorAll('#sOri button').forEach(b => b.onclick = () => { SET.orient = b.dataset.v; saveSet(); setUI(); applyOrient(); });
+$('#sAdPriv').onclick = () => { try { window.AndroidAds.showPrivacyOptions(); } catch (e) {} };
 $('#sTut').onclick = () => { $('#setScr').hidden = true; $('#tutAgainBtn').onclick(); };
 $('#sReset').onclick = () => { $('#sResetConfirm').hidden = false; $('#sResetYes').focus(); };
 $('#sResetNo').onclick = () => { $('#sResetConfirm').hidden = true; };
