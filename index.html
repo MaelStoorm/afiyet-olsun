@@ -4571,8 +4571,6 @@ function start() {
   try { auto = sessionStorage.getItem('afiyet-autostart') === '1'; sessionStorage.removeItem('afiyet-autostart'); } catch (e) {}
   if (auto) begin(); else openTitle();
 }
-try { window.claude?.hot?.snapshot?.(() => ({ S })); } catch (e) {}
-const boot = d => { if (d && d.S) Object.assign(S, d.S); start(); };
-window.claude?.hot?.ready ? window.claude.hot.ready(boot) : boot(window.claude?.hot?.data ?? {});
+start();
 })();
 </script>
