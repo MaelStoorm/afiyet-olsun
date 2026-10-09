@@ -70,8 +70,8 @@ android {
         applicationId = "com.afiyetolsun.oyun"
         minSdk = 24
         targetSdk = 36
-        versionCode = 17
-        versionName = "1.5.0"
+        versionCode = 18
+        versionName = "1.5.1"
         manifestPlaceholders["admobAppId"] = admobAppId
         buildConfigField("String", "ADMOB_REWARDED_ID", "\"$admobRewardedId\"")
     }

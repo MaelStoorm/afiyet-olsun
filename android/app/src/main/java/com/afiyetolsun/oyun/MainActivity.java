@@ -210,6 +210,8 @@ public class MainActivity extends Activity {
     @Override
     protected void onPause() {
         resumed = false;
+        // WebView arka planda Web Audio'yu kendiliğinden durdurmuyor: oyuna haber ver, sesi kessin ve beklesin
+        web.evaluateJavascript("window.__afiyetBg&&window.__afiyetBg(true)", null);
         web.onPause();
         web.pauseTimers();
         ReminderReceiver.schedule(this, true);
@@ -222,6 +224,7 @@ public class MainActivity extends Activity {
         resumed = true;
         web.resumeTimers();
         web.onResume();
+        web.evaluateJavascript("window.__afiyetBg&&window.__afiyetBg(false)", null);
         ReminderReceiver.cancel(this);
         if (pendingAdResult != null) {
             String status = pendingAdResult;
