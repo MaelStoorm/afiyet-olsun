@@ -1,0 +1,113 @@
+name: iOS deneme (simülatör)
+
+# Yalnızca ios-dene dalında: uygulamayı iki iPhone simülatöründe açar, test sürücüsüyle oyunu gezer,
+# arka plana alıp geri getirir ve her 5 saniyede ekran görüntüsü alır. Sonuçlar ios-dene-sonuc dalına konur.
+
+on:
+  push:
+    branches: [ios-dene]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ios-dene
+  cancel-in-progress: true
+
+jobs:
+  dene:
+    runs-on: macos-15
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Xcode 26 seç
+        run: |
+          X=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -1)
+          sudo xcode-select -s "$X/Contents/Developer"
+
+      - name: Siteyi hazırla, test sürücüsünü ekle, projeyi üret
+        run: |
+          ios/hazirla.sh
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('ios/gen/AfiyetOlsun/site/index.html')
+          d = Path('.github/ios-dene/driver.js').read_text(encoding='utf-8')
+          p.write_text(p.read_text(encoding='utf-8') + '\n<script>\n' + d + '\n</script>\n', encoding='utf-8')
+          PY
+          brew install xcodegen >/dev/null
+          cd ios && xcodegen generate
+
+      - name: Simülatör için derle
+        run: |
+          cd ios
+          xcodebuild -project AfiyetOlsun.xcodeproj -scheme AfiyetOlsun -configuration Debug \
+            -destination 'generic/platform=iOS Simulator' -derivedDataPath "$RUNNER_TEMP/dd" CODE_SIGNING_ALLOWED=NO build | tail -5
+
+      - name: Simülatörlerde dene
+        run: |
+          set -uo pipefail
+          OUT="$RUNNER_TEMP/sonuc"; mkdir -p "$OUT"
+          APP=$(ls -d "$RUNNER_TEMP"/dd/Build/Products/Debug-iphonesimulator/AfiyetOlsun.app)
+          BID=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$APP/Info.plist")
+          xcrun simctl list devices available | grep -i iphone | head -30
+          pick() { xcrun simctl list devices available -j | python3 -c "
+          import json,sys
+          want=sys.argv[1:]
+          d=json.load(sys.stdin)['devices']
+          c=[(k,x) for k,v in d.items() if 'iOS' in k for x in v]
+          for w in want:
+              m=[x for k,x in sorted(c,key=lambda t:t[0]) if x['name']==w]
+              if m: print(m[-1]['udid'], w.replace(' ','_')); break
+          " "$@"; }
+          run() {
+            read -r DEV NAME <<< "$1"
+            [ -z "$DEV" ] && return
+            echo "=== $NAME $DEV"
+            xcrun simctl boot "$DEV" || true
+            xcrun simctl bootstatus "$DEV" -b
+            xcrun simctl status_bar "$DEV" override --time "09:41" --batteryState charged --batteryLevel 100 || true
+            xcrun simctl install "$DEV" "$APP"
+            LOG="$OUT/$NAME-gunluk.txt"
+            xcrun simctl spawn "$DEV" log stream --style compact --predicate 'eventMessage CONTAINS "[kabuk]"' > "$LOG" 2>&1 &
+            LP=$!
+            sleep 2
+            xcrun simctl launch "$DEV" "$BID" -ShellNoAsk YES
+            bg=0
+            for i in $(seq -w 1 40); do
+              sleep 5
+              xcrun simctl io "$DEV" screenshot "$OUT/$NAME-$i.png" >/dev/null 2>&1
+              if [ $bg = 0 ] && grep -q "arka plana hazir" "$LOG"; then
+                bg=1
+                echo "arka plana alınıyor ($i)"
+                xcrun simctl launch "$DEV" com.apple.Preferences
+                sleep 4
+                xcrun simctl io "$DEV" screenshot "$OUT/$NAME-$i-arka.png" >/dev/null 2>&1
+                sleep 2
+                xcrun simctl launch "$DEV" "$BID" -ShellNoAsk YES
+              fi
+              if grep -q "bitti B" "$LOG"; then break; fi
+            done
+            sleep 2
+            kill $LP || true
+            xcrun simctl terminate "$DEV" "$BID" || true
+            xcrun simctl shutdown "$DEV" || true
+            grep -v "^Filtering" "$LOG" | cut -c1-400 | tail -80
+          }
+          run "$(pick 'iPhone 17 Pro Max' 'iPhone 16 Pro Max')"
+          run "$(pick 'iPhone 16e' 'iPhone 17' 'iPhone 16')"
+          ls -la "$OUT"
+
+      - name: Sonuçları ios-dene-sonuc dalına koy
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cd "$RUNNER_TEMP/sonuc" || exit 0
+          echo "$GITHUB_SHA" > commit.txt
+          git init -q -b ios-dene-sonuc
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add -A
+          git commit -qm "iOS deneme ${GITHUB_SHA::7}"
+          git push -q -f "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" ios-dene-sonuc
