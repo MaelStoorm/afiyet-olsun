@@ -1,0 +1,29 @@
+getpwuid_r did not find a match for uid 501
+Filtering the log data using "composedMessage CONTAINS "[kabuk]""
+Timestamp               Ty Process[PID:TID]
+2026-10-10 23:10:09.287 Df AfiyetOlsun[10507:8bb5] (Foundation) [kabuk] hazır: app://site/index.html Afiyet Olsun
+2026-10-10 23:10:11.827 Df AfiyetOlsun[10507:8bb5] (Foundation) [kabuk] [test 2.6s] baslik {"w":980,"h":451,"cw":980,"sw":980,"vv":[980,451,0.9760000109672546],"dpr":3,"safe":"0px 62px 20px 62px","meta":"viewport-fit=cover,width=980,initial-scale=0.976,maximum-scale=0.976,minimum-scale=0.976,user-scalable=no","bridge":["setReminder","setReminderOn","vibrate","setOrientation"],"hidden":false}
+2026-10-10 23:10:17.956 Df AfiyetOlsun[10507:8bb5] (Foundation) [kabuk] [test 8.7s] ayarlar {"notif":true,"vib":true,"ori":true,"set":null}
+2026-10-10 23:10:32.633 Df AfiyetOlsun[10507:8bb5] (Foundation) [kabuk] [test 23.4s] sabah1 {"w":980,"h":451,"cw":980,"sw":980,"vv":[980,451,0.9760000109672546],"dpr":3,"safe":"0px 62px 20px 62px","meta":"viewport-fit=cover,width=980,initial-scale=0.976,maximum-scale=0.976,minimum-scale=0.976,user-scalable=no","bridge":["setReminder","setReminderOn","vibrate","setOrientation"],"hidden":false}
+2026-10-10 23:10:39.151 Df AfiyetOlsun[10507:8bb5] (Foundation) [kabuk] [test 29.9s] dukkan {"w":980,"h":451,"cw":980,"sw":980,"vv":[980,451,0.9760000109672546],"dpr":3,"safe":"0px 62px 20px 62px","meta":"viewport-fit=cover,width=980,initial-scale=0.976,maximum-scale=0.976,minimum-scale=0.976,user-scalable=no","bridge":["setReminder","setReminderOn","vibrate","setOrientation"],"hidden":false}
+2026-10-10 23:10:42.697 Df AfiyetOlsun[10507:8bb5] (Foundation) [kabuk] [test 33.4s] siparis alindi
+2026-10-10 23:10:47.710 Df AfiyetOlsun[10507:8bb5] (Foundation) [kabuk] [test 38.5s] mutfak {"w":980,"h":451,"cw":980,"sw":980,"vv":[980,451,0.9760000109672546],"dpr":3,"safe":"0px 62px 20px 62px","meta":"viewport-fit=cover,width=980,initial-scale=0.976,maximum-scale=0.976,minimum-scale=0.976,user-scalable=no","bridge":["setReminder","setReminderOn","vibrate","setOrientation"],"hidden":false}
+2026-10-10 23:10:57.765 Df AfiyetOlsun[10507:8bb5] (Foundation) [kabuk] [test 48.5s] kayit hazir, yeniden yukleniyor
+2026-10-10 23:10:58.350 Df AfiyetOlsun[10507:8bb5] (Foundation) [kabuk] hazır: app://site/index.html Afiyet Olsun
+2026-10-10 23:11:05.981 Df AfiyetOlsun[10507:8bb5] (Foundation) [kabuk] [test 7.6s] sabah {"w":980,"h":451,"cw":980,"sw":980,"vv":[980,451,0.9760000109672546],"dpr":3,"safe":"0px 62px 20px 62px","meta":"viewport-fit=cover,width=980,initial-scale=0.976,maximum-scale=0.976,minimum-scale=0.976,user-scalable=no","bridge":["setReminder","setReminderOn","vibrate","setOrientation"],"hidden":false}
+2026-10-10 23:11:05.981 Df AfiyetOlsun[10507:8bb5] (Foundation) [kabuk] [test 7.6s] YOK null
+2026-10-10 23:11:10.983 Df AfiyetOlsun[10507:8bb5] (Foundation) [kabuk] [test 12.6s] market {"w":980,"h":451,"cw":980,"sw":980,"vv":[980,451,0.9760000109672546],"dpr":3,"safe":"0px 62px 20px 62px","meta":"viewport-fit=cover,width=980,initial-scale=0.976,maximum-scale=0.976,minimum-scale=0.976,user-scalable=no","bridge":["setReminder","setReminderOn","vibrate","setOrientation"],"hidden":false}
+2026-10-10 23:11:21.133 Df AfiyetOlsun[10507:8bb5] (Foundation) [kabuk] [test 22.7s] dukkan6 {"w":980,"h":451,"cw":980,"sw":980,"vv":[980,451,0.9760000109672546],"dpr":3,"safe":"0px 62px 20px 62px","meta":"viewport-fit=cover,width=980,initial-scale=0.976,maximum-scale=0.976,minimum-scale=0.976,user-scalable=no","bridge":["setReminder","setReminderOn","vibrate","setOrientation"],"hidden":false}
+2026-10-10 23:11:26.168 Df AfiyetOlsun[10507:8bb5] (Foundation) [kabuk] [test 27.8s] dikey
+2026-10-10 23:11:31.236 Df AfiyetOlsun[10507:8bb5] (Foundation) [kabuk] [test 32.9s] dikey {"w":440,"h":956,"cw":440,"sw":440,"vv":[440,956,1],"dpr":3,"safe":"62px 0px 34px 0px","meta":"width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,minimum-scale=1,user-scalable=no","bridge":["setReminder","setReminderOn","vibrate","setOrientation"],"hidden":false}
+2026-10-10 23:11:36.252 Df AfiyetOlsun[10507:8bb5] (Foundation) [kabuk] [test 37.9s] yatay
+2026-10-10 23:11:41.335 Df AfiyetOlsun[10507:8bb5] (Foundation) [kabuk] [test 42.9s] yatay {"w":980,"h":451,"cw":980,"sw":980,"vv":[980,451,0.9760000109672546],"dpr":3,"safe":"0px 62px 20px 62px","meta":"viewport-fit=cover,width=980,initial-scale=0.976,maximum-scale=0.976,minimum-scale=0.976,user-scalable=no","bridge":["setReminder","setReminderOn","vibrate","setOrientation"],"hidden":false}
+2026-10-10 23:11:41.349 Df AfiyetOlsun[10507:8bb5] (Foundation) [kabuk] [test 43.0s] saat 11:28
+2026-10-10 23:11:46.359 Df AfiyetOlsun[10507:8bb5] (Foundation) [kabuk] [test 48.0s] saat 11:35 arka plana hazir
+2026-10-10 23:11:51.490 Df AfiyetOlsun[10507:8bb5] (Foundation) [kabuk] [test 53.1s] saat 11:41 false
+2026-10-10 23:11:56.528 Df AfiyetOlsun[10507:8bb5] (Foundation) [kabuk] [test 58.1s] saat 11:47 false
+2026-10-10 23:11:56.567 Df AfiyetOlsun[10507:8bb5] (Foundation) [kabuk] [test 58.2s] donus {"w":980,"h":451,"cw":980,"sw":980,"vv":[980,451,0.9760000109672546],"dpr":3,"safe":"0px 62px 20px 62px","meta":"viewport-fit=cover,width=980,initial-scale=0.976,maximum-scale=0.976,minimum-scale=0.976,user-scalable=no","bridge":["setReminder","setReminderOn","vibrate","setOrientation"],"hidden":false}
+2026-10-10 23:12:01.653 Df AfiyetOlsun[10507:8bb5] (Foundation) [kabuk] [test 63.2s] saat 11:53 false
+2026-10-10 23:12:06.653 Df AfiyetOlsun[10507:8bb5] (Foundation) [kabuk] [test 68.3s] bitti B
+2026-10-10 23:30:58.397 Df AfiyetOlsun[10507:8bb5] (Foundation) [kabuk] hatırlatma kuruldu: 2026-10-11 18:30:00 +0000, 3 akşam
+Child process terminated with signal 15: Terminated
