@@ -21,12 +21,20 @@ final class ShellViewController: UIViewController, WKNavigationDelegate, WKUIDel
 
     let location = ShellLocation()
     private var reminders: ShellReminders?
+    private var afiyet: ShellAfiyet?
     private var askedReminders = false
+    private var fit: (zoom: CGFloat, width: CGFloat) = (1, 0)
+
+    /// Sayfanın istediği ekran yönü (oyunun ayarlarındaki "Ekran yönü"); nil ise Info.plist'teki ayar
+    static var orientationOverride: UIInterfaceOrientationMask?
 
     override var preferredStatusBarStyle: UIStatusBarStyle {
         config.autoStatusBar ? .default : (config.lightStatusBar ? .lightContent : .darkContent)
     }
     override var prefersHomeIndicatorAutoHidden: Bool { config.orientations == .landscape }
+    override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
+        Self.orientationOverride ?? config.orientations
+    }
 
     // MARK: - Kurulum
 
@@ -64,25 +72,41 @@ final class ShellViewController: UIViewController, WKNavigationDelegate, WKUIDel
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         // Oyun açılırken bildirim izni bir kez sorulur (Android'deki gibi)
-        if let r = reminders, !askedReminders {
+        if !askedReminders, reminders != nil || afiyet != nil {
             askedReminders = true
-            r.askPermission()
+            // Ekran görüntüsü alınırken (simülatör, -ShellNoAsk YES) izin penceresi açılmasın
+            if !UserDefaults.standard.bool(forKey: "ShellNoAsk") {
+                reminders?.askPermission()
+                afiyet?.askPermission()
+            }
         }
     }
 
-    // Alçak ekranlarda (ör. yatay iPhone) sayfa, tasarlandığı yüksekliğe sığacak kadar uzaklaştırılır
+    // Alçak ekranlarda (ör. yatay iPhone) sayfa, tasarlandığı yüksekliğe sığacak kadar uzaklaştırılır.
+    // pageZoom kullanılmıyor: sayfayı küçültür ama genişliği büyütmez, sağda boş şerit kalıyordu.
+    // Bunun yerine sayfanın viewport ölçeği ayarlanır (genişlik = ekran / ölçek), sayfa ekranı tam doldurur.
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         guard config.fitHeight > 0, view.bounds.height > 0 else { return }
         let usable = view.bounds.height - view.safeAreaInsets.top - view.safeAreaInsets.bottom
-        let zoom = max(0.7, min(1, usable / config.fitHeight))
-        if abs(web.pageZoom - zoom) > 0.01 { web.pageZoom = zoom }
+        var zoom = max(0.7, min(1, usable / config.fitHeight))
+        zoom = (zoom * 1000).rounded(.down) / 1000
+        if abs(fit.zoom - zoom) > 0.005 || abs(fit.width - view.bounds.width) > 0.5 {
+            fit = (zoom, view.bounds.width)
+            sendFit()
+        }
+    }
+
+    private func sendFit() {
+        guard config.fitHeight > 0, fit.width > 0 else { return }
+        call("window.__shellFit", [Double(fit.zoom), Double(fit.width)])
     }
 
     override func viewDidLoad() {
         super.viewDidLoad()
         location.answer = { [weak self] args in self?.call("window.__shellLocation", args) }
         if config.reminders == "pati" { reminders = ShellReminders(web: web) }
+        if config.reminders == "afiyet" { afiyet = ShellAfiyet(web: web) }
         web.load(URLRequest(url: URL(string: "\(SiteScheme.scheme)://\(SiteScheme.host)/\(config.startPage)")!))
     }
 
@@ -98,20 +122,37 @@ final class ShellViewController: UIViewController, WKNavigationDelegate, WKUIDel
           window.addEventListener('DOMContentLoaded', function () { send('hazır', [location.href, document.title]); });
         })();
         """]
-        // Sayfa iki parmakla büyümesin: yakınlaştırmayı sayfanın kendisi (ör. harita) yapsın
+        // Sayfa iki parmakla büyümesin: yakınlaştırmayı sayfanın kendisi (ör. harita) yapsın.
+        // Alçak ekranda sığdırma (FitHeight) da buradan yapılır: uygulama ölçeği window.__shellFit ile bildirir.
         let css = config.extraCSS.replacingOccurrences(of: "\\", with: "\\\\").replacingOccurrences(of: "`", with: "\\`")
         list.append("""
-        document.addEventListener('DOMContentLoaded', function () {
-          var m = document.querySelector('meta[name=viewport]');
-          if (!m) { m = document.createElement('meta'); m.name = 'viewport'; document.head.appendChild(m); }
-          var c = (m.content || 'width=device-width,initial-scale=1,viewport-fit=cover')
-            .split(',').map(function (s) { return s.trim(); })
-            .filter(function (s) { return s && !/^(maximum-scale|minimum-scale|user-scalable)/.test(s); });
-          m.content = c.concat(['maximum-scale=1', 'minimum-scale=1', 'user-scalable=no']).join(',');
-          var css = `\(css)`;
-          if (css) { var st = document.createElement('style'); st.textContent = css; document.head.appendChild(st); }
-        });
+        (function () {
+          var fit = null;
+          function apply() {
+            var m = document.querySelector('meta[name=viewport]');
+            if (!m) { if (!document.head) return; m = document.createElement('meta'); m.name = 'viewport'; document.head.appendChild(m); }
+            if (!m.getAttribute('data-shell')) m.setAttribute('data-shell', m.content || 'width=device-width,initial-scale=1,viewport-fit=cover');
+            var c = m.getAttribute('data-shell')
+              .split(',').map(function (s) { return s.trim(); })
+              .filter(function (s) { return s && !/^(maximum-scale|minimum-scale|user-scalable)/.test(s); });
+            if (fit && fit[0] < 1) {
+              var z = fit[0];
+              c = c.filter(function (s) { return !/^(width|initial-scale)/.test(s); });
+              m.content = c.concat(['width=' + Math.round(fit[1] / z), 'initial-scale=' + z, 'maximum-scale=' + z, 'minimum-scale=' + z, 'user-scalable=no']).join(',');
+            } else {
+              m.content = c.concat(['maximum-scale=1', 'minimum-scale=1', 'user-scalable=no']).join(',');
+            }
+          }
+          window.__shellFit = function (z, w) { fit = [z, w]; if (document.readyState !== 'loading') apply(); };
+          document.addEventListener('DOMContentLoaded', function () {
+            apply();
+            var css = `\(css)`;
+            if (css) { var st = document.createElement('style'); st.textContent = css; document.head.appendChild(st); }
+          });
+          try { webkit.messageHandlers.shell.postMessage({ op: 'fit' }); } catch (e) {}
+        })();
         """)
+        if config.reminders == "afiyet" { list.append(ShellAfiyet.script) }
         if config.bridge == "files" {
             list.append("""
             window.AndroidBridge = {
@@ -245,6 +286,7 @@ final class ShellViewController: UIViewController, WKNavigationDelegate, WKUIDel
 
     func userContentController(_ controller: WKUserContentController, didReceive message: WKScriptMessage) {
         guard let body = message.body as? [String: Any], let op = body["op"] as? String else { return }
+        if let a = afiyet, a.handle(op, body) { return }
         switch op {
         case "pickText": pick(.textFiles)
         case "pickBinary": pick(.binaryFile)
@@ -261,8 +303,29 @@ final class ShellViewController: UIViewController, WKNavigationDelegate, WKUIDel
             if let id = body["id"] as? Int { location.request(id) }
         case "log":
             NSLog("[kabuk] %@", body["text"] as? String ?? "")
+        case "fit":
+            sendFit()
+        case "orient":
+            setOrientation(body["mode"] as? String ?? "")
         default:
             break
+        }
+    }
+
+    private func setOrientation(_ mode: String) {
+        let mask: UIInterfaceOrientationMask
+        switch mode {
+        case "portrait": mask = .portrait
+        case "landscape": mask = .landscape
+        default: mask = .allButUpsideDown
+        }
+        guard Self.orientationOverride != mask else { return }
+        Self.orientationOverride = mask
+        if #available(iOS 16.0, *) {
+            setNeedsUpdateOfSupportedInterfaceOrientations()
+            view.window?.windowScene?.requestGeometryUpdate(.iOS(interfaceOrientations: mask)) { _ in }
+        } else {
+            UIViewController.attemptRotationToDeviceOrientation()
         }
     }
 

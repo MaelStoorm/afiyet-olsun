@@ -20,7 +20,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     // Ekran yönü: Info.plist'teki ayara göre (oyun sırasında sayfa da değiştirebilir)
     func application(_ application: UIApplication,
                      supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask {
-        ShellConfig.shared.orientations
+        ShellViewController.orientationOverride ?? ShellConfig.shared.orientations
     }
 }
 
@@ -65,6 +65,7 @@ struct ShellConfig {
     /// Uygulamaya özel ek CSS (ör. uygulamada anlamı olmayan bir kutuyu gizlemek için)
     let extraCSS: String
     /// "pati": Pati oyunlarının ihtiyaç bildirimleri (izin sorulur, oyun kapanınca hatırlatma kurulur)
+    /// "afiyet": Afiyet Olsun'un window.AfiyetAndroid köprüsü (akşam hatırlatması, titreşim, ekran yönü)
     let reminders: String
 
     init() {
