@@ -1,0 +1,3 @@
+getpwuid_r did not find a match for uid 501
+Timestamp               Ty Process[PID:TID]
+2026-10-10 23:53:06.065 Df log[14472:0] [com.apple.log:] log run noninteractively, parent: 6203 (launchd_sim), args: 'log' 'show' '--last' '3m' '--style' 'compact' '--predicate' 'eventMessage CONTAINS "[kabuk]"'
