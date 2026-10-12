@@ -2568,7 +2568,7 @@ function iceCube(ctx, x, y, s, a) {
 }
 function drawDrink(ctx, type, x, y, s = 1) {
   ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
-  if (type === 'cay') { drawTeaGlass(ctx, 0, 28, .86, 0, false); ctx.restore(); return; }
+  if (type === 'cay') { drawTeaGlass(ctx, 0, 24, 1, 0, false); ctx.restore(); return; }
   const glass = new Path2D(); glass.moveTo(-18, -34); glass.lineTo(18, -34); glass.lineTo(14, 29); glass.quadraticCurveTo(13.8, 32, 11, 32); glass.lineTo(-11, 32); glass.quadraticCurveTo(-13.8, 32, -14, 29); glass.closePath();
   const top = { ayran: -22, salgam: -22, limonata: -25 }[type];
   ctx.fillStyle = 'rgba(0,0,0,.13)'; ellipse(ctx, 2, 33, 18, 3); ctx.fill();
@@ -3717,46 +3717,85 @@ function drawTeapot(x, full) {
     }
   }
 }
-// ince belli çay bardağı, tabağı, kesme şekeri ve kaşığıyla
+// ince belli çay bardağı: altta tombul gövde, ince bel, yukarı açılan lale ağız
 function teaGlassPath(ctx) {
-  ctx.beginPath(); ctx.moveTo(-10.5, 0);
-  ctx.bezierCurveTo(-14.8, -4, -15.2, -17, -10.8, -27);
-  ctx.bezierCurveTo(-9.2, -32, -11, -47, -15.5, -62);
-  ctx.lineTo(15.5, -62);
-  ctx.bezierCurveTo(11, -47, 9.2, -32, 10.8, -27);
-  ctx.bezierCurveTo(15.2, -17, 14.8, -4, 10.5, 0);
+  ctx.beginPath(); ctx.moveTo(-10, 0);
+  ctx.bezierCurveTo(-15, -1.5, -16.6, -12, -12.4, -19.5);
+  ctx.bezierCurveTo(-10.6, -22.5, -9.6, -25, -9.7, -28);
+  ctx.bezierCurveTo(-10.2, -38, -14.4, -50, -18.5, -60);
+  ctx.lineTo(18.5, -60);
+  ctx.bezierCurveTo(14.4, -50, 10.2, -38, 9.7, -28);
+  ctx.bezierCurveTo(9.6, -25, 10.6, -22.5, 12.4, -19.5);
+  ctx.bezierCurveTo(16.6, -12, 15, -1.5, 10, 0);
   ctx.closePath();
 }
+// çay tabağı, kesme şekerler ve kaşıkla birlikte; tabanı (cx, by)
 function drawTeaGlass(ctx, cx, by, s = 1, t = 0, steam = true) {
   ctx.save(); ctx.translate(cx, by); ctx.scale(s, s); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-  ctx.fillStyle = 'rgba(0,0,0,.18)'; ellipse(ctx, 0, 6, 31, 7); ctx.fill();
-  ctx.fillStyle = '#fbfaf5'; ellipse(ctx, 0, 3, 30, 7.5); ctx.fill(); ctx.strokeStyle = '#8f9aa1'; ctx.lineWidth = 1.5; ctx.stroke();
-  ctx.strokeStyle = '#c0392b'; ctx.lineWidth = 2; ellipse(ctx, 0, 3, 24, 5.6); ctx.stroke();
-  ctx.fillStyle = '#e8e2d6'; ellipse(ctx, 0, 2, 13, 3); ctx.fill();
-  for (const [sx, sy] of [[-23, 1], [-17, 4]]) { ctx.fillStyle = '#ffffff'; roundRect(ctx, sx - 3.5, sy - 3.5, 7, 6, 1.2); ctx.fill(); ctx.strokeStyle = '#a9b0b5'; ctx.lineWidth = 1; ctx.stroke(); }
-  ctx.strokeStyle = '#8f9aa1'; ctx.lineWidth = 2.4; ctx.beginPath(); ctx.moveTo(16, 4); ctx.lineTo(28, -.5); ctx.stroke();
-  ctx.fillStyle = '#c3cbd1'; ellipse(ctx, 13.5, 4.8, 4, 2.2, -.3); ctx.fill();
+  // tabak
+  ctx.fillStyle = 'rgba(0,0,0,.16)'; ellipse(ctx, 1.5, 6.5, 30, 6.5); ctx.fill();
+  ctx.fillStyle = '#d5d0c6'; ellipse(ctx, 0, 4.2, 28, 6.8); ctx.fill();
+  const pg = ctx.createLinearGradient(0, -4, 0, 9); pg.addColorStop(0, '#ffffff'); pg.addColorStop(1, '#ebe7de');
+  ctx.fillStyle = pg; ellipse(ctx, 0, 2.6, 28, 6.8); ctx.fill(); ctx.strokeStyle = '#98a0a5'; ctx.lineWidth = 1.2; ctx.stroke();
+  ctx.strokeStyle = '#c0392b'; ctx.lineWidth = 1.8; ellipse(ctx, 0, 2.6, 24.6, 5.7); ctx.stroke();
+  ctx.strokeStyle = '#d9a93c'; ctx.lineWidth = .8; ellipse(ctx, 0, 2.6, 22.6, 5.1); ctx.stroke();
+  ctx.fillStyle = '#e9e5dc'; ellipse(ctx, 0, 1.6, 14.5, 3.6); ctx.fill();
+  // kesme şekerler
+  for (const [sx, sy] of [[-21.5, .6], [-16.5, 3.4]]) {
+    ctx.fillStyle = '#e4e6e8'; ctx.beginPath(); ctx.moveTo(sx + 3, sy - 3); ctx.lineTo(sx + 5, sy - 4.6); ctx.lineTo(sx + 5, sy + 1.2); ctx.lineTo(sx + 3, sy + 3); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#f4f5f6'; ctx.beginPath(); ctx.moveTo(sx - 3, sy - 3); ctx.lineTo(sx - 1, sy - 4.6); ctx.lineTo(sx + 5, sy - 4.6); ctx.lineTo(sx + 3, sy - 3); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(sx - 3, sy - 3, 6, 6);
+    ctx.strokeStyle = '#a7aeb3'; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(sx - 3, sy + 3); ctx.lineTo(sx - 3, sy - 3); ctx.lineTo(sx - 1, sy - 4.6); ctx.lineTo(sx + 5, sy - 4.6); ctx.lineTo(sx + 5, sy + 1.2); ctx.lineTo(sx + 3, sy + 3); ctx.closePath(); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(sx - 3, sy - 3); ctx.lineTo(sx + 3, sy - 3); ctx.lineTo(sx + 3, sy + 3); ctx.lineTo(sx + 5, sy - 4.6); ctx.stroke();
+  }
+  // bardağın tabaktaki gölgesi
+  ctx.fillStyle = 'rgba(140,40,15,.18)'; ellipse(ctx, 2, 1.4, 12, 2.4); ctx.fill();
+  // bardak: önce cam, sonra içindeki çay
   ctx.save(); teaGlassPath(ctx); ctx.clip();
-  ctx.fillStyle = 'rgba(225,240,245,.55)'; ctx.fillRect(-16, -63, 32, 12);
-  const g = ctx.createLinearGradient(-14, 0, 14, 0); g.addColorStop(0, '#8e2410'); g.addColorStop(.35, '#c8461a'); g.addColorStop(.6, '#b13a15'); g.addColorStop(1, '#6e1a08');
-  ctx.fillStyle = g; ctx.fillRect(-16, -52, 32, 52);
-  const g2 = ctx.createLinearGradient(0, -52, 0, 0); g2.addColorStop(0, 'rgba(240,120,40,.35)'); g2.addColorStop(1, 'rgba(60,10,0,.35)');
-  ctx.fillStyle = g2; ctx.fillRect(-16, -52, 32, 52);
-  ctx.fillStyle = '#d9622a'; ellipse(ctx, 0, -52, 13.5, 2.4); ctx.fill();
-  ctx.fillStyle = 'rgba(255,190,120,.5)'; ellipse(ctx, -3, -52.4, 6, 1); ctx.fill();
-  ctx.fillStyle = 'rgba(255,255,255,.45)'; ellipse(ctx, 0, -1.5, 9.5, 2.2); ctx.fill();
-  ctx.strokeStyle = 'rgba(255,255,255,.75)'; ctx.lineWidth = 2.2;
-  ctx.beginPath(); ctx.moveTo(-12.5, -58); ctx.bezierCurveTo(-10.5, -50, -9, -40, -8.6, -31); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(-10, -23); ctx.bezierCurveTo(-12.5, -17, -12.5, -10, -9.5, -4); ctx.stroke();
-  ctx.strokeStyle = 'rgba(255,255,255,.3)'; ctx.lineWidth = 1.4;
-  ctx.beginPath(); ctx.moveTo(11.5, -55); ctx.bezierCurveTo(10, -46, 8.8, -38, 8.6, -31); ctx.stroke();
+  ctx.fillStyle = 'rgba(232,244,248,.55)'; ctx.fillRect(-19, -62, 38, 63);
+  const lv = -51.5;
+  // kalın cam taban
+  ctx.fillStyle = 'rgba(200,90,50,.22)'; ctx.fillRect(-13, -5, 26, 6);
+  ctx.save(); ctx.beginPath(); ctx.rect(-19, lv, 38, -lv - 5); ctx.ellipse(0, -5, 11, 2.2, 0, 0, Math.PI * 2); ctx.clip();
+  const g = ctx.createLinearGradient(-17, 0, 17, 0);
+  g.addColorStop(0, '#5e1205'); g.addColorStop(.16, '#94260c'); g.addColorStop(.4, '#c9461b'); g.addColorStop(.55, '#d4532a'); g.addColorStop(.8, '#a0300f'); g.addColorStop(1, '#5a1104');
+  ctx.fillStyle = g; ctx.fillRect(-19, lv, 38, 50);
+  const g2 = ctx.createLinearGradient(0, lv, 0, -3);
+  g2.addColorStop(0, 'rgba(255,170,100,.16)'); g2.addColorStop(.42, 'rgba(255,175,95,.22)'); g2.addColorStop(.62, 'rgba(70,10,0,.05)'); g2.addColorStop(1, 'rgba(60,8,0,.32)');
+  ctx.fillStyle = g2; ctx.fillRect(-19, lv, 38, 50);
+  // gövdeden geçen ışık
+  const g3 = ctx.createRadialGradient(2.5, -9, 1, 2.5, -9, 10); g3.addColorStop(0, 'rgba(255,180,90,.65)'); g3.addColorStop(1, 'rgba(255,140,60,0)');
+  ctx.fillStyle = g3; ctx.fillRect(-19, -24, 38, 22);
   ctx.restore();
-  ctx.strokeStyle = '#66757e'; ctx.lineWidth = 1.6; teaGlassPath(ctx); ctx.stroke();
-  ctx.fillStyle = 'rgba(235,245,250,.6)'; ellipse(ctx, 0, -62, 15, 2.6); ctx.fill(); ctx.lineWidth = 1.2; ctx.stroke();
+  // çayın yüzeyi
+  ctx.fillStyle = '#a8350f'; ellipse(ctx, 0, lv, 15.3, 2.6); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,196,140,.7)'; ctx.lineWidth = .9; ctx.beginPath(); ctx.ellipse(0, lv, 15.3, 2.6, 0, Math.PI, Math.PI * 2); ctx.stroke();
+  ctx.fillStyle = 'rgba(255,215,170,.5)'; ellipse(ctx, -4.5, lv - .5, 5, .8); ctx.fill();
+  // cam kalınlığı
+  ctx.strokeStyle = 'rgba(255,255,255,.4)'; ctx.lineWidth = 3.4; teaGlassPath(ctx); ctx.stroke();
+  // parlamalar
+  ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.lineWidth = 2.2;
+  ctx.beginPath(); ctx.moveTo(-15, -56); ctx.bezierCurveTo(-12.4, -48, -9.6, -40, -7.8, -31); ctx.stroke();
+  ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-10.2, -18.5); ctx.bezierCurveTo(-13.4, -14, -13.6, -7, -9.6, -3); ctx.stroke();
+  ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = 1.3;
+  ctx.beginPath(); ctx.moveTo(14.4, -54); ctx.bezierCurveTo(12, -46, 9.6, -38, 8.2, -31); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(11.4, -15); ctx.quadraticCurveTo(12.8, -10, 11, -5); ctx.stroke();
+  ctx.restore();
+  ctx.strokeStyle = 'rgba(62,82,94,.85)'; ctx.lineWidth = 1.2; teaGlassPath(ctx); ctx.stroke();
+  ctx.lineWidth = .9; ctx.beginPath(); ctx.ellipse(0, -.2, 10, 1.7, 0, 0, Math.PI); ctx.stroke();
+  // ağız
+  ctx.fillStyle = 'rgba(236,246,250,.55)'; ellipse(ctx, 0, -60, 18.5, 3.3); ctx.fill();
+  ctx.strokeStyle = 'rgba(62,82,94,.9)'; ctx.lineWidth = 1.2; ctx.stroke();
+  ctx.strokeStyle = 'rgba(255,255,255,.95)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.ellipse(0, -59.2, 17.3, 2.6, 0, .15, Math.PI - .15); ctx.stroke();
+  // kaşık
+  ctx.strokeStyle = '#6f7a82'; ctx.lineWidth = 2.6; ctx.beginPath(); ctx.moveTo(17.5, 4.2); ctx.lineTo(30, -1.2); ctx.stroke();
+  ctx.strokeStyle = '#dfe4e8'; ctx.lineWidth = 1.3; ctx.beginPath(); ctx.moveTo(17.5, 4.2); ctx.lineTo(30, -1.2); ctx.stroke();
+  const sg = ctx.createLinearGradient(12, 2, 18, 7); sg.addColorStop(0, '#f2f5f7'); sg.addColorStop(1, '#9aa5ad');
+  ctx.fillStyle = sg; ellipse(ctx, 14.6, 5, 4.2, 2.3, -.4); ctx.fill(); ctx.strokeStyle = '#6f7a82'; ctx.lineWidth = .9; ctx.stroke();
   if (steam) for (let i = 0; i < 2; i++) {
     const o = Math.sin(t * 2 + i * 1.7) * 3, sx = -5 + i * 10;
-    for (const [col, lw] of [['rgba(110,90,80,.2)', 5], ['rgba(255,255,255,.9)', 2.4]]) {
-      ctx.strokeStyle = col; ctx.lineWidth = lw; ctx.beginPath(); ctx.moveTo(sx, -68); ctx.quadraticCurveTo(sx + 5 + o, -76, sx, -83); ctx.quadraticCurveTo(sx - 5 - o, -88, sx + 1, -93); ctx.stroke();
+    for (const [col, lw] of [['rgba(110,90,80,.12)', 4], ['rgba(255,255,255,.8)', 1.8]]) {
+      ctx.strokeStyle = col; ctx.lineWidth = lw; ctx.beginPath(); ctx.moveTo(sx, -66); ctx.quadraticCurveTo(sx + 4 + o, -73, sx, -79); ctx.quadraticCurveTo(sx - 4 - o, -84, sx + 1, -88); ctx.stroke();
     }
   }
   ctx.restore();
