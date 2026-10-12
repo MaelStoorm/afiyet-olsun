@@ -144,7 +144,7 @@ button:focus-visible{outline:3px solid var(--cini);outline-offset:2px}
 .gauge-wrap{flex:1 1 320px;min-width:0;display:flex;flex-direction:column;gap:4px}
 .gauge{position:relative;height:22px;border-radius:99px;border:3px solid var(--ink);background:linear-gradient(90deg,#f5e2b9 0 50%,#7cc576 50% 72%,#e59a3c 72% 86%,#6b3a1c 86% 100%)}
 .needle{position:absolute;top:-9px;width:6px;height:34px;margin-left:-3px;background:var(--ink);border-radius:3px;left:0}
-.gauge-labels{display:grid;grid-template-columns:50% 22% 28%;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft)}
+.gauge-labels{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:8px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft)}
 .gauge-labels span:nth-child(2){color:var(--good);text-align:center}
 .gauge-labels span:nth-child(3){text-align:right}
 .oven-tag{position:absolute;left:50%;top:6%;transform:translateX(-50%);background:var(--paper);border:3px solid var(--ink);border-radius:99px;padding:4px 16px;font-family:var(--display);font-weight:800;font-size:clamp(14px,2.4vw,22px);white-space:nowrap}
@@ -830,6 +830,23 @@ DISH.kurabiye = { kind: 'cookie', name: 'Elmalı kurabiye', base: 'Kurabiye hamu
   ], optional: ['ceviz', 'pudra'] };
 DISH.recel = { kind: 'jam', name: 'Portakal reçeli', base: 'Reçel tenceresi', price: 90, cost: 3, learn: 'recel',
   variants: [{ id: 'klasik', label: '', req: ['portakal', 'seker', 'su', 'limon'], day: 1 }], optional: ['tarcin'] };
+// mahallenin öbür teyzelerinin tarifleri
+ING.irmik = { name: 'İrmik', style: 'grain', colors: ['#f2d88e', '#e6c36a', '#f8e6b0'], cost: 1, main: true, mix: [240, 214, 140], mw: 2 };
+DISH.sutlac = { kind: 'jam', look: 'sutlac', name: 'Sütlaç', base: 'Sütlaç tenceresi', price: 60, cost: 2, learn: 'sutlac', teyze: 'Nazife Teyze',
+  phrase: () => 'bir kase sütlaç', unit: '1 kase', labels: ['Sulu', 'Dibi tuttu'],
+  gauge: ['Süt ısınıyor…', 'Pirinçler pişiyor…', 'Tam kıvamında, ocaktan al!', 'Fazla koyulaştı!', 'Dibi tutuyor!'],
+  texts: ['Sütlaç sulu kalmış!', 'Pirinçler biraz diri.', 'Sütlaç fazla koyulaşmış.', 'Sütlacın dibi tutmuş!'],
+  how: 'Pirinci azıcık suyla haşla, sütü ve şekeri ekle, karıştırarak koyulaştır. Kaseye dök, istersen üstüne tarçın.',
+  variants: [{ id: 'klasik', label: '', req: ['pirinc', 'sut', 'seker', 'su'], day: 1 }], optional: ['tarcin'],
+  pool: ['pirinc', 'bulgur', 'irmik', 'sut', 'su', 'seker', 'esmerseker', 'un', 'tereyagi', 'portakal', 'limon', 'ceviz', 'tarcin'] };
+DISH.helva = { kind: 'jam', look: 'helva', name: 'İrmik helvası', base: 'Helva tenceresi', price: 70, cost: 2, learn: 'helva', teyze: 'Zehra Teyze',
+  phrase: (o, V) => V.label ? `bir tabak ${V.label} irmik helvası` : 'bir tabak irmik helvası', unit: '1 tabak', labels: ['Çiğ', 'Yandı'],
+  gauge: ['Tereyağı eriyor…', 'İrmik kavruluyor…', 'Pembeleşti, ocaktan al!', 'Fazla kavruluyor!', 'İrmik yanıyor!'],
+  texts: ['İrmik çiğ kalmış!', 'Biraz daha kavrulsaydı.', 'Biraz fazla kavrulmuş.', 'Helva yanmış!'],
+  how: 'Tereyağında irmiği pembeleşene kadar kavur, sütle şekeri ekle, irmik suyunu çekene kadar karıştır.',
+  variants: [{ id: 'klasik', label: '', req: ['irmik', 'tereyagi', 'seker', 'sut'], day: 1 },
+             { id: 'fistikli', label: 'fıstıklı', req: ['irmik', 'tereyagi', 'seker', 'sut', 'antep'], day: 1 }], optional: ['tarcin'],
+  pool: ['irmik', 'un', 'pirinc', 'tereyagi', 'yag', 'seker', 'esmerseker', 'sut', 'su', 'antep', 'ceviz', 'fistik', 'portakal', 'tarcin'] };
 Object.assign(ING, {
   mercimek: { name: 'Kırmızı mercimek', style: 'grain', colors: ['#e8823a', '#f09a50', '#d9702a'], cost: 1, main: true, mix: [235, 140, 60], mw: 2 },
   havuc:    { name: 'Havuç', style: 'dice', colors: ['#f07a1a', '#f59a40'], cost: .5, mix: [240, 130, 40] },
@@ -988,7 +1005,7 @@ const MARKET = {
   yufka: ['bakkal', '6 yaprak', 6, 18], bulgur: ['bakkal', '1 kg', 10, 12], pirinc: ['bakkal', '1 kg', 10, 14], mercimek: ['bakkal', '1 kg', 10, 14],
   un: ['bakkal', '2 kg', 12, 8], seker: ['bakkal', '1 kg', 12, 8], esmerseker: ['bakkal', '500 g', 8, 8], pudra: ['bakkal', '250 g', 8, 5],
   salca: ['bakkal', '1 kavanoz', 10, 14], zeytinyagi: ['bakkal', '1 litre', 10, 30], yag: ['bakkal', '1 litre', 12, 15], nar: ['bakkal', '1 şişe', 8, 18],
-  kusuzumu: ['bakkal', '100 g', 8, 10], fistik: ['bakkal', '100 g', 8, 20], ceviz: ['bakkal', '250 g', 8, 20], kadayif: ['bakkal', '500 g', 6, 20],
+  irmik: ['bakkal', '500 g', 10, 12], kusuzumu: ['bakkal', '100 g', 8, 10], fistik: ['bakkal', '100 g', 8, 20], ceviz: ['bakkal', '250 g', 8, 20], kadayif: ['bakkal', '500 g', 6, 20],
   serbet: ['bakkal', '1 şişe', 8, 6], antep: ['bakkal', '100 g', 8, 25], nohut: ['bakkal', '1 kg', 10, 16], tahin: ['bakkal', '1 kavanoz', 10, 28],
   salatalik: ['manav', '1 kg', 8, 10],
   pulbiber: ['baharat', '1 paket', 20, 8], karabiber: ['baharat', '1 paket', 20, 8], tarcin: ['baharat', '1 paket', 20, 8], kimyon: ['baharat', '1 paket', 20, 8],
@@ -1023,13 +1040,16 @@ const DECOR = [
   { id: 'boya_nar', group: 'boya', name: 'Nar çiçeği boya', price: 80, desc: 'Duvarlar sıcak bir nar çiçeği rengine boyanır.', wall: ['#f6cfc2', 'rgba(180,45,35,.09)'] },
   { id: 'boya_fistik', group: 'boya', name: 'Fıstık yeşili boya', price: 80, desc: 'Duvarlar açık fıstık yeşiline boyanır.', wall: ['#e0eac6', 'rgba(90,130,40,.11)'] },
   { id: 'saksi', name: 'Sardunya saksıları', price: 60, desc: 'Pencerenin önüne kırmızı sardunyalar.' },
-  { id: 'lamba', name: 'Mozaik lamba', price: 90, desc: 'Rengarenk camlı, ışıl ışıl bir lamba.' },
+  { id: 'lamba', group: 'lamba', name: 'Mozaik lamba', price: 90, desc: 'Rengarenk camlı, ışıl ışıl bir lamba.' },
+  { id: 'lamba_bakir', group: 'lamba', name: 'Bakır sarkıt lamba', price: 90, desc: 'Dövme bakırdan, sıcak ışıklı bir sarkıt lamba.' },
+  { id: 'lamba_fener', group: 'lamba', name: 'Osmanlı feneri', price: 110, desc: 'Yıldız delikli pirinç fener, ışığı titrek.' },
+  { id: 'lamba_hasir', group: 'lamba', name: 'Hasır lamba', price: 70, desc: 'El örgüsü hasırdan, yumuşak ışıklı bir lamba.' },
   { id: 'kilim', name: 'Tezgaha kilim', price: 100, desc: 'Tezgahın önüne el dokuması bir kilim.' },
   { id: 'tabela', name: 'Lokanta tabelası', price: 120, desc: 'Tentenin üstüne ahşap bir tabela.' },
   { id: 'bahce', name: 'Bahçe masaları', price: 150, desc: 'Dışarıya örtülü masalar kurulur, pencereden görünür.' },
 ];
 const hasDecor = id => !!(S.decor && S.decor[id]);
-const decorCount = () => DECOR.filter(d => d.price && hasDecor(d.id)).length;
+const decorCount = () => DECOR.filter(d => d.price && hasDecor(d.id) && d.group !== 'lamba').length + (DECOR.some(d => d.group === 'lamba' && hasDecor(d.id)) ? 1 : 0);
 const wallColors = () => (DECOR.find(d => d.id === S.decor.wall) || DECOR[0]).wall;
 
 // ---------- state ----------
@@ -1130,6 +1150,14 @@ const sfx = {
   chop: () => { noise(.035, 'bandpass', rnd(2200, 3200), .14, 2); tone(rnd(180, 230), .05, 'triangle', .04); },
   pour: () => { noise(.35, 'lowpass', rnd(700, 1000), .07, 1); noise(.25, 'bandpass', 1800, .02, 3, .05); },
   knife: () => { noise(.14, 'highpass', 3500, .08); tone(1200, .05, 'square', .015); },
+  // pizza tekerleği: tahtada yuvarlanan teker ve çıtır hamur, sonda tahtaya değen tık
+  slice: () => {
+    const D = .38;
+    for (let i = 0; i < 6; i++) noise(.1, 'lowpass', 650, .05, 1, i * .065);
+    for (let i = 0; i < 24; i++) { const k = i / 24; noise(rnd(.006, .018), 'bandpass', rnd(2300, 5200), .075 * (.45 + Math.sin(k * Math.PI) * .8), 2.5, k * D * .95 + Math.random() * .012); }
+    noise(.05, 'lowpass', 400, .09, 1, D); setTimeout(() => tone(rnd(820, 960), .035, 'triangle', .022), D * 1000);
+  },
+  toss: () => { for (let i = 0; i < 3; i++) noise(rnd(.03, .06), 'bandpass', rnd(1700, 3600), .05, 1.4, i * rnd(.02, .04)); tone(rnd(300, 380), .04, 'triangle', .012); },
   smear: () => { tone(rnd(140, 180), .05, 'triangle', .025); noise(.09, 'bandpass', rnd(600, 1000), .05, 1.5); },
   sizzle: () => noise(rnd(.03, .09), 'highpass', rnd(4000, 7000), rnd(.01, .03)),
   bubble: () => tone(rnd(260, 520), .07, 'sine', .025),
@@ -1141,7 +1169,7 @@ const sfx = {
   crack: () => { noise(.05, 'highpass', 2600, .16, 1.5); noise(.04, 'bandpass', 1500, .1, 3, .05); tone(rnd(700, 900), .03, 'square', .02); },
   splat: () => { noise(.14, 'lowpass', 520, .12, 1); tone(rnd(150, 190), .09, 'sine', .04); },
 };
-[['coin', 25], ['bad', 70], ['knife', 12], ['grumble', 40]].forEach(([k, ms]) => { const f = sfx[k]; sfx[k] = () => { f(); buzz(ms); }; });
+[['coin', 25], ['bad', 70], ['knife', 12], ['slice', 14], ['grumble', 40]].forEach(([k, ms]) => { const f = sfx[k]; sfx[k] = () => { f(); buzz(ms); }; });
 
 // ---------- music: hafif bir Hicaz ezgisi ----------
 let musicOn = true;
@@ -1388,7 +1416,7 @@ function makeCustomer() {
     const free = Object.keys(FRIENDS).filter(id => !S.friendsDay.ids.includes(id));
     if (free.length) {
       const id = pick(free), f = makeFriend(id), pid = FRIENDS[id].pair;
-      if (pid && !S.friendsDay.ids.includes(pid) && Math.random() < .55) f.partner = makeFriend(pid);
+      if (pid && !S.friendsDay.ids.includes(pid) && Math.random() < .35) f.partner = makeFriend(pid);
       return f;
     }
   }
@@ -1399,30 +1427,56 @@ function makeCustomer() {
   return c;
 }
 const KAMIL = { name: 'Kebapçı Kâmil', hair: 'chef', hairColor: '#2b1d14', skin: '#eac09a', skinDark: '#d09f75', shirt: '#8f2a1f', scarf: null, mustache: true, glasses: false };
+const NAZIFE = { name: 'Nazife Teyze', hair: 'scarf', hairColor: '#5a3a22', skin: '#f1c8a4', skinDark: '#d9a982', shirt: '#2f6f73', scarf: '#e3b23c', mustache: false, glasses: false };
+const ZEHRA = { name: 'Zehra Teyze', hair: 'bun', hairColor: '#cfcac4', skin: '#e8b892', skinDark: '#c99670', shirt: '#b8463a', mustache: false, glasses: true };
 const HAYRIYE = { name: 'Hayriye Teyze', hair: 'scarf', hairColor: '#8b5a2b', skin: '#f6d2b4', skinDark: '#e2b48f', shirt: '#7a3b5a', scarf: '#7d4fa0', mustache: false, glasses: true };
 // Egemen'in arkadaşları (çizgi karakter olarak)
 const FRIENDS = {
   bilge: { name: 'Bilge', diet: 'vegan', polite: true, pair: 'tan', hair: 'bob', hairColor: '#4a2e1c', skin: '#f6d2b4', skinDark: '#e2b48f', shirt: '#fbf6e8', stripes: '#f2c23a', tee: true, trim: '#f2c23a', necklace: 'beads', mustache: false, glasses: false,
-    hi: p => `Merhaba, kolay gelsin! Rica etsem ${p} hazırlar mısınız? Veganım, içinde hayvansal hiçbir şey olmasın lütfen. Atölyede çömlek çarkından kalkamadım, çok acıktım.`,
-    happy: ['Çok teşekkür ederim, ellerinize sağlık! Size kendi yaptığım bir çömlek tabak getireceğim.', 'Harika olmuş, gerçekten çok teşekkürler!'],
-    meh: i => `Çok naziksiniz, teşekkür ederim. Sadece… ${i}`,
+    hi: [p => `Merhaba, kolay gelsin! Rica etsem ${p} hazırlar mısınız? Veganım, içinde hayvansal hiçbir şey olmasın lütfen. Atölyede çömlek çarkından kalkamadım, çok acıktım.`,
+      p => `Merhabalar! Ellerim hâlâ çamurlu, kusura bakmayın. ${cap(p)} alabilir miyim? Hayvansal ürün olmasın lütfen, veganım.`,
+      p => `Kolay gelsin! Bugün fırından yeni vazolar çıktı, kutlamak istiyorum. ${cap(p)} rica edebilir miyim? Vegan olsun lütfen.`],
+    happy: ['Çok teşekkür ederim, ellerinize sağlık! Size kendi yaptığım bir çömlek tabak getireceğim.', 'Harika olmuş, gerçekten çok teşekkürler!',
+      'Bu kadar özenli hazırlamanız çok hoşuma gitti, teşekkür ederim.', 'Çok lezzetli! Atölyedeki herkese burayı anlatacağım.'],
+    meh: [i => `Çok naziksiniz, teşekkür ederim. Sadece… ${i}`, i => `Emeğinize sağlık, ama söylemeden edemeyeceğim… ${i}`],
+    solo: ['Tan bugün gelemedi, selamı var.', 'Tan maçtaymış, ben yalnız geldim.'],
     olay: t => `Ah… Bunun içinde ${t} var. Veganım demiştim, gerçekten çok üzüldüm. Bunu yiyemem, kusura bakmayın.` },
   tan: { name: 'Tan', easy: true, pair: 'bilge', hair: 'messy', hairColor: '#4a2e1c', skin: '#eac09a', skinDark: '#d09f75', shirt: '#a9d2ea', stripes: '#7a5534', tee: true, trim: '#7a5534', beard: 'stubble', earring: 'stud', strap: '#24345c', mustache: false, glasses: false,
-    hi: p => `Selam usta! Ne yaparsan yerim, sen bilirsin. Mesela ${p}?`,
-    happy: ['Oha, efsane olmuş! Eline sağlık usta.', 'Bayıldım! Yine gelirim.'], meh: () => 'Olsun usta, ben yine de yerim, afiyet olsun bana!' },
+    hi: [p => `Selam usta! Ne yaparsan yerim, sen bilirsin. Mesela ${p}?`,
+      p => `Usta, halı sahadan geliyorum, kurt gibi açım! ${cap(p)} olur mu?`,
+      p => `Naber usta! Bugün kafama göre takılıyorum, ${p} yapsana.`,
+      p => `Selam! Menüye baktım ama karar veremedim. Sen ${p} yap, gerisini dert etme.`],
+    happy: ['Oha, efsane olmuş! Eline sağlık usta.', 'Bayıldım! Yine gelirim.', 'Bu ne ya, parmaklarımı yiyeceğim!', 'Usta sen bu işi biliyorsun, helal olsun.'],
+    meh: [() => 'Olsun usta, ben yine de yerim, afiyet olsun bana!', () => 'Eh, aç ayı oynamaz. Yerim ben bunu!', () => 'Biraz değişik olmuş ama sorun yok, hepsi gider.'],
+    solo: ['Bilge atölyede, çömleklerinden kalkamıyor.', 'Bilge sonra gelecekmiş, ben önden geldim.'] },
   idil: { name: 'İdil', diet: 'vejetaryen', polite: true, pair: 'goksu', hair: 'shoulder', hairColor: '#a3753f', hairStreak: '#e2c07c', skin: '#f6d2b4', skinDark: '#e2b48f', shirt: '#fbf8f0', glassArt: true, tee: true, trim: '#2a2420', jacket: '#2b2d33', strap: '#c7302a', mustache: false, glasses: false,
-    hi: p => `Merhaba! Etsiz bir şey rica edebilir miyim? ${cap(p)} çok güzel olur.`,
-    happy: ['Ellerinize sağlık! Renkleri öyle güzel ki vitrayını yapasım geldi.', 'Çok teşekkür ederim, nefis olmuş!'],
-    meh: i => `Teşekkür ederim, çok tatlısınız. Ama… ${i}`,
+    hi: [p => `Merhaba! Etsiz bir şey rica edebilir miyim? ${cap(p)} çok güzel olur.`,
+      p => `Merhabalar, kolay gelsin! Vitray atölyesinden geliyorum, ${p} alabilir miyim? Et olmasın lütfen.`,
+      p => `Selam! Bugün canım ${p} çekti. Vejetaryenim, et koymazsanız çok sevinirim.`],
+    happy: ['Ellerinize sağlık! Renkleri öyle güzel ki vitrayını yapasım geldi.', 'Çok teşekkür ederim, nefis olmuş!',
+      'Tam istediğim gibi, sağ olun! Göksu da buna bayılır.', 'Bu tabak bir sanat eseri gibi, teşekkürler!'],
+    meh: [i => `Teşekkür ederim, çok tatlısınız. Ama… ${i}`, i => `Güzel olmuş aslında, yalnız… ${i}`],
+    solo: ['Göksu bugün gelemedi, ona da selam söyleyeyim.', 'Bugün tek başımayım, Göksu işte kaldı.'],
     olay: t => `Bunun içinde ${t} var… Ben vejetaryenim, söylemiştim. Açıkçası çok üzüldüm.` },
   goksu: { name: 'Göksu', easy: true, pair: 'idil', hair: 'wavyshort', hairColor: '#3b2618', skin: '#f2cba8', skinDark: '#dcae86', shirt: '#1d1d22', collar: '#34343c', earring: 'hoop', mustache: false, glasses: false,
-    hi: p => `Selam! Fark etmez, ne varsa. ${cap(p)} olsun.`,
-    happy: ['Harika, eline sağlık!', 'Süper olmuş, teşekkürler!'], meh: () => 'Olsun, sorun değil. Yerim ben.' },
-  egemen: { name: 'Egemen', maker: true, fav: ['sarma', 'manti'], hair: 'short', hairColor: '#141210', skin: '#eac09a', skinDark: '#d09f75', shirt: '#7d8a4e', tee: true, trim: '#22305a', print: 'eye', mustache: false, necklace: 'cord', glasses: 'clear',
-    hi: p => `Bu dükkanı ben kurdum sayılır! Bana ${p} yap usta, en sevdiğim.`,
-    happy: ['İşte bu! Oyunu yaparken tam böyle hayal etmiştim.', 'Mükemmel, ellerine sağlık usta!'],
-    meh: i => `Hmm, idare eder. ${i}` },
+    hi: [p => `Selam! Fark etmez, ne varsa. ${cap(p)} olsun.`,
+      p => `Selam usta! Bugün canım ${p} çekti, var mı?`,
+      p => `Merhabalar! Çok aç değilim ama ${p} yerim herhalde.`,
+      p => `Selam selam! İşten çıktım, kafam dağınık. ${cap(p)} iyi gelir.`,
+      p => `Ooo usta, nasılsın? Acele yok, ${p} yapıver.`],
+    happy: ['Harika, eline sağlık!', 'Süper olmuş, teşekkürler!', 'Ooo, bu çok iyi olmuş. İdil\'e de anlatacağım!',
+      'Bunu yerken her şeyi unuttum, eline sağlık.', 'Tam kıvamında. Ben buranın müdavimi oluyorum galiba!'],
+    meh: [() => 'Olsun, sorun değil. Yerim ben.', () => 'Eh, idare eder. Aç olunca her şey güzel.', () => 'Biraz farklı olmuş ama dert değil, yerim.'],
+    solo: ['İdil bugün atölyede, ben tek geldim.', 'İdil sonra gelirim dedi, ben dayanamadım.'] },
+  egemen: { name: 'Egemen', fav: ['sarma', 'manti'], hair: 'short', hairColor: '#141210', skin: '#eac09a', skinDark: '#d09f75', shirt: '#7d8a4e', tee: true, trim: '#22305a', print: 'eye', mustache: false, necklace: 'cord', glasses: 'clear',
+    hi: [p => `Selam usta! Bana ${p} yap, en sevdiğim.`,
+      p => `Kolay gelsin! Yürüyüşten döndüm, kurt gibi açım. ${cap(p)} lütfen!`,
+      p => `Usta, bugün ${p} yemeden gitmem!`],
+    happy: ['İşte bu! Tam istediğim gibi.', 'Mükemmel, ellerine sağlık usta!', 'Bunu arkadaşlara da anlatacağım, efsane olmuş.'],
+    meh: [i => `Hmm, idare eder. ${i}`, i => `Fena değil ama bir dahakine daha iyisini beklerim. ${i}`] },
 };
+// konuşmalar: tek cümle ya da cümle listesi; listeden rastgele biri seçilir
+const said = (v, ...a) => { const f = Array.isArray(v) ? pick(v) : v; return typeof f === 'function' ? f(...a) : f; };
 const FIKRET = { name: 'Gurme Fikret Bey', critic: true, hair: 'beret', hairColor: '#d8d2c8', skin: '#f6d2b4', skinDark: '#e2b48f', shirt: '#3a3f58', collar: '#fbfaf5', bowtie: '#a5301b', mustache: true, glasses: true };
 const GICIK = [
   { name: 'Huysuz Hüsnü', gicik: true, hair: 'cap', hairColor: '#9a948a', skin: '#eac09a', skinDark: '#d09f75', shirt: '#6b6b5a', mustache: true, glasses: false },
@@ -1657,67 +1711,53 @@ function drawShop(ctx, t) {
     ctx.fillStyle = '#16807f'; ctx.beginPath(); ctx.moveTo(x + 22, 258); ctx.lineTo(x + 38, 274); ctx.lineTo(x + 22, 290); ctx.lineTo(x + 6, 274); ctx.closePath(); ctx.fill();
     ctx.fillStyle = '#d6442a'; circle(ctx, x + 22, 274, 5); ctx.fill();
   }
-  // menu board
-  ctx.fillStyle = '#6f421d'; roundRect(ctx, 24, 58, 186, 180, 10); ctx.fill();
-  ctx.fillStyle = '#2f4a3a'; roundRect(ctx, 34, 68, 166, 160, 6); ctx.fill();
-  ctx.fillStyle = '#f6efe0'; ctx.textAlign = 'center'; ctx.font = '800 26px "Baloo 2", sans-serif'; ctx.fillText('MENÜ', 117, 100);
-  const menu = Object.keys(DISH).filter(k => (!DISH[k].learn && !DISH[k].day) || dishOpen(k));
-  const SHORT = { sarma: 'Sarma', kurabiye: 'Kurabiye', recel: 'Reçel', mercimek: 'Çorba', cigkofte: 'Çiğ köfte', imambayildi: 'İmam bayıldı', karniyarik: 'Karnıyarık', coban: 'Çoban salata', mercimekkoftesi: 'Mercimek köfte', tofumenemen: 'Tofu menemen' };
-  if (menu.length > 7) {
-    ctx.font = '700 9.5px "Nunito", sans-serif';
-    const rows = Math.ceil(menu.length / 2), step = Math.min(16, 88 / Math.max(1, rows - 1));
-    menu.forEach((k, i) => {
-      const D = DISH[k], locked = !dishOpen(k), x = i < rows ? 41 : 119, y = 116 + (i % rows) * step;
-      const nm = SHORT[k] || D.name, pr = locked ? '—' : soldOut(k) ? 'bitti' : D.price + '₺';
-      const room = 75 - ctx.measureText(pr).width - 3, w = ctx.measureText(nm).width;
-      ctx.fillStyle = locked ? 'rgba(246,239,224,.35)' : '#f6efe0'; ctx.textAlign = 'left';
-      if (w > room) { ctx.save(); ctx.translate(x, y); ctx.scale(room / w, 1); ctx.fillText(nm, 0, 0); ctx.restore(); } else ctx.fillText(nm, x, y);
-      ctx.fillStyle = locked ? 'rgba(246,239,224,.35)' : '#f2c14e'; ctx.textAlign = 'right';
-      ctx.fillText(pr, x + 75, y);
-    });
-    ctx.textAlign = 'left';
-  } else {
-  const step = Math.min(20, 110 / Math.max(1, menu.length - 1));
-  ctx.font = menu.length > 6 ? '700 12px "Nunito", sans-serif' : '700 14px "Nunito", sans-serif'; ctx.textAlign = 'left';
-  let my = 114;
-  for (const k of menu) {
-    const D = DISH[k], locked = !dishOpen(k);
-    ctx.fillStyle = locked ? 'rgba(246,239,224,.35)' : '#f6efe0';
-    ctx.fillText(SHORT[k] || D.name, 46, my); ctx.textAlign = 'right'; ctx.fillText(locked ? 'yakında' : soldOut(k) ? 'bitti' : D.price + '₺', 190, my); ctx.textAlign = 'left';
-    my += step;
-  }
-  }
-  // window with skyline
-  ctx.fillStyle = '#6f421d'; roundRect(ctx, 236, 56, 192, 186, 10); ctx.fill();
-  const sky = ctx.createLinearGradient(0, 66, 0, 232); sky.addColorStop(0, '#9fd3e6'); sky.addColorStop(1, '#f7e4c4');
-  ctx.fillStyle = sky; ctx.fillRect(246, 66, 172, 166);
-  ctx.fillStyle = '#9ab3c2';
-  circle(ctx, 330, 196, 34); ctx.fill(); circle(ctx, 292, 206, 18); ctx.fill(); circle(ctx, 368, 206, 18); ctx.fill();
-  ctx.fillRect(256, 200, 152, 32);
-  ctx.fillRect(266, 120, 7, 90); ctx.beginPath(); ctx.moveTo(262, 122); ctx.lineTo(269.5, 92); ctx.lineTo(277, 122); ctx.fill();
-  ctx.fillRect(388, 126, 7, 84); ctx.beginPath(); ctx.moveTo(384, 128); ctx.lineTo(391.5, 100); ctx.lineTo(399, 128); ctx.fill();
-  ctx.fillStyle = 'rgba(255,255,255,.8)'; ellipse(ctx, 300 + Math.sin(t * .2) * 20, 96, 26, 8); ctx.fill();
+  // menü tahtası (büyük, okunaklı)
+  ctx.fillStyle = 'rgba(0,0,0,.14)'; roundRect(ctx, 18, 58, 254, 190, 12); ctx.fill();
+  ctx.fillStyle = '#6f421d'; roundRect(ctx, 14, 52, 254, 190, 12); ctx.fill();
+  ctx.fillStyle = '#2f4a3a'; roundRect(ctx, 23, 61, 236, 172, 7); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,.05)'; for (let i = 0; i < 5; i++) { ellipse(ctx, 60 + i * 44, 120 + (i % 2) * 50, 40, 12, -.3); ctx.fill(); }
+  ctx.fillStyle = '#f6efe0'; ctx.textAlign = 'center'; ctx.font = '800 24px "Baloo 2", sans-serif'; ctx.fillText('MENÜ', 141, 88);
+  ctx.strokeStyle = 'rgba(246,239,224,.5)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(84, 95); ctx.lineTo(198, 95); ctx.stroke();
+  let menu = Object.keys(DISH).filter(k => (!DISH[k].learn && !DISH[k].day) || dishOpen(k));
+  if (menu.length > 14) menu = menu.filter(dishOpen);
+  const SHORT = { sarma: 'Sarma', kurabiye: 'Kurabiye', recel: 'Reçel', mercimek: 'Çorba', cigkofte: 'Çiğ köfte', imambayildi: 'İmam bayıldı', karniyarik: 'Karnıyarık', coban: 'Çoban salata', mercimekkoftesi: 'Mercimek köfte', tofumenemen: 'Tofu menemen', sutlac: 'Sütlaç', helva: 'İrmik helvası' };
+  const two = menu.length > 7, rows = two ? Math.ceil(menu.length / 2) : menu.length;
+  const step = Math.min(two ? 17 : 19, 114 / Math.max(1, rows - 1)), fs = Math.min(two ? 13.5 : 16, step - 1);
+  ctx.font = `700 ${fs}px "Nunito", sans-serif`;
+  menu.forEach((k, i) => {
+    const D = DISH[k], locked = !dishOpen(k), col = two && i >= rows ? 1 : 0, x = two ? 31 + col * 116 : 38, y = 100 + fs + (i % rows) * step;
+    const colW = two ? 108 : 206, nm = SHORT[k] || D.name, pr = locked ? (two ? '—' : 'yakında') : soldOut(k) ? 'bitti' : D.price + '₺';
+    const room = colW - ctx.measureText(pr).width - 4, w = ctx.measureText(nm).width;
+    ctx.fillStyle = locked ? 'rgba(246,239,224,.35)' : '#f6efe0'; ctx.textAlign = 'left';
+    if (w > room) { ctx.save(); ctx.translate(x, y); ctx.scale(room / w, 1); ctx.fillText(nm, 0, 0); ctx.restore(); } else ctx.fillText(nm, x, y);
+    ctx.fillStyle = locked ? 'rgba(246,239,224,.35)' : soldOut(k) ? '#f08a7a' : '#f2c14e'; ctx.textAlign = 'right';
+    ctx.fillText(pr, x + colW, y);
+  });
+  ctx.textAlign = 'left';
+  // pencere: Boğaz ve köprü manzarası
+  drawWindowView(ctx, t);
   if (hasDecor('bahce')) drawGarden(ctx);
-  ctx.fillStyle = '#6f421d'; ctx.fillRect(328, 66, 6, 166); ctx.fillRect(246, 146, 172, 6);
-  if (hasDecor('saksi')) { drawPot2(ctx, 268, t); drawPot2(ctx, 396, t + 1); }
-  // shelf right
-  ctx.fillStyle = '#7b4a22'; ctx.fillRect(470, 196, 310, 12);
-  const jars = [[498, '#7aa63a'], [548, '#d9572f'], [598, '#e3b23c'], [690, '#7aa63a'], [740, '#b23a52']];
-  for (const [jx, col] of jars) {
-    ctx.fillStyle = 'rgba(255,255,255,.55)'; roundRect(ctx, jx - 18, 150, 36, 46, 8); ctx.fill();
-    ctx.fillStyle = col; roundRect(ctx, jx - 14, 162, 28, 32, 6); ctx.fill();
-    ctx.fillStyle = '#c0392b'; ctx.fillRect(jx - 16, 144, 32, 8);
-  }
-  // copper cezve
-  ctx.fillStyle = '#c4703a'; ctx.beginPath(); ctx.moveTo(628, 196); ctx.lineTo(634, 160); ctx.lineTo(666, 160); ctx.lineTo(672, 196); ctx.closePath(); ctx.fill();
-  ctx.fillRect(664, 166, 30, 6);
+  ctx.fillStyle = '#6f421d'; ctx.fillRect(359, 64, 6, 168); ctx.fillRect(292, 144, 140, 6);
+  ctx.fillStyle = '#5b3416'; ctx.fillRect(278, 232, 168, 10);
+  if (hasDecor('saksi')) { drawPot2(ctx, 306, t); drawPot2(ctx, 418, t + 1); }
+  // sağdaki raf ve kavanozlar
+  ctx.fillStyle = '#5b3416'; for (const bx of [494, 760]) { ctx.beginPath(); ctx.moveTo(bx - 6, 206); ctx.lineTo(bx + 6, 206); ctx.lineTo(bx, 226); ctx.closePath(); ctx.fill(); }
+  ctx.fillStyle = '#7b4a22'; ctx.fillRect(470, 196, 320, 12); ctx.fillStyle = '#9a6234'; ctx.fillRect(470, 196, 320, 3);
+  drawShelfJar(ctx, 542, 'tursu'); drawShelfJar(ctx, 592, 'zeytin'); drawShelfJar(ctx, 641, 'biber');
+  drawShelfJar(ctx, 766, 'recel');
+  // bakır cezve
+  const cz = ctx.createLinearGradient(680, 0, 726, 0); cz.addColorStop(0, '#9c4f22'); cz.addColorStop(.45, '#e09358'); cz.addColorStop(1, '#a5562a');
+  ctx.fillStyle = cz; ctx.beginPath(); ctx.moveTo(682, 196); ctx.lineTo(688, 166); ctx.lineTo(718, 166); ctx.lineTo(724, 196); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#b8622e'; ctx.fillRect(686, 162, 34, 6); ctx.fillStyle = '#6b3a1a'; roundRect(ctx, 716, 168, 34, 6, 3); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.fillRect(692, 170, 4, 22);
   // nazar boncuğu
   const sw = Math.sin(t * 1.5) * .08;
-  ctx.save(); ctx.translate(hasDecor('lamba') ? 223 : 446, 0); ctx.rotate(sw);
+  ctx.save(); ctx.translate(452, 0); ctx.rotate(sw);
   ctx.strokeStyle = '#6f421d'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(0, 30); ctx.lineTo(0, 88); ctx.stroke();
   for (const [r, col] of [[18, '#1d4fa0'], [12.5, '#fff'], [8, '#5fb3e6'], [4, '#1a1a1a']]) { ctx.fillStyle = col; circle(ctx, 0, 104, r); ctx.fill(); }
   ctx.restore();
-  if (hasDecor('lamba')) drawLamp(ctx, 456, t);
+  const lamp = activeLamp();
+  if (lamp) LAMPS[lamp](ctx, 488, t);
   // awning
   for (let i = 0; i < 20; i++) {
     ctx.fillStyle = i % 2 ? '#fff4e2' : '#d6442a';
@@ -1748,11 +1788,11 @@ function drawShop(ctx, t) {
   }
   if (hasDecor('kilim')) drawKilim(ctx);
   // register
-  ctx.fillStyle = '#5a6670'; roundRect(ctx, 40, 238, 140, 62, 10); ctx.fill();
-  ctx.fillStyle = '#3e4850'; roundRect(ctx, 52, 214, 70, 32, 6); ctx.fill();
-  ctx.fillStyle = '#b8e6a8'; ctx.fillRect(58, 220, 58, 18);
-  ctx.fillStyle = '#2a3238'; ctx.font = '800 13px "Nunito", sans-serif'; ctx.textAlign = 'right'; ctx.fillText(S.money + '₺', 112, 234);
-  ctx.fillStyle = '#e8e2d6'; for (let i = 0; i < 4; i++) for (let j = 0; j < 2; j++) { roundRect(ctx, 56 + i * 28, 256 + j * 18, 20, 12, 3); ctx.fill(); }
+  ctx.fillStyle = '#5a6670'; roundRect(ctx, 40, 260, 140, 42, 10); ctx.fill();
+  ctx.fillStyle = '#3e4850'; roundRect(ctx, 52, 244, 72, 24, 6); ctx.fill();
+  ctx.fillStyle = '#b8e6a8'; ctx.fillRect(57, 248, 62, 15);
+  ctx.fillStyle = '#2a3238'; ctx.font = '800 12px "Nunito", sans-serif'; ctx.textAlign = 'right'; ctx.fillText(S.money + '₺', 116, 260);
+  ctx.fillStyle = '#e8e2d6'; for (let i = 0; i < 4; i++) for (let j = 0; j < 2; j++) { roundRect(ctx, 56 + i * 28, 272 + j * 14, 20, 9, 3); ctx.fill(); }
   // çay
   drawTeaGlass(ctx, 716, 292, 1.05, t, true);
   // served plate
@@ -1765,6 +1805,8 @@ function drawShop(ctx, t) {
     ctx.save(); ctx.translate(520, 292); ctx.scale(.36, .16); ctx.translate(-250, -250); renderPlate(ctx, plate); ctx.restore();
     if (plate.dough === 'recel') drawJar(ctx, 520, 252, plate.bake, .42);
     if (plate.dough === 'mercimek') drawSoupBowl(ctx, 520, 280, plate.bake, .6);
+    if (plate.dough === 'sutlac') drawSutlacBowl(ctx, 520, 282, plate.bake, .5);
+    if (plate.dough === 'helva') drawHelvaPlate(ctx, 520, 280, plate.bake, .85, true);
     if (plate.dough === 'menemen' || plate.dough === 'tofumenemen') drawSahan(ctx, 520, 286, plate.bake, .55, 0, plate.dough === 'tofumenemen');
     }
     if (plate.drink) drawDrink(ctx, plate.drink, 632, 262, .9);
@@ -1772,8 +1814,8 @@ function drawShop(ctx, t) {
 }
 
 function drawGarden(ctx) {
-  ctx.fillStyle = '#c9b48f'; ctx.fillRect(246, 214, 172, 18);
-  for (const [x, s] of [[288, 1], [376, .85]]) {
+  ctx.fillStyle = '#c9b48f'; ctx.fillRect(292, 214, 140, 18); ctx.fillStyle = '#b39d78'; for (let x = 292; x < 432; x += 14) ctx.fillRect(x, 214, 1.5, 18);
+  for (const [x, s] of [[324, .9], [402, .85]]) {
     ctx.save(); ctx.translate(x, 226); ctx.scale(s, s);
     ctx.strokeStyle = '#6f421d'; ctx.lineWidth = 2.5;
     for (const cx of [-24, 24]) { ctx.beginPath(); ctx.moveTo(cx, -2); ctx.lineTo(cx, -22); ctx.moveTo(cx - 6, -2); ctx.lineTo(cx - 6, -12); ctx.lineTo(cx + 6, -12); ctx.lineTo(cx + 6, -2); ctx.stroke(); }
@@ -1816,6 +1858,224 @@ function drawLamp(ctx, x, t) {
   ctx.fillStyle = '#fff1c4'; ellipse(ctx, x, 100, 9, 12); ctx.fill();
   ctx.fillStyle = '#b8862f'; ctx.beginPath(); ctx.moveTo(x - 6, 122); ctx.lineTo(x + 6, 122); ctx.lineTo(x, 132); ctx.closePath(); ctx.fill();
   ctx.restore();
+}
+// pencereden Boğaz: köprü, deniz, vapur ve martılar
+function drawWindowView(ctx, t) {
+  ctx.fillStyle = 'rgba(0,0,0,.14)'; roundRect(ctx, 282, 60, 168, 186, 10); ctx.fill();
+  ctx.fillStyle = '#6f421d'; roundRect(ctx, 278, 56, 168, 186, 10); ctx.fill();
+  ctx.fillStyle = '#8a5a2b'; roundRect(ctx, 285, 60, 154, 176, 5); ctx.fill();
+  ctx.save(); ctx.beginPath(); ctx.rect(292, 64, 140, 168); ctx.clip();
+  const sky = ctx.createLinearGradient(0, 64, 0, 176); sky.addColorStop(0, '#86c4e2'); sky.addColorStop(.65, '#c9e6ef'); sky.addColorStop(1, '#f6e2c2');
+  ctx.fillStyle = sky; ctx.fillRect(292, 64, 140, 112);
+  const sg = ctx.createRadialGradient(410, 86, 2, 410, 86, 26); sg.addColorStop(0, 'rgba(255,240,180,.95)'); sg.addColorStop(1, 'rgba(255,240,180,0)');
+  ctx.fillStyle = sg; circle(ctx, 410, 86, 26); ctx.fill(); ctx.fillStyle = '#fff3c8'; circle(ctx, 410, 86, 7); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,.88)';
+  for (const [c0, cy, s, v] of [[20, 82, 1, 2.4], [120, 104, .7, 1.6]]) {
+    const cx = 292 + ((c0 + t * v) % 190 + 190) % 190 - 25;
+    ellipse(ctx, cx, cy, 17 * s, 4.5 * s); ctx.fill(); ellipse(ctx, cx - 5 * s, cy - 4 * s, 9 * s, 5.5 * s); ctx.fill(); ellipse(ctx, cx + 6 * s, cy - 3 * s, 7 * s, 4.5 * s); ctx.fill();
+  }
+  // karşı kıyı tepeleri ve evler
+  ctx.fillStyle = '#9db8a6';
+  ctx.beginPath(); ctx.moveTo(292, 160); ctx.quadraticCurveTo(318, 136, 350, 148); ctx.quadraticCurveTo(388, 128, 432, 142); ctx.lineTo(432, 176); ctx.lineTo(292, 176); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#76987f';
+  ctx.beginPath(); ctx.moveTo(292, 168); ctx.quadraticCurveTo(328, 154, 368, 162); ctx.quadraticCurveTo(404, 152, 432, 160); ctx.lineTo(432, 176); ctx.lineTo(292, 176); ctx.closePath(); ctx.fill();
+  for (let i = 0; i < 10; i++) {
+    const hx = 296 + i * 14, hy = 166 - (i % 3) * 2 - (i % 2);
+    ctx.fillStyle = ['#f6efe0', '#e9b892', '#dcd4c2', '#f3d9a8'][i % 4]; ctx.fillRect(hx, hy, 6, 5);
+    ctx.fillStyle = '#b4523a'; ctx.beginPath(); ctx.moveTo(hx - 1, hy); ctx.lineTo(hx + 3, hy - 3); ctx.lineTo(hx + 7, hy); ctx.closePath(); ctx.fill();
+  }
+  // deniz
+  const sea = ctx.createLinearGradient(0, 174, 0, 232); sea.addColorStop(0, '#5fa9c8'); sea.addColorStop(1, '#2c6a92');
+  ctx.fillStyle = sea; ctx.fillRect(292, 174, 140, 58);
+  ctx.fillStyle = 'rgba(255,244,200,.55)'; for (let i = 0; i < 5; i++) { const w = 16 - i * 2.5; ctx.fillRect(410 - w / 2 + Math.sin(t * 2 + i) * 2, 178 + i * 5, w, 1.5); }
+  ctx.strokeStyle = 'rgba(255,255,255,.45)'; ctx.lineWidth = 1.2;
+  for (let i = 0; i < 10; i++) {
+    const wx = 292 + ((i * 37 + t * (6 + (i % 3) * 2)) % 156) - 8, wy = 184 + (i % 5) * 10;
+    ctx.beginPath(); ctx.moveTo(wx, wy); ctx.quadraticCurveTo(wx + 4, wy - 3, wx + 8, wy); ctx.stroke();
+  }
+  // Boğaz köprüsü: kuleler, ana halat, askılar ve tabliye
+  const T1 = 316, T2 = 408, TOP = 100, DECK = 150;
+  const cab = s => (1 - s) * (1 - s) * TOP + 2 * s * (1 - s) * 192 + s * s * TOP;
+  ctx.strokeStyle = 'rgba(232,236,238,.9)'; ctx.lineWidth = .8;
+  for (let s = .04; s < 1; s += .06) { const hx = T1 + (T2 - T1) * s; ctx.beginPath(); ctx.moveTo(hx, cab(s)); ctx.lineTo(hx, DECK); ctx.stroke(); }
+  for (let k = 1; k < 4; k++) { const f = k / 4; ctx.beginPath(); ctx.moveTo(T1 - 26 * f, TOP + 38 * f); ctx.lineTo(T1 - 26 * f, DECK); ctx.stroke(); ctx.beginPath(); ctx.moveTo(T2 + 26 * f, TOP + 38 * f); ctx.lineTo(T2 + 26 * f, DECK); ctx.stroke(); }
+  ctx.strokeStyle = '#eef1f2'; ctx.lineWidth = 1.8;
+  ctx.beginPath(); ctx.moveTo(286, TOP + 46); ctx.lineTo(T1, TOP); ctx.quadraticCurveTo((T1 + T2) / 2, 192, T2, TOP); ctx.lineTo(438, TOP + 46); ctx.stroke();
+  ctx.fillStyle = '#eceff0'; ctx.fillRect(292, DECK, 140, 4); ctx.fillStyle = '#8a969c'; ctx.fillRect(292, DECK + 4, 140, 2);
+  for (let i = 0; i < 4; i++) { const cx = 292 + ((i * 41 + t * (i % 2 ? 18 : -14)) % 150 + 150) % 150 - 5; ctx.fillStyle = ['#d6442a', '#f2c14e', '#1d4fa0', '#fff'][i]; ctx.fillRect(cx, DECK - 1.5, 4, 1.8); }
+  for (const tx of [T1, T2]) {
+    ctx.fillStyle = '#d9dee1'; ctx.fillRect(tx - 3, TOP - 4, 6, 180 - TOP);
+    ctx.fillStyle = '#a7b2b8'; ctx.fillRect(tx + 1, TOP - 4, 2, 180 - TOP);
+    ctx.fillStyle = '#c3cbd0'; for (const by of [TOP + 6, TOP + 26, DECK + 8]) ctx.fillRect(tx - 4, by, 8, 2.5);
+    ctx.fillStyle = '#e8ecee'; ctx.fillRect(tx - 4, TOP - 6, 8, 3);
+    ctx.fillStyle = 'rgba(30,70,100,.25)'; ellipse(ctx, tx, 181, 7, 2); ctx.fill();
+  }
+  // vapur
+  const fx = 292 + ((t * 7) % 196) - 28, fy = 204;
+  ctx.fillStyle = 'rgba(255,255,255,.55)'; for (let i = 1; i < 5; i++) { ellipse(ctx, fx - 22 - i * 7, fy + 3 + i * .4, 5 - i * .6, 1.2); ctx.fill(); }
+  ctx.fillStyle = 'rgba(20,50,70,.25)'; ellipse(ctx, fx, fy + 6, 26, 2.5); ctx.fill();
+  ctx.fillStyle = '#2a2f36'; ctx.beginPath(); ctx.moveTo(fx - 22, fy - 2); ctx.lineTo(fx + 25, fy - 2); ctx.lineTo(fx + 20, fy + 5); ctx.lineTo(fx - 19, fy + 5); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#fbfaf5'; ctx.fillRect(fx - 20, fy - 9, 40, 7); ctx.fillRect(fx - 13, fy - 14, 24, 5);
+  ctx.fillStyle = '#5d7d95'; for (let i = 0; i < 7; i++) ctx.fillRect(fx - 17 + i * 5.2, fy - 7, 2.6, 2.4);
+  ctx.fillStyle = '#e3b23c'; ctx.fillRect(fx - 2, fy - 21, 5, 7); ctx.fillStyle = '#1a1a1a'; ctx.fillRect(fx - 2, fy - 22, 5, 2);
+  ctx.fillStyle = `rgba(230,230,230,${.35 + .1 * Math.sin(t * 3)})`; circle(ctx, fx - 3 - (t * 4) % 6, fy - 25 - (t * 4) % 6, 2.5 + (t * 4) % 6 * .4); ctx.fill();
+  // martılar
+  ctx.strokeStyle = '#4a4f55'; ctx.lineWidth = 1.4; ctx.lineCap = 'round';
+  for (let k = 0; k < 3; k++) {
+    const gx = 292 + ((t * (10 + k * 3) + k * 61) % 176) - 18, gy = 92 + k * 14 + Math.sin(t * 1.3 + k * 2) * 5, fl = Math.sin(t * 7 + k * 1.7) * 2.2;
+    ctx.beginPath(); ctx.moveTo(gx - 6, gy - 1 - fl); ctx.quadraticCurveTo(gx - 3, gy - 3 - fl, gx, gy); ctx.quadraticCurveTo(gx + 3, gy - 3 - fl, gx + 6, gy - 1 - fl); ctx.stroke();
+  }
+  ctx.lineCap = 'butt';
+  ctx.fillStyle = 'rgba(255,255,255,.13)';
+  ctx.beginPath(); ctx.moveTo(300, 64); ctx.lineTo(322, 64); ctx.lineTo(292, 112); ctx.lineTo(292, 78); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(380, 150); ctx.lineTo(392, 150); ctx.lineTo(370, 190); ctx.lineTo(366, 176); ctx.closePath(); ctx.fill();
+  ctx.restore();
+}
+// raftaki ev yapımı kavanozlar: cam, içindekiler, bezli kapak ve etiket
+function drawShelfJar(ctx, x, kind) {
+  const J = {
+    tursu: { liq: 'rgba(206,214,120,.6)', cloth: '#d6442a', dots: '#fff4e2', h: 52, w: 19 },
+    zeytin: { liq: 'rgba(122,132,52,.55)', cloth: '#16807f', dots: '#fdf7ee', h: 44, w: 19 },
+    biber: { liq: 'rgba(236,168,84,.5)', cloth: '#e3b23c', dots: '#fff', h: 56, w: 18 },
+    recel: { liq: '#a91d38', cloth: 'kare', h: 40, w: 17 },
+  }[kind];
+  const b = 196, top = b - J.h, w = J.w, R = mulberry(kind.length * 31 + 7);
+  const jar = new Path2D();
+  jar.moveTo(x - w + 5, top); jar.lineTo(x + w - 5, top); jar.lineTo(x + w - 5, top + 4);
+  jar.quadraticCurveTo(x + w, top + 6, x + w, top + 14); jar.lineTo(x + w, b - 6); jar.quadraticCurveTo(x + w, b, x + w - 6, b);
+  jar.lineTo(x - w + 6, b); jar.quadraticCurveTo(x - w, b, x - w, b - 6); jar.lineTo(x - w, top + 14);
+  jar.quadraticCurveTo(x - w, top + 6, x - w + 5, top + 4); jar.closePath();
+  ctx.fillStyle = 'rgba(0,0,0,.2)'; ellipse(ctx, x + 2, b, w + 3, 3); ctx.fill();
+  ctx.fillStyle = 'rgba(226,242,240,.5)'; ctx.fill(jar);
+  ctx.save(); ctx.clip(jar);
+  const lvl = top + (kind === 'recel' ? 11 : 9);
+  ctx.fillStyle = J.liq; ctx.fillRect(x - w, lvl, w * 2, b - lvl);
+  if (kind === 'tursu') {
+    for (let i = 0; i < 5; i++) { const cx = x - 13 + i * 6.5, cy = lvl + 16 + (i % 2) * 6; ctx.fillStyle = '#4f7d2a'; ellipse(ctx, cx, cy, 3.6, 12, (i - 2) * .12); ctx.fill(); ctx.fillStyle = '#86b04a'; ellipse(ctx, cx - 1, cy, 1, 9, (i - 2) * .12); ctx.fill(); }
+    for (const [dx, dy] of [[-10, 34], [6, 30], [12, 38], [-2, 38]]) { ctx.fillStyle = '#e8823a'; circle(ctx, x + dx, lvl + dy, 4.2); ctx.fill(); ctx.fillStyle = '#f6b26b'; circle(ctx, x + dx, lvl + dy, 1.8); ctx.fill(); }
+    ctx.fillStyle = '#d23a2a'; ellipse(ctx, x + 9, lvl + 10, 2.4, 8, .5); ctx.fill();
+    ctx.fillStyle = '#f4ecd8'; circle(ctx, x - 6, lvl + 6, 2.6); ctx.fill();
+  } else if (kind === 'zeytin') {
+    for (let row = 0; row < 5; row++) for (let i = 0; i < 5; i++) {
+      const ox = x - 14 + i * 7 + (row % 2) * 3.5 + (R() - .5) * 2, oy = b - 5 - row * 7 + (R() - .5) * 2;
+      if (oy < lvl + 3) continue;
+      ctx.fillStyle = (i + row) % 3 ? '#2d2532' : '#7b8a2c'; ellipse(ctx, ox, oy, 3.6, 3, R()); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,.45)'; circle(ctx, ox - 1.2, oy - 1.1, .9); ctx.fill();
+    }
+    ctx.fillStyle = '#4f7d2a'; ellipse(ctx, x + 4, lvl + 5, 5, 1.8, .3); ctx.fill();
+  } else if (kind === 'biber') {
+    for (let i = 0; i < 5; i++) {
+      const cx = x - 12 + i * 6, cy = lvl + 22 + (i % 2) * 4, a = (i - 2) * .14;
+      ctx.fillStyle = i === 3 ? '#e8b021' : '#c8321e'; ellipse(ctx, cx, cy, 3.4, 17, a); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,.3)'; ellipse(ctx, cx - 1, cy - 4, .9, 9, a); ctx.fill();
+      ctx.fillStyle = '#4f7d2a'; ctx.fillRect(cx - 1 - Math.sin(a) * 17, cy - 19, 2, 4);
+    }
+  } else {
+    ctx.fillStyle = '#7e1026'; for (let i = 0; i < 9; i++) { ellipse(ctx, x - 12 + R() * 24, lvl + 5 + R() * (b - lvl - 9), 2.8, 2, R() * 3); ctx.fill(); }
+    ctx.fillStyle = 'rgba(255,214,150,.6)'; for (let i = 0; i < 14; i++) { circle(ctx, x - 13 + R() * 26, lvl + 3 + R() * (b - lvl - 6), .7); ctx.fill(); }
+  }
+  ctx.fillStyle = 'rgba(255,255,255,.3)'; ctx.fillRect(x - w, lvl, w * 2, 1.5);
+  ctx.restore();
+  ctx.strokeStyle = 'rgba(80,110,110,.55)'; ctx.lineWidth = 1.4; ctx.stroke(jar);
+  ctx.fillStyle = 'rgba(255,255,255,.6)'; roundRect(ctx, x - w + 3.5, top + 15, 3.5, b - top - 24, 2); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,.35)'; roundRect(ctx, x + w - 6.5, top + 17, 2.2, 10, 1); ctx.fill();
+  // etiket
+  ctx.fillStyle = '#f6efe0'; roundRect(ctx, x - 10, b - 21, 20, 12, 2); ctx.fill();
+  ctx.strokeStyle = '#b4523a'; ctx.lineWidth = .8; roundRect(ctx, x - 8.5, b - 19.5, 17, 9, 1.5); ctx.stroke();
+  ctx.fillStyle = '#6f421d'; ctx.fillRect(x - 6, b - 17, 12, 1.4); ctx.fillRect(x - 4, b - 14, 8, 1.2);
+  // bezli kapak ve sicim
+  const lid = new Path2D(), L = x - w + 1, Rr = x + w - 1;
+  lid.moveTo(L, top + 7); lid.quadraticCurveTo(L - 1, top - 7, x, top - 8); lid.quadraticCurveTo(Rr + 1, top - 7, Rr, top + 7);
+  for (let i = 1; i <= 6; i++) lid.lineTo(Rr - (Rr - L) * i / 6, top + (i % 2 ? 11 : 7));
+  lid.closePath();
+  if (J.cloth === 'kare') {
+    ctx.fillStyle = '#fdf7ee'; ctx.fill(lid);
+    ctx.save(); ctx.clip(lid); ctx.fillStyle = 'rgba(214,48,58,.85)';
+    for (let i = -4; i < 6; i++) for (let j = -2; j < 4; j++) if ((i + j) % 2 === 0) ctx.fillRect(x - 20 + i * 5, top - 10 + j * 5, 5, 5);
+    ctx.restore();
+  } else {
+    ctx.fillStyle = J.cloth; ctx.fill(lid);
+    ctx.save(); ctx.clip(lid); ctx.fillStyle = J.dots;
+    for (let i = -3; i <= 3; i++) for (let j = 0; j < 3; j++) { circle(ctx, x + i * 6 + (j % 2) * 3, top - 4 + j * 5, 1.1); ctx.fill(); }
+    ctx.restore();
+  }
+  ctx.fillStyle = 'rgba(0,0,0,.12)'; ctx.beginPath(); ctx.ellipse(x, top + 2, w - 3, 3, 0, 0, Math.PI); ctx.fill();
+  ctx.strokeStyle = '#c9a36a'; ctx.lineWidth = 1.8;
+  ctx.beginPath(); ctx.moveTo(L + 1, top + 4); ctx.quadraticCurveTo(x, top + 6.5, Rr - 1, top + 4); ctx.stroke();
+  ctx.lineWidth = 1.3;
+  ctx.beginPath(); ctx.ellipse(x + 3, top + 2, 3, 2, -.5, 0, Math.PI * 2); ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(x + 9, top + 2.5, 3, 2, .5, 0, Math.PI * 2); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x + 6, top + 5); ctx.lineTo(x + 3, top + 12); ctx.moveTo(x + 6, top + 5); ctx.lineTo(x + 9, top + 12); ctx.stroke();
+}
+// tavan lambaları: dükkanda bir tanesi asılır
+function lampGlow(ctx, x, y, r, t, rgb = '255,214,120', a = .5) {
+  const glow = a + Math.sin(t * 3) * .05 + Math.sin(t * 7.3) * .03;
+  const g = ctx.createRadialGradient(x, y, 4, x, y, r);
+  g.addColorStop(0, `rgba(${rgb},${glow * .6})`); g.addColorStop(1, `rgba(${rgb},0)`);
+  ctx.fillStyle = g; circle(ctx, x, y, r); ctx.fill();
+}
+function lampChain(ctx, x, y0, y1) {
+  ctx.strokeStyle = '#6b4a2a'; ctx.lineWidth = 1.6;
+  for (let y = y0; y < y1; y += 7) { ctx.beginPath(); ctx.ellipse(x, y + 3.5, 2, 3.5, 0, 0, Math.PI * 2); ctx.stroke(); }
+}
+const LAMPS = {
+  lamba: (ctx, x, t) => drawLamp(ctx, x, t),
+  lamba_bakir: (ctx, x, t) => {
+    lampGlow(ctx, x, 156, 96, t);
+    const cone = ctx.createLinearGradient(0, 150, 0, 250); cone.addColorStop(0, 'rgba(255,226,150,.22)'); cone.addColorStop(1, 'rgba(255,226,150,0)');
+    ctx.fillStyle = cone; ctx.beginPath(); ctx.moveTo(x - 26, 150); ctx.lineTo(x + 26, 150); ctx.lineTo(x + 70, 250); ctx.lineTo(x - 70, 250); ctx.closePath(); ctx.fill();
+    lampChain(ctx, x, 30, 112);
+    ctx.fillStyle = '#9c4f22'; roundRect(ctx, x - 6, 110, 12, 10, 3); ctx.fill();
+    const cu = ctx.createLinearGradient(x - 32, 0, x + 32, 0); cu.addColorStop(0, '#7e3c16'); cu.addColorStop(.35, '#e5a066'); cu.addColorStop(.55, '#c8743c'); cu.addColorStop(1, '#6e3412');
+    ctx.fillStyle = cu; ctx.beginPath(); ctx.moveTo(x - 7, 118); ctx.bezierCurveTo(x - 14, 120, x - 32, 136, x - 33, 152); ctx.lineTo(x + 33, 152); ctx.bezierCurveTo(x + 32, 136, x + 14, 120, x + 7, 118); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = 'rgba(60,25,8,.28)'; for (let i = 0; i < 16; i++) { const a = i * 2.39, rr = 6 + (i * 7) % 22; circle(ctx, x + Math.cos(a) * rr, 140 + Math.sin(a) * 6, 1.3); ctx.fill(); }
+    ctx.fillStyle = 'rgba(255,230,190,.55)'; ellipse(ctx, x - 13, 134, 3, 9, .5); ctx.fill();
+    ctx.fillStyle = '#b8622e'; ellipse(ctx, x, 152, 34, 4.5); ctx.fill();
+    ctx.fillStyle = '#fff4cf'; ellipse(ctx, x, 153, 28, 3); ctx.fill();
+    ctx.fillStyle = '#fffbe6'; ellipse(ctx, x, 156, 8, 6); ctx.fill();
+  },
+  lamba_fener: (ctx, x, t) => {
+    lampGlow(ctx, x, 146, 92, t, '255,200,110', .55);
+    lampChain(ctx, x, 30, 106);
+    const br = ctx.createLinearGradient(x - 22, 0, x + 22, 0); br.addColorStop(0, '#8a6420'); br.addColorStop(.4, '#e9c46a'); br.addColorStop(1, '#7a561a');
+    ctx.fillStyle = '#b8862f'; circle(ctx, x, 107, 3.5); ctx.fill();
+    ctx.fillStyle = br; ctx.beginPath(); ctx.moveTo(x - 4, 110); ctx.quadraticCurveTo(x - 20, 112, x - 22, 126); ctx.lineTo(x + 22, 126); ctx.quadraticCurveTo(x + 20, 112, x + 4, 110); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#6e4e16'; ctx.fillRect(x - 23, 125, 46, 3);
+    ctx.fillStyle = '#5a3f12'; ctx.beginPath(); ctx.moveTo(x - 20, 128); ctx.lineTo(x + 20, 128); ctx.lineTo(x + 17, 166); ctx.lineTo(x - 17, 166); ctx.closePath(); ctx.fill();
+    const fl = .85 + Math.sin(t * 9) * .1 + Math.sin(t * 13.7) * .05;
+    for (const [px, w] of [[x - 12, 10], [x, 12], [x + 12, 10]]) {
+      ctx.fillStyle = `rgba(255,${190 + (px === x ? 30 : 0)},90,${fl})`; roundRect(ctx, px - w / 2, 131, w, 32, 4); ctx.fill();
+    }
+    ctx.fillStyle = br; for (const px of [x - 18, x - 6, x + 6, x + 18]) ctx.fillRect(px - 1.5, 128, 3, 38);
+    ctx.fillStyle = '#5a3f12';
+    for (const [sx, sy] of [[x, 140], [x - 12, 150], [x + 12, 150], [x, 156]]) {
+      ctx.beginPath(); for (let k = 0; k < 10; k++) { const a = -Math.PI / 2 + k * Math.PI / 5, r = k % 2 ? 1.6 : 3.6; ctx.lineTo(sx + Math.cos(a) * r, sy + Math.sin(a) * r); } ctx.closePath(); ctx.fill();
+    }
+    ctx.fillStyle = br; ctx.beginPath(); ctx.moveTo(x - 19, 166); ctx.lineTo(x + 19, 166); ctx.lineTo(x + 8, 174); ctx.lineTo(x, 182); ctx.lineTo(x - 8, 174); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#b8862f'; circle(ctx, x, 184, 2.5); ctx.fill();
+  },
+  lamba_hasir: (ctx, x, t) => {
+    lampGlow(ctx, x, 160, 88, t, '255,222,150', .45);
+    ctx.strokeStyle = '#3a2a1a'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(x, 30); ctx.lineTo(x, 116); ctx.stroke();
+    const shade = new Path2D(); shade.moveTo(x - 10, 116); shade.bezierCurveTo(x - 30, 118, x - 36, 140, x - 38, 160); shade.lineTo(x + 38, 160); shade.bezierCurveTo(x + 36, 140, x + 30, 118, x + 10, 116); shade.closePath();
+    ctx.fillStyle = '#d9b77c'; ctx.fill(shade);
+    ctx.save(); ctx.clip(shade);
+    ctx.strokeStyle = '#a8814a'; ctx.lineWidth = 1.4;
+    for (let y = 120; y < 162; y += 5) { ctx.beginPath(); ctx.moveTo(x - 40, y); ctx.quadraticCurveTo(x, y + 3, x + 40, y); ctx.stroke(); }
+    ctx.strokeStyle = 'rgba(120,85,40,.5)'; ctx.lineWidth = 1;
+    for (let i = -8; i <= 8; i++) { ctx.beginPath(); ctx.moveTo(x + i * 1.4, 116); ctx.lineTo(x + i * 4.6, 162); ctx.stroke(); }
+    ctx.fillStyle = 'rgba(255,240,200,.35)'; for (let y = 122; y < 160; y += 10) for (let i = -6; i <= 6; i += 2) { circle(ctx, x + i * (2 + (y - 116) * .06), y + (i % 4 ? 2.5 : 0), 1); ctx.fill(); }
+    ctx.restore();
+    ctx.fillStyle = '#8a6434'; ellipse(ctx, x, 160, 38, 4); ctx.fill();
+    ctx.fillStyle = '#fff1c4'; ellipse(ctx, x, 161, 30, 2.5); ctx.fill();
+    ctx.fillStyle = '#5a3f20'; roundRect(ctx, x - 7, 112, 14, 6, 2); ctx.fill();
+  },
+};
+const LAMP_IDS = Object.keys(LAMPS);
+function activeLamp() {
+  const d = S.decor || {};
+  if (d.lamp && LAMPS[d.lamp] && d[d.lamp]) return d.lamp;
+  return LAMP_IDS.find(id => d[id]) || null;
 }
 function drawKilim(ctx) {
   const x0 = 200, x1 = 600, y0 = 318, y1 = 444;
@@ -1862,38 +2122,81 @@ function drawSac(ctx, t) {
     }
   }
 }
+function drawLogs(ctx, x, y, n, s = 1) {
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+  const rows = [[0, 0], [24, 0], [48, 0], [12, -20], [36, -20], [24, -40]].slice(0, n);
+  for (const [lx, ly] of rows) {
+    ctx.fillStyle = '#6b4022'; circle(ctx, lx, ly, 12); ctx.fill();
+    ctx.fillStyle = '#d9a86c'; circle(ctx, lx, ly, 9); ctx.fill();
+    ctx.strokeStyle = '#b07c48'; ctx.lineWidth = 1.2; circle(ctx, lx, ly, 5.5); ctx.stroke(); circle(ctx, lx, ly, 2.5); ctx.stroke();
+  }
+  ctx.restore();
+}
 function drawOven(ctx, t) {
-  ctx.fillStyle = '#b4523a'; ctx.fillRect(0, 0, 800, 450);
+  // tuğla duvar: derz araları ve tuğla tonları
+  ctx.fillStyle = '#d8c2a2'; ctx.fillRect(0, 0, 800, 450);
   const br = mulberry(3);
   for (let row = 0; row < 18; row++) for (let i = -1; i < 14; i++) {
-    const x = i * 64 + (row % 2) * 32, y = row * 26;
-    ctx.fillStyle = `rgba(${120 + br() * 40},${50 + br() * 20},${30 + br() * 10},.35)`;
-    ctx.fillRect(x + 2, y + 2, 60, 22);
+    const x = i * 64 + (row % 2) * 32, y = row * 26, r = br();
+    ctx.fillStyle = `rgb(${168 + r * 30},${72 + r * 18},${48 + r * 12})`; roundRect(ctx, x + 2, y + 2, 60, 22, 3); ctx.fill();
+    ctx.fillStyle = 'rgba(255,220,190,.18)'; ctx.fillRect(x + 4, y + 3, 56, 3);
+    ctx.fillStyle = 'rgba(60,20,10,.18)'; ctx.fillRect(x + 4, y + 20, 56, 3);
   }
-  // dome body
-  ctx.fillStyle = '#ead6b4';
-  ctx.beginPath(); ctx.moveTo(100, 450); ctx.lineTo(100, 250); ctx.bezierCurveTo(100, 30, 700, 30, 700, 250); ctx.lineTo(700, 450); ctx.closePath(); ctx.fill();
-  ctx.strokeStyle = 'rgba(120,80,40,.25)'; ctx.lineWidth = 3; ctx.stroke();
-  // çini arch
+  const vg = ctx.createRadialGradient(400, 260, 120, 400, 260, 520); vg.addColorStop(0, 'rgba(255,150,60,.12)'); vg.addColorStop(1, 'rgba(40,10,0,.35)');
+  ctx.fillStyle = vg; ctx.fillRect(0, 0, 800, 450);
+  // baca
+  ctx.fillStyle = '#a24a33'; ctx.fillRect(366, 0, 68, 90); ctx.fillStyle = 'rgba(0,0,0,.2)'; ctx.fillRect(410, 0, 24, 90);
+  ctx.fillStyle = '#7e3424'; for (let y = 8; y < 90; y += 18) ctx.fillRect(366, y, 68, 2);
+  // kubbe: sıva, gölge ve doku
+  const dome = new Path2D(); dome.moveTo(100, 450); dome.lineTo(100, 250); dome.bezierCurveTo(100, 30, 700, 30, 700, 250); dome.lineTo(700, 450); dome.closePath();
+  ctx.fillStyle = 'rgba(0,0,0,.18)'; ctx.save(); ctx.translate(10, 6); ctx.fill(dome); ctx.restore();
+  const dg = ctx.createRadialGradient(320, 150, 30, 400, 260, 380); dg.addColorStop(0, '#fbf0dc'); dg.addColorStop(.55, '#ead6b4'); dg.addColorStop(1, '#c7a77e');
+  ctx.fillStyle = dg; ctx.fill(dome);
+  ctx.save(); ctx.clip(dome);
+  const sp = mulberry(9); for (let i = 0; i < 160; i++) { ctx.fillStyle = sp() < .5 ? 'rgba(150,110,70,.16)' : 'rgba(255,255,255,.25)'; circle(ctx, 100 + sp() * 600, 70 + sp() * 380, .8 + sp() * 1.8); ctx.fill(); }
+  ctx.strokeStyle = 'rgba(150,105,60,.18)'; ctx.lineWidth = 2;
+  for (const k of [.82, .64]) { ctx.beginPath(); ctx.moveTo(400 - 300 * k, 450); ctx.lineTo(400 - 300 * k, 260); ctx.bezierCurveTo(400 - 300 * k, 30 + 230 * (1 - k), 400 + 300 * k, 30 + 230 * (1 - k), 400 + 300 * k, 260); ctx.lineTo(400 + 300 * k, 450); ctx.stroke(); }
+  ctx.restore();
+  ctx.strokeStyle = 'rgba(120,80,40,.35)'; ctx.lineWidth = 3; ctx.stroke(dome);
+  // ağız ve çini kemer
   const mouth = new Path2D(); mouth.moveTo(220, 400); mouth.lineTo(220, 270); mouth.bezierCurveTo(220, 128, 580, 128, 580, 270); mouth.lineTo(580, 400); mouth.closePath();
-  ctx.save(); ctx.lineWidth = 34; ctx.strokeStyle = '#16807f'; ctx.stroke(mouth); ctx.lineWidth = 6; ctx.strokeStyle = '#fdf7ee'; ctx.setLineDash([6, 14]); ctx.stroke(mouth); ctx.restore();
-  const g = ctx.createRadialGradient(400, 360, 20, 400, 320, 260);
+  ctx.save(); ctx.lineWidth = 40; ctx.strokeStyle = '#0f6665'; ctx.stroke(mouth); ctx.lineWidth = 34; ctx.strokeStyle = '#16807f'; ctx.stroke(mouth); ctx.restore();
+  const arch = [];
+  for (let y = 400; y > 270; y -= 26) arch.push([220, y]);
+  for (let i = 0; i <= 14; i++) { const u = i / 14, v = 1 - u; arch.push([v * v * v * 220 + 3 * v * v * u * 220 + 3 * v * u * u * 580 + u * u * u * 580, v * v * v * 270 + 3 * v * v * u * 128 + 3 * v * u * u * 128 + u * u * u * 270]); }
+  for (let y = 296; y <= 400; y += 26) arch.push([580, y]);
+  arch.forEach(([ax, ay], i) => {
+    ctx.fillStyle = '#fdf7ee'; ctx.beginPath(); ctx.moveTo(ax, ay - 8); ctx.lineTo(ax + 8, ay); ctx.lineTo(ax, ay + 8); ctx.lineTo(ax - 8, ay); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = i % 2 ? '#d6442a' : '#1d4fa0'; circle(ctx, ax, ay, 3.2); ctx.fill();
+  });
+  const g = ctx.createRadialGradient(330, 360, 20, 400, 320, 260);
   const glow = .85 + .15 * Math.sin(t * 7);
   g.addColorStop(0, `rgba(255,170,70,${glow})`); g.addColorStop(.45, '#7a2a0e'); g.addColorStop(1, '#1d0a05');
   ctx.fillStyle = g; ctx.fill(mouth);
   ctx.save(); ctx.clip(mouth);
-  // fire at the back
-  for (let i = 0; i < 7; i++) {
-    const fx = 250 + i * 18, h = 70 + Math.sin(t * 9 + i * 1.7) * 18 + (i % 3) * 14;
-    ctx.fillStyle = '#e8541c'; flame(ctx, fx, 372, 18, h);
-    ctx.fillStyle = '#ffc23d'; flame(ctx, fx, 372, 10, h * .6);
+  // ateş tuğlası iç kubbe
+  ctx.strokeStyle = 'rgba(20,5,0,.25)'; ctx.lineWidth = 2;
+  for (let k = 1; k < 6; k++) { ctx.beginPath(); ctx.ellipse(400, 400, 60 * k, 52 * k, 0, Math.PI, 0); ctx.stroke(); }
+  // odunlar, alevler, köz ve kıvılcımlar
+  for (const [lx, ly, a] of [[268, 372, -.25], [312, 372, .2], [290, 362, .02]]) { ctx.save(); ctx.translate(lx, ly); ctx.rotate(a); ctx.fillStyle = '#3a1a0c'; roundRect(ctx, -34, -7, 68, 14, 7); ctx.fill(); ctx.fillStyle = '#ff8a2a'; ctx.fillRect(-26, 3, 52, 2); ctx.fillStyle = '#a0643a'; ellipse(ctx, 34, 0, 5, 7); ctx.fill(); ctx.restore(); }
+  for (let i = 0; i < 8; i++) {
+    const fx = 244 + i * 14, h = 76 + Math.sin(t * 9 + i * 1.7) * 18 + (i % 3) * 14;
+    ctx.fillStyle = '#c8321e'; flame(ctx, fx, 368, 20, h * 1.05);
+    ctx.fillStyle = '#f07a1a'; flame(ctx, fx, 368, 14, h * .82);
+    ctx.fillStyle = '#ffd04a'; flame(ctx, fx, 368, 7, h * .5);
   }
-  for (let i = 0; i < 4; i++) { ctx.fillStyle = '#3a1a0c'; roundRect(ctx, 240 + i * 26, 366, 40, 12, 6); ctx.fill(); }
-  ctx.fillStyle = '#3a160a'; ellipse(ctx, 400, 388, 190, 26); ctx.fill();
-  // dish on the peel
+  for (let i = 0; i < 22; i++) { const ex = 236 + (i * 37) % 120, ey = 374 + (i * 13) % 14; ctx.fillStyle = `rgba(255,${120 + (i % 4) * 30},40,${.55 + .4 * Math.sin(t * 5 + i)})`; circle(ctx, ex, ey, 2.2 + (i % 3)); ctx.fill(); }
+  for (let i = 0; i < 9; i++) { const k = (t * .45 + i / 9) % 1; ctx.fillStyle = `rgba(255,220,120,${1 - k})`; circle(ctx, 260 + (i * 23) % 90 + Math.sin(t * 2 + i) * 10, 340 - k * 170, 1.8); ctx.fill(); }
+  ctx.fillStyle = '#3a160a'; ellipse(ctx, 400, 390, 190, 26); ctx.fill();
+  const fl = ctx.createRadialGradient(300, 380, 10, 300, 380, 200); fl.addColorStop(0, 'rgba(255,140,50,.45)'); fl.addColorStop(1, 'rgba(255,140,50,0)');
+  ctx.fillStyle = fl; ellipse(ctx, 400, 390, 190, 26); ctx.fill();
+  // kürekteki yemek
   if (K && K.dough) {
-    ctx.fillStyle = '#b98249'; ctx.fillRect(392, 370, 16, 90);
-    ctx.fillStyle = '#c99358'; ellipse(ctx, 420, 360, 120, 30); ctx.fill();
+    const wood = ctx.createLinearGradient(392, 0, 408, 0); wood.addColorStop(0, '#9a6234'); wood.addColorStop(.5, '#d0995c'); wood.addColorStop(1, '#94602f');
+    ctx.fillStyle = wood; ctx.fillRect(392, 370, 16, 90);
+    ctx.fillStyle = '#b98249'; ellipse(ctx, 420, 362, 122, 31); ctx.fill();
+    ctx.fillStyle = '#d4a46a'; ellipse(ctx, 420, 359, 120, 29); ctx.fill();
+    ctx.save(); ctx.beginPath(); ctx.ellipse(420, 359, 118, 27, 0, 0, Math.PI * 2); ctx.clip(); ctx.strokeStyle = 'rgba(140,90,40,.35)'; ctx.lineWidth = 1.5; for (let i = -3; i <= 3; i++) { ctx.beginPath(); ctx.moveTo(300, 359 + i * 7); ctx.quadraticCurveTo(420, 362 + i * 7, 540, 359 + i * 7); ctx.stroke(); } ctx.restore();
     ctx.save(); ctx.translate(420, 352); ctx.scale(.5, .2); ctx.translate(-250, -250); renderAny(ctx, K, true); ctx.restore();
     if (K.bake > .75) {
       ctx.fillStyle = `rgba(70,60,55,${clamp((K.bake - .75) * 2, 0, .5)})`;
@@ -1901,8 +2204,20 @@ function drawOven(ctx, t) {
     }
   }
   ctx.restore();
-  ctx.fillStyle = '#c99a6a'; ctx.fillRect(80, 410, 640, 40);
-  ctx.fillStyle = 'rgba(0,0,0,.12)'; ctx.fillRect(80, 410, 640, 6);
+  // ön taş tezgah ve odun yığınları
+  const ledge = ctx.createLinearGradient(0, 404, 0, 450); ledge.addColorStop(0, '#d7b088'); ledge.addColorStop(1, '#b88c62');
+  ctx.fillStyle = ledge; ctx.fillRect(80, 406, 640, 44);
+  ctx.fillStyle = 'rgba(255,240,220,.35)'; ctx.fillRect(80, 406, 640, 3);
+  ctx.fillStyle = 'rgba(0,0,0,.14)'; ctx.fillRect(80, 409, 640, 5);
+  ctx.strokeStyle = 'rgba(120,80,45,.35)'; ctx.lineWidth = 2; for (const sx of [190, 320, 480, 610]) { ctx.beginPath(); ctx.moveTo(sx, 412); ctx.lineTo(sx, 450); ctx.stroke(); }
+  drawLogs(ctx, 22, 436, 6, .9); drawLogs(ctx, 734, 436, 6, .9);
+  // kubbede küçük nazar
+  const sw = Math.sin(t * 1.5) * .1;
+  ctx.save(); ctx.translate(640, 150); ctx.rotate(sw);
+  ctx.strokeStyle = '#6f421d'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, 26); ctx.stroke();
+  for (const [r, col] of [[11, '#1d4fa0'], [7.5, '#fff'], [5, '#5fb3e6'], [2.5, '#1a1a1a']]) { ctx.fillStyle = col; circle(ctx, 0, 36, r); ctx.fill(); }
+  ctx.restore();
+  ctx.fillStyle = '#6f421d'; circle(ctx, 640, 150, 2.5); ctx.fill();
 }
 
 // ---------- kase, tepsi, sarma çizimleri ----------
@@ -2029,6 +2344,27 @@ function mixRGB(d) {
   }
   return w ? acc.map(v => v / w) : [220, 200, 160];
 }
+let tossAt = 0;
+const tossLift = () => clamp(1 - (Date.now() - tossAt) / 420, 0, 1);
+// salata kaşığı ve çatalı: karıştırırken parmağın altında, beklerken kasenin yanında
+function drawServers(ctx, x, y, a) {
+  for (const [dx, ang, fork] of [[-16, a - .22, false], [16, a + .22, true]]) {
+    ctx.save(); ctx.translate(x + dx, y); ctx.rotate(ang);
+    ctx.fillStyle = 'rgba(50,25,8,.18)'; roundRect(ctx, -2, -140, 12, 128, 6); ctx.fill();
+    const wood = ctx.createLinearGradient(-8, 0, 8, 0); wood.addColorStop(0, '#94602f'); wood.addColorStop(.45, '#d29a5c'); wood.addColorStop(1, '#8a5628');
+    ctx.fillStyle = wood; roundRect(ctx, -6, -150, 12, 126, 6); ctx.fill();
+    ctx.fillStyle = '#6f421d'; circle(ctx, 0, -138, 2.5); ctx.fill();
+    if (fork) {
+      ctx.fillStyle = wood; roundRect(ctx, -17, -34, 34, 22, 9); ctx.fill();
+      for (let k = 0; k < 4; k++) { roundRect(ctx, -16 + k * 9, -18, 6, 34, 3); ctx.fill(); }
+    } else {
+      ctx.fillStyle = wood; ellipse(ctx, 0, -6, 19, 29); ctx.fill();
+      ctx.fillStyle = 'rgba(90,50,20,.25)'; ellipse(ctx, 0, -3, 13, 21); ctx.fill();
+    }
+    ctx.fillStyle = 'rgba(255,240,210,.35)'; roundRect(ctx, -3, -146, 2.5, 100, 1.2); ctx.fill();
+    ctx.restore();
+  }
+}
 function renderBowl(ctx, d, noShadow, copper) {
   ctx.save();
   if (!noShadow) { ctx.shadowColor = 'rgba(60,30,10,.28)'; ctx.shadowBlur = 14; ctx.shadowOffsetY = 6; }
@@ -2048,17 +2384,40 @@ function renderBowl(ctx, d, noShadow, copper) {
     for (let i = 0; i < 260; i++) { const a = r() * 6.283, q = Math.sqrt(r()) * rad; ctx.fillStyle = r() < .5 ? rgb(c, -.18) : rgb(c, .15); ellipse(ctx, 250 + Math.cos(a) * q, 250 + Math.sin(a) * q, 2.6, 1.8, r() * 3); ctx.fill(); }
     ctx.globalAlpha = 1;
   }
-  for (const p of d.portions) {
+  if (!toss) for (const p of d.portions) {
     if (unborn(p)) continue;
-    const sc = 1 - st * (toss ? .22 : .35);
-    ctx.save(); ctx.translate(250, 250); ctx.rotate(st * (toss ? 1.6 : 5)); ctx.scale(sc, sc); ctx.translate(-250, -250);
-    ctx.globalAlpha = toss ? 1 : Math.max(0, 1 - 1.3 * st); if (ctx.globalAlpha > 0) drawPortion(ctx, p.type, p.x, p.y, p.seed); ctx.restore();
+    const sc = 1 - st * .35;
+    ctx.save(); ctx.translate(250, 250); ctx.rotate(st * 5); ctx.scale(sc, sc); ctx.translate(-250, -250);
+    ctx.globalAlpha = Math.max(0, 1 - 1.3 * st); if (ctx.globalAlpha > 0) drawPortion(ctx, p.type, p.x, p.y, p.seed); ctx.restore();
   }
-  // salata harmanlanınca malzemeler kaseye dağılır
-  if (toss && st > 0) for (const p of d.portions) {
-    if (unborn(p)) continue;
-    ctx.save(); ctx.globalAlpha = st; ctx.translate(250, 250); ctx.rotate(2.4 + st); ctx.scale(.8, .8); ctx.translate(-250, -250);
-    drawPortion(ctx, p.type, 500 - p.x, 500 - p.y, p.seed + 7); ctx.restore();
+  // salata harmanlanınca: her malzeme parçalara ayrılıp kaseye dağılır, karıştırırken zıplar
+  if (toss) {
+    const e = st * st * (3 - 2 * st), lift = tossLift(), now = Date.now();
+    d.portions.forEach((p, i) => {
+      if (unborn(p)) return;
+      const R = mulberry(p.seed * 7 + 3), wet = pstyle(p.type).style === 'liquid';
+      for (let j = 0; j < (wet ? 1 : 5); j++) {
+        const a = R() * 6.283, q = 20 + Math.sqrt(R()) * 130, al = wet ? clamp(1 - st * 1.4, 0, 1) : j ? clamp(st * 2.4 - .25 * j, 0, 1) : 1;
+        if (al <= 0) continue;
+        const tx = 250 + Math.cos(a) * q, ty = 250 + Math.sin(a) * q, m = j ? e : e * .6;
+        const sw = st * 2.6 + j * .5, cx = p.x + (tx - p.x) * m - 250, cy = p.y + (ty - p.y) * m - 250;
+        const x = 250 + cx * Math.cos(sw) - cy * Math.sin(sw), y = 250 + cx * Math.sin(sw) + cy * Math.cos(sw);
+        const hop = wet ? 0 : lift * (.35 + .65 * Math.abs(Math.sin(now / 95 + i * 1.7 + j * 2.3))) * 22, sc = (1 - st * .18) * (1 + hop / 160);
+        ctx.save(); ctx.globalAlpha = al;
+        if (hop > 2) { ctx.fillStyle = 'rgba(60,40,20,.12)'; ellipse(ctx, x, y + 8, 24 * sc, 9 * sc); ctx.fill(); }
+        ctx.translate(x, y - hop); ctx.rotate(sw * .5 + j * 2.1); ctx.scale(sc, sc); ctx.translate(-p.x, -p.y);
+        drawPortion(ctx, p.type, p.x, p.y, p.seed + j * 7); ctx.restore();
+      }
+    });
+    if (st > 0) {
+      const r = mulberry(29); ctx.save(); ctx.globalAlpha = .6 * st;
+      for (let i = 0; i < (d.portions.some(p => pstyle(p.type).style === 'liquid') ? 30 : 0); i++) {
+        const a = r() * 6.283, q = Math.sqrt(r()) * 150, x = 250 + Math.cos(a) * q, y = 250 + Math.sin(a) * q;
+        ctx.fillStyle = 'rgba(200,180,50,.4)'; ellipse(ctx, x, y, 5 + r() * 6, 3 + r() * 3, r() * 3); ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,240,.85)'; circle(ctx, x - 2, y - 1.5, 1.3); ctx.fill();
+      }
+      ctx.restore();
+    }
   }
   ctx.restore();
 }
@@ -2199,18 +2558,90 @@ function drawSahan(ctx, x, y, b, s = 1, t = 0, tofu = false) {
   if (t) { ctx.fillStyle = 'rgba(255,255,255,.35)'; for (let i = 0; i < 6; i++) { const k = (t * 1.4 + i * .3) % 1; circle(ctx, -80 + i * 32, 4 - k * 10, 2 + k * 3); ctx.fill(); } }
   ctx.restore(); ctx.restore();
 }
+function iceCube(ctx, x, y, s, a) {
+  ctx.save(); ctx.translate(x, y); ctx.rotate(a);
+  ctx.fillStyle = 'rgba(255,255,255,.38)'; roundRect(ctx, -s / 2, -s / 2, s, s, s * .24); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,.95)'; ctx.lineWidth = 1.1; ctx.stroke();
+  ctx.strokeStyle = 'rgba(170,140,30,.35)'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(-s / 2 + 2, s / 2 - 1.5); ctx.lineTo(s / 2 - 1.5, s / 2 - 1.5); ctx.lineTo(s / 2 - 1.5, -s / 2 + 2); ctx.stroke();
+  ctx.fillStyle = 'rgba(255,255,255,.8)'; roundRect(ctx, -s / 2 + 2, -s / 2 + 2, s * .42, s * .22, s * .1); ctx.fill();
+  ctx.restore();
+}
 function drawDrink(ctx, type, x, y, s = 1) {
   ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
-  if (type === 'cay') {
-    drawTeaGlass(ctx, 0, 27, 1, 0, false);
-  } else {
-    const col = { ayran: '#fbfaf3', salgam: '#7a1f4a', limonata: '#f6dd5a' }[type];
-    ctx.fillStyle = 'rgba(255,255,255,.65)'; ctx.beginPath(); ctx.moveTo(-18, -34); ctx.lineTo(18, -34); ctx.lineTo(14, 30); ctx.lineTo(-14, 30); ctx.closePath(); ctx.fill();
-    ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(-16, -22); ctx.lineTo(16, -22); ctx.lineTo(13, 28); ctx.lineTo(-13, 28); ctx.closePath(); ctx.fill();
-    if (type === 'ayran') { ctx.fillStyle = '#ffffff'; for (let i = 0; i < 6; i++) { circle(ctx, -12 + i * 5, -24 + (i % 2) * 2, 4); ctx.fill(); } ctx.strokeStyle = 'rgba(180,170,150,.5)'; ctx.lineWidth = 1.5; ctx.strokeRect(-16, -22, 32, 50); }
-    if (type === 'salgam') { ctx.fillStyle = '#f07a1a'; ctx.save(); ctx.translate(14, -30); ctx.rotate(.4); ctx.fillRect(-3, -14, 6, 26); ctx.restore(); }
-    if (type === 'limonata') { ctx.fillStyle = 'rgba(255,255,255,.75)'; roundRect(ctx, -10, -14, 10, 10, 2); ctx.fill(); roundRect(ctx, 2, -6, 10, 10, 2); ctx.fill(); ctx.fillStyle = '#f5d23a'; circle(ctx, 16, -32, 9); ctx.fill(); ctx.fillStyle = '#fbeea0'; circle(ctx, 16, -32, 6); ctx.fill(); }
+  if (type === 'cay') { drawTeaGlass(ctx, 0, 28, .86, 0, false); ctx.restore(); return; }
+  const glass = new Path2D(); glass.moveTo(-18, -34); glass.lineTo(18, -34); glass.lineTo(14, 29); glass.quadraticCurveTo(13.8, 32, 11, 32); glass.lineTo(-11, 32); glass.quadraticCurveTo(-13.8, 32, -14, 29); glass.closePath();
+  const top = { ayran: -22, salgam: -22, limonata: -25 }[type];
+  ctx.fillStyle = 'rgba(0,0,0,.13)'; ellipse(ctx, 2, 33, 18, 3); ctx.fill();
+  if (type === 'salgam') { ctx.fillStyle = '#f07a1a'; ctx.save(); ctx.translate(12, -30); ctx.rotate(.4); roundRect(ctx, -3.5, -14, 7, 30, 3); ctx.fill(); ctx.fillStyle = '#f7a35a'; ctx.fillRect(-1, -12, 2, 22); ctx.restore(); }
+  if (type === 'limonata') {
+    ctx.save(); ctx.translate(-2, -10); ctx.rotate(-.3);
+    ctx.fillStyle = '#fff'; roundRect(ctx, -2.5, -46, 5, 70, 2.5); ctx.fill();
+    ctx.save(); ctx.beginPath(); ctx.rect(-2.5, -46, 5, 70); ctx.clip(); ctx.fillStyle = '#e0453a';
+    for (let i = 0; i < 9; i++) { ctx.beginPath(); ctx.moveTo(-3, -42 + i * 8); ctx.lineTo(3, -46 + i * 8); ctx.lineTo(3, -42 + i * 8); ctx.lineTo(-3, -38 + i * 8); ctx.closePath(); ctx.fill(); }
+    ctx.restore(); ctx.restore();
   }
+  ctx.fillStyle = 'rgba(235,248,250,.55)'; ctx.fill(glass);
+  ctx.save(); ctx.clip(glass);
+  if (type === 'limonata') {
+    const lg = ctx.createLinearGradient(0, top, 0, 32); lg.addColorStop(0, 'rgba(252,238,140,.9)'); lg.addColorStop(1, 'rgba(240,200,50,.95)');
+    ctx.fillStyle = lg; ctx.fillRect(-20, top, 40, 60);
+    ctx.fillStyle = 'rgba(255,255,255,.5)'; for (const [bx, by, r] of [[-8, 18, 1.3], [5, 22, 1], [9, 8, 1.2], [-4, 6, .9], [2, 26, 1.1], [-10, 26, .8]]) { circle(ctx, bx, by, r); ctx.fill(); }
+    ctx.fillStyle = '#f3d23a'; ctx.beginPath(); ctx.arc(-3, 24, 9, Math.PI, 0); ctx.fill(); ctx.fillStyle = '#fbf0a6'; ctx.beginPath(); ctx.arc(-3, 24, 7, Math.PI, 0); ctx.fill();
+    ctx.strokeStyle = '#f3d23a'; ctx.lineWidth = .8; for (let k = 1; k < 4; k++) { const a = Math.PI + k * Math.PI / 4; ctx.beginPath(); ctx.moveTo(-3, 24); ctx.lineTo(-3 + Math.cos(a) * 7, 24 + Math.sin(a) * 7); ctx.stroke(); }
+    ctx.fillStyle = '#5aa64a'; ellipse(ctx, 7, 14, 4.5, 2.2, .6); ctx.fill();
+    iceCube(ctx, -6, -24, 13, .25); iceCube(ctx, 7, -18, 12, -.35); iceCube(ctx, -3, -7, 11, .6);
+    ctx.fillStyle = 'rgba(255,255,255,.45)'; ctx.fillRect(-20, top, 40, 1.5);
+  } else {
+    ctx.fillStyle = type === 'ayran' ? '#fbfaf3' : '#7a1f4a'; ctx.fillRect(-20, top, 40, 60);
+    if (type === 'ayran') { ctx.fillStyle = '#ffffff'; for (let i = 0; i < 7; i++) { circle(ctx, -15 + i * 5, top - 1 + (i % 2) * 2, 4); ctx.fill(); } ctx.fillStyle = 'rgba(200,190,170,.25)'; ctx.fillRect(6, top + 4, 8, 50); }
+    else { ctx.fillStyle = 'rgba(255,255,255,.18)'; ctx.fillRect(-20, top, 40, 2); ctx.fillStyle = 'rgba(0,0,0,.2)'; ctx.fillRect(6, top + 2, 10, 60); }
+  }
+  ctx.restore();
+  ctx.strokeStyle = 'rgba(140,165,170,.75)'; ctx.lineWidth = 1.3; ctx.stroke(glass);
+  ctx.fillStyle = 'rgba(255,255,255,.7)'; ctx.beginPath(); ctx.moveTo(-14.5, -30); ctx.lineTo(-11.5, -30); ctx.lineTo(-9.5, 24); ctx.lineTo(-11.5, 24); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,.95)'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(-18, -34); ctx.lineTo(18, -34); ctx.stroke();
+  if (type === 'limonata') {
+    ctx.save(); ctx.translate(15, -33);
+    ctx.fillStyle = '#e8c21e'; circle(ctx, 0, 0, 10); ctx.fill(); ctx.fillStyle = '#fbf0a6'; circle(ctx, 0, 0, 8); ctx.fill();
+    ctx.strokeStyle = '#f0d24a'; ctx.lineWidth = 1; for (let k = 0; k < 8; k++) { const a = k * Math.PI / 4; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(a) * 7.5, Math.sin(a) * 7.5); ctx.stroke(); }
+    ctx.fillStyle = '#fffbe0'; circle(ctx, 0, 0, 1.5); ctx.fill();
+    ctx.restore();
+    ctx.fillStyle = '#4f9a3e'; ellipse(ctx, -10, -37, 6, 3, -.5); ctx.fill(); ellipse(ctx, -4, -39, 5, 2.6, .5); ctx.fill();
+    ctx.strokeStyle = '#2f6f2a'; ctx.lineWidth = .7; ctx.beginPath(); ctx.moveTo(-14, -35); ctx.lineTo(-6, -39); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,.75)'; for (const [dx, dy] of [[10, -8], [11, 4], [-12, 10], [9, 18]]) { ellipse(ctx, dx, dy, 1, 1.6); ctx.fill(); }
+  }
+  ctx.restore();
+}
+function drawSutlacBowl(ctx, x, y, b, s = 1) {
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s); b = clamp(b, 0, 1);
+  ctx.fillStyle = 'rgba(0,0,0,.15)'; ellipse(ctx, 0, 60, 66, 9); ctx.fill();
+  ctx.fillStyle = '#fbfaf5'; ctx.beginPath(); ctx.moveTo(-80, -10); ctx.quadraticCurveTo(-76, 60, 0, 64); ctx.quadraticCurveTo(76, 60, 80, -10); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = 'rgba(120,110,90,.12)'; ctx.beginPath(); ctx.moveTo(30, -6); ctx.quadraticCurveTo(70, 0, 80, -10); ctx.quadraticCurveTo(76, 60, 0, 64); ctx.quadraticCurveTo(52, 50, 30, -6); ctx.fill();
+  ctx.strokeStyle = '#1d4fa0'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(-76, 14); ctx.quadraticCurveTo(0, 44, 76, 14); ctx.stroke();
+  ctx.fillStyle = '#1d4fa0'; for (let i = -3; i <= 3; i++) { const px = i * 20, py = 29 - Math.abs(i) * 4.2; for (let k = 0; k < 4; k++) { circle(ctx, px + Math.cos(k * 1.57) * 3.2, py + 7 + Math.sin(k * 1.57) * 3.2, 1.9); ctx.fill(); } }
+  ctx.fillStyle = '#e9e5da'; ellipse(ctx, 0, -10, 80, 18); ctx.fill();
+  const c = b < .6 ? mix([234, 238, 236], [250, 242, 216], b / .6) : mix([250, 242, 216], [214, 182, 128], (b - .6) / .4);
+  ctx.fillStyle = rgb(c); ellipse(ctx, 0, -10, 72, 14); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,.55)'; ellipse(ctx, -22, -14, 26, 4, -.05); ctx.fill();
+  if (b > .7) { ctx.fillStyle = `rgba(150,90,30,${(b - .7) * 1.6})`; for (const [px, py, r] of [[-30, -8, 9], [12, -12, 12], [40, -6, 7], [-6, -4, 6]]) { ellipse(ctx, px, py, r, r * .3); ctx.fill(); } }
+  ctx.fillStyle = 'rgba(138,74,30,.85)'; const r = mulberry(7); for (let i = 0; i < 90; i++) { const a = r() * 6.283, q = Math.sqrt(r()); circle(ctx, Math.cos(a) * q * 58, -10 + Math.sin(a) * q * 11, .7 + r() * .8); ctx.fill(); }
+  ctx.restore();
+}
+function drawHelvaPlate(ctx, x, y, b, s = 1, noPlate = false) {
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s); b = clamp(b, 0, 1);
+  if (!noPlate) {
+    ctx.fillStyle = 'rgba(0,0,0,.15)'; ellipse(ctx, 0, 30, 94, 18); ctx.fill();
+    ctx.fillStyle = '#fbfaf5'; ellipse(ctx, 0, 24, 94, 24); ctx.fill();
+    ctx.strokeStyle = '#16807f'; ctx.lineWidth = 3; ellipse(ctx, 0, 24, 82, 19); ctx.stroke();
+  }
+  const c = b < .6 ? mix([246, 228, 170], [214, 160, 80], b / .6) : mix([214, 160, 80], [110, 58, 20], (b - .6) / .4), r = mulberry(5);
+  for (const [dx, dy, w] of [[0, 8, 34], [-34, 22, 33], [34, 22, 33]]) {
+    ctx.fillStyle = rgb(c, -.1); ctx.beginPath(); ctx.moveTo(dx - w, dy + 6); ctx.bezierCurveTo(dx - w, dy - 32, dx + w, dy - 32, dx + w, dy + 6); ctx.quadraticCurveTo(dx, dy + 14, dx - w, dy + 6); ctx.fill();
+    ctx.fillStyle = rgb(c, .07); ellipse(ctx, dx - w * .3, dy - 12, w * .36, 5.5, -.4); ctx.fill();
+    ctx.strokeStyle = 'rgba(80,40,10,.18)'; ctx.lineWidth = 1.5; for (let k = -1; k <= 1; k++) { ctx.beginPath(); ctx.moveTo(dx - w * .8, dy + k * 7); ctx.quadraticCurveTo(dx, dy - 14 + k * 7, dx + w * .8, dy + k * 7); ctx.stroke(); }
+    for (let i = 0; i < 26; i++) { ctx.fillStyle = r() < .5 ? rgb(c, -.22) : rgb(c, .2); circle(ctx, dx + (r() - .5) * w * 1.5, dy - 14 + r() * 22, .9); ctx.fill(); }
+  }
+  ctx.fillStyle = '#8a4a1e'; for (let i = 0; i < 24; i++) { circle(ctx, (r() - .5) * 110, 4 + r() * 18, .9); ctx.fill(); }
   ctx.restore();
 }
 function drawSoupBowl(ctx, x, y, b, s = 1) {
@@ -2470,6 +2901,7 @@ const ICON = {
       x.fillStyle = i % 2 ? '#2f7a3a' : '#4e9a50'; ellipse(x, 56 + s * sz * .8, py, sz, sz * .55, s * .4); x.fill();
     }
   },
+  irmik: x => jarIcon(x, 'İRMİK', ['#f2d88e', '#e6c36a', '#f8e6b0'], '#b8913a', false, '#1d4fa0'),
   pirinc: x => jarIcon(x, 'PİRİNÇ', ['#fbf8ef', '#ede6d2', '#f6f1e3'], '#b5a882', true),
   bulgur: x => jarIcon(x, 'BULGUR', ['#d9b26a', '#c79a4e', '#e8c98a'], '#9a7434'),
   mercimek: x => jarIcon(x, 'MERCİMEK', ['#e8823a', '#f09a50', '#d9702a'], '#a8521a'),
@@ -2595,36 +3027,118 @@ const ICON = {
   },
 };
 
+// ocak: emaye ön panel, düğmeler, döküm ızgara ve halka halinde mavi alevler
+function drawStove(ctx, t) {
+  const top = ctx.createLinearGradient(0, 350, 0, 378); top.addColorStop(0, '#e4e0da'); top.addColorStop(1, '#b9b3ab');
+  ctx.fillStyle = top; ctx.fillRect(0, 350, 800, 28);
+  ctx.fillStyle = 'rgba(255,255,255,.6)'; ctx.fillRect(0, 350, 800, 2);
+  ctx.fillStyle = '#8f8a84'; ctx.fillRect(0, 376, 800, 4);
+  const front = ctx.createLinearGradient(0, 380, 0, 450); front.addColorStop(0, '#f3e9d6'); front.addColorStop(1, '#e2d3b8');
+  ctx.fillStyle = front; ctx.fillRect(0, 380, 800, 70);
+  ctx.fillStyle = '#c9c4bd'; ctx.fillRect(0, 380, 800, 3); ctx.fillRect(0, 426, 800, 3);
+  // fırın kapağı camı ve kulp
+  ctx.fillStyle = '#2b2522'; roundRect(ctx, 250, 434, 300, 30, 6); ctx.fill();
+  ctx.fillStyle = 'rgba(255,170,90,.18)'; roundRect(ctx, 258, 438, 284, 22, 4); ctx.fill();
+  const bar = ctx.createLinearGradient(0, 414, 0, 422); bar.addColorStop(0, '#f4f6f7'); bar.addColorStop(1, '#8c9399');
+  ctx.fillStyle = bar; roundRect(ctx, 290, 414, 220, 8, 4); ctx.fill();
+  ctx.fillStyle = '#9aa1a6'; ctx.fillRect(300, 420, 6, 8); ctx.fillRect(494, 420, 6, 8);
+  // düğmeler (yanan ocağınki çevrilmiş, ışığı kırmızı)
+  [120, 200, 600, 680].forEach((kx, i) => {
+    ctx.fillStyle = 'rgba(0,0,0,.18)'; circle(ctx, kx + 2, 406, 15); ctx.fill();
+    const g = ctx.createRadialGradient(kx - 5, 398, 2, kx, 404, 16); g.addColorStop(0, '#5a5550'); g.addColorStop(1, '#1f1c1a');
+    ctx.fillStyle = g; circle(ctx, kx, 404, 14); ctx.fill();
+    ctx.save(); ctx.translate(kx, 404); ctx.rotate(i === 1 ? 2.2 : 0); ctx.fillStyle = '#f3e9d6'; roundRect(ctx, -2, -12, 4, 9, 2); ctx.fill(); ctx.restore();
+    ctx.fillStyle = '#9a948c'; for (let k = 0; k < 5; k++) { const a = -Math.PI / 2 + (k - 2) * .55; circle(ctx, kx + Math.cos(a) * 19, 404 + Math.sin(a) * 19, 1.3); ctx.fill(); }
+  });
+  ctx.fillStyle = `rgba(230,40,30,${.75 + .25 * Math.sin(t * 4)})`; circle(ctx, 240, 404, 3.5); ctx.fill();
+  // döküm ızgara
+  ctx.fillStyle = 'rgba(0,0,0,.25)'; ellipse(ctx, 400, 362, 210, 14); ctx.fill();
+  ctx.strokeStyle = '#26221f'; ctx.lineWidth = 7; ctx.beginPath(); ctx.ellipse(400, 356, 200, 13, 0, 0, Math.PI * 2); ctx.stroke();
+  ctx.lineWidth = 6; for (const gx of [196, 604]) { ctx.beginPath(); ctx.moveTo(gx, 350); ctx.lineTo(gx + (gx < 400 ? 34 : -34), 352); ctx.stroke(); }
+  ctx.fillStyle = '#26221f'; for (const gx of [204, 596]) { ctx.fillRect(gx - 4, 356, 8, 12); }
+  // brülör halkası
+  ctx.fillStyle = '#3a3633'; ellipse(ctx, 400, 360, 122, 9); ctx.fill();
+  ctx.fillStyle = 'rgba(80,140,255,.25)'; ellipse(ctx, 400, 356, 150, 18); ctx.fill();
+}
+function stoveFlames(ctx, t, rx = 112) {
+  for (let i = 0; i <= 16; i++) {
+    const a = Math.PI * i / 16, fx = 400 + Math.cos(a) * rx, fy = 358 + Math.sin(a) * 8, h = 15 + Math.sin(t * 13 + i * 1.9) * 5 + (i % 3) * 2;
+    ctx.fillStyle = 'rgba(59,123,217,.9)'; flame(ctx, fx, fy, 7, h); ctx.fillStyle = '#b8dcff'; flame(ctx, fx, fy, 3.5, h * .55);
+  }
+}
 function drawPot(ctx, t) {
   ctx.fillStyle = '#fdf7ee'; ctx.fillRect(0, 0, 800, 450);
   for (let x = 0; x < 800; x += 50) for (let y = 0; y < 360; y += 50) {
-    ctx.strokeStyle = 'rgba(22,128,127,.35)'; ctx.lineWidth = 2; ctx.strokeRect(x + 1, y + 1, 48, 48);
-    ctx.fillStyle = 'rgba(22,128,127,.5)'; ctx.beginPath(); ctx.moveTo(x + 25, y + 12); ctx.lineTo(x + 38, y + 25); ctx.lineTo(x + 25, y + 38); ctx.lineTo(x + 12, y + 25); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = 'rgba(22,128,127,.3)'; ctx.lineWidth = 2; ctx.strokeRect(x + 1, y + 1, 48, 48);
+    ctx.fillStyle = 'rgba(22,128,127,.42)'; ctx.beginPath(); ctx.moveTo(x + 25, y + 12); ctx.lineTo(x + 38, y + 25); ctx.lineTo(x + 25, y + 38); ctx.lineTo(x + 12, y + 25); ctx.closePath(); ctx.fill();
   }
-  ctx.fillStyle = '#55504c'; ctx.fillRect(0, 352, 800, 14); ctx.fillStyle = '#3d3a38'; ctx.fillRect(0, 366, 800, 84);
-  for (let i = 0; i < 10; i++) {
-    const fx = 290 + i * 24, h = 20 + Math.sin(t * 12 + i) * 6;
-    ctx.fillStyle = '#3b7bd9'; flame(ctx, fx, 360, 8, h); ctx.fillStyle = '#9fd0ff'; flame(ctx, fx, 360, 4, h * .55);
-  }
+  const wl = ctx.createRadialGradient(400, 330, 40, 400, 330, 420); wl.addColorStop(0, 'rgba(255,190,120,.16)'); wl.addColorStop(1, 'rgba(60,40,20,.12)');
+  ctx.fillStyle = wl; ctx.fillRect(0, 0, 800, 360);
+  drawStove(ctx, t);
   const b = K ? K.bake : 0;
-  if (K && K.dough && DISH[K.dough].look === 'pan') { drawSahan(ctx, 400, 300, b, 1.7, t, K.dough === 'tofumenemen'); return; }
-  ctx.fillStyle = '#b8622e'; roundRect(ctx, 220, 172, 360, 180, 46); ctx.fill();
-  ctx.fillStyle = '#d07a40'; ctx.fillRect(220, 214, 360, 10); ctx.fillRect(220, 300, 360, 8);
-  ctx.fillStyle = '#8a4520'; roundRect(ctx, 186, 206, 40, 20, 8); ctx.fill(); roundRect(ctx, 574, 206, 40, 20, 8); ctx.fill();
-  ctx.fillStyle = '#8a4520'; ellipse(ctx, 400, 174, 182, 34); ctx.fill();
-  const broth = new Path2D(); broth.ellipse(400, 176, 166, 26, 0, 0, Math.PI * 2);
+  if (K && K.dough && DISH[K.dough].look === 'pan') { stoveFlames(ctx, t, 96); drawSahan(ctx, 400, 300, b, 1.7, t, K.dough === 'tofumenemen'); return; }
+  // bakır tencere
+  const body = new Path2D();
+  body.moveTo(222, 178); body.lineTo(228, 322); body.quadraticCurveTo(232, 352, 264, 352); body.lineTo(536, 352); body.quadraticCurveTo(568, 352, 572, 322); body.lineTo(578, 178); body.closePath();
+  const cu = ctx.createLinearGradient(222, 0, 578, 0);
+  cu.addColorStop(0, '#6e3412'); cu.addColorStop(.12, '#b8622e'); cu.addColorStop(.26, '#f2b27c'); cu.addColorStop(.34, '#d0824a'); cu.addColorStop(.7, '#b05a2a'); cu.addColorStop(.9, '#8a4520'); cu.addColorStop(1, '#5e2c0f');
+  ctx.fillStyle = cu; ctx.fill(body);
+  const sh = ctx.createLinearGradient(0, 178, 0, 352); sh.addColorStop(0, 'rgba(0,0,0,0)'); sh.addColorStop(.75, 'rgba(0,0,0,0)'); sh.addColorStop(1, 'rgba(40,10,0,.35)');
+  ctx.fillStyle = sh; ctx.fill(body);
+  ctx.save(); ctx.clip(body);
+  ctx.strokeStyle = 'rgba(70,25,5,.35)'; ctx.lineWidth = 3;
+  for (const by of [222, 298]) { ctx.beginPath(); ctx.ellipse(400, by, 182, 12, 0, 0, Math.PI); ctx.stroke(); }
+  ctx.strokeStyle = 'rgba(255,215,170,.35)'; ctx.lineWidth = 2;
+  for (const by of [226, 302]) { ctx.beginPath(); ctx.ellipse(400, by, 182, 12, 0, .1, Math.PI - .1); ctx.stroke(); }
+  const hr = mulberry(17); for (let i = 0; i < 70; i++) { const hx = 236 + hr() * 330, hy = 190 + hr() * 150; ctx.fillStyle = hr() < .5 ? 'rgba(70,25,5,.1)' : 'rgba(255,220,180,.12)'; ellipse(ctx, hx, hy, 2 + hr() * 3, 1.5 + hr() * 2, hr() * 3); ctx.fill(); }
+  ctx.fillStyle = 'rgba(255,240,220,.45)'; roundRect(ctx, 300, 190, 10, 140, 5); ctx.fill(); roundRect(ctx, 318, 200, 4, 110, 2); ctx.fill();
+  const fg = ctx.createLinearGradient(0, 300, 0, 352); fg.addColorStop(0, 'rgba(90,150,255,0)'); fg.addColorStop(1, `rgba(70,130,255,${.13 + .04 * Math.sin(t * 9)})`);
+  ctx.fillStyle = fg; ctx.fillRect(220, 300, 360, 52);
+  ctx.restore();
+  // kulplar
+  for (const s of [-1, 1]) {
+    const hx = 400 + s * 178;
+    ctx.strokeStyle = '#4a220c'; ctx.lineWidth = 9; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(hx, 200); ctx.bezierCurveTo(hx + s * 40, 196, hx + s * 40, 236, hx, 232); ctx.stroke();
+    ctx.strokeStyle = '#a3592b'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(hx + s * 4, 202); ctx.bezierCurveTo(hx + s * 34, 199, hx + s * 34, 229, hx + s * 4, 228); ctx.stroke();
+    ctx.lineCap = 'butt';
+    ctx.fillStyle = '#e7a46b'; circle(ctx, hx - s * 4, 202, 3.5); ctx.fill(); circle(ctx, hx - s * 4, 230, 3.5); ctx.fill();
+  }
+  // ağız
+  ctx.fillStyle = '#e8a26a'; ellipse(ctx, 400, 175, 184, 35); ctx.fill();
+  ctx.fillStyle = '#7a3a16'; ellipse(ctx, 400, 177, 174, 30); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,230,200,.6)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(400, 175, 182, 33, 0, Math.PI * 1.05, Math.PI * 1.6); ctx.stroke();
+  const broth = new Path2D(); broth.ellipse(400, 178, 166, 26, 0, 0, Math.PI * 2);
   const look = K && K.dough ? (DISH[K.dough].look || kindOf(K.dough)) : '';
   const jam = look === 'jam';
-  ctx.fillStyle = jam ? rgb(mix([245, 145, 30], [130, 50, 10], b)) : look === 'soup' ? rgb(mix([240, 160, 60], [160, 70, 20], b)) : look === 'manti' ? rgb(mix([225, 215, 190], [200, 185, 150], b)) : rgb(mix([150, 120, 50], [100, 80, 30], b)); ctx.fill(broth);
+  ctx.fillStyle = look === 'sutlac' ? rgb(b < .6 ? mix([232, 236, 238], [250, 242, 216], b / .6) : mix([250, 242, 216], [210, 178, 124], (b - .6) / .4))
+    : look === 'helva' ? rgb(b < .6 ? mix([244, 226, 168], [214, 160, 80], b / .6) : mix([214, 160, 80], [100, 52, 18], (b - .6) / .4))
+    : jam ? rgb(mix([245, 145, 30], [130, 50, 10], b)) : look === 'soup' ? rgb(mix([240, 160, 60], [160, 70, 20], b)) : look === 'manti' ? rgb(mix([225, 215, 190], [200, 185, 150], b)) : rgb(mix([150, 120, 50], [100, 80, 30], b)); ctx.fill(broth);
   ctx.save(); ctx.clip(broth);
-  if (jam) { ctx.strokeStyle = 'rgba(255,205,100,.85)'; ctx.lineWidth = 5; ctx.lineCap = 'round'; for (let i = 0; i < 14; i++) { const a = t * .6 + i; ctx.beginPath(); ctx.arc(260 + (i * 41) % 280, 168 + (i % 3) * 8, 10, a, a + 1.6); ctx.stroke(); } }
+  ctx.fillStyle = 'rgba(0,0,0,.18)'; ellipse(ctx, 400, 160, 170, 16); ctx.fill();
+  if (jam) { ctx.strokeStyle = 'rgba(255,205,100,.85)'; ctx.lineWidth = 5; ctx.lineCap = 'round'; for (let i = 0; i < 14; i++) { const a = t * .6 + i; ctx.beginPath(); ctx.arc(260 + (i * 41) % 280, 170 + (i % 3) * 8, 10, a, a + 1.6); ctx.stroke(); } }
   const n = K ? rolledCount(K) : 0;
-  if (look === 'manti') { for (let i = 0; i < n; i++) drawManti(ctx, 255 + (i % 7) * 48, 166 + Math.floor(i / 7) * 16 + Math.sin(t * 3 + i) * 2, b, .7); }
-  else if (look === 'soup') { ctx.fillStyle = 'rgba(240,120,30,.7)'; for (let i = 0; i < 40; i++) { circle(ctx, 250 + (i * 53) % 300, 160 + (i * 7) % 30, 2.5); ctx.fill(); } }
-  else for (let i = 0; i < n; i++) { ctx.save(); ctx.translate(262 + (i % 6) * 55, 166 + Math.floor(i / 6) * 16); ctx.scale(.7, .45); drawLeaf(ctx, 0, 0, true, b); ctx.restore(); }
+  if (look === 'manti') { for (let i = 0; i < n; i++) drawManti(ctx, 255 + (i % 7) * 48, 168 + Math.floor(i / 7) * 16 + Math.sin(t * 3 + i) * 2, b, .7); }
+  else if (look === 'soup') { ctx.fillStyle = 'rgba(240,120,30,.7)'; for (let i = 0; i < 40; i++) { circle(ctx, 250 + (i * 53) % 300, 162 + (i * 7) % 30, 2.5); ctx.fill(); } }
+  else if (look === 'sutlac') {
+    ctx.fillStyle = 'rgba(255,255,255,.85)'; for (let i = 0; i < 60; i++) { ellipse(ctx, 248 + (i * 53) % 304, 160 + (i * 11) % 34, 3, 1.4, i); ctx.fill(); }
+    ctx.strokeStyle = 'rgba(200,180,140,.45)'; ctx.lineWidth = 2; for (let i = 0; i < 3; i++) { const a = t * .8 + i * 2.1; ctx.beginPath(); ctx.ellipse(400, 178, 50 + i * 36, 8 + i * 5, 0, a, a + 2.2); ctx.stroke(); }
+  } else if (look === 'helva') {
+    const hr = mulberry(21); for (let i = 0; i < 260; i++) { ctx.fillStyle = hr() < .5 ? 'rgba(120,70,20,.35)' : 'rgba(255,240,190,.45)'; circle(ctx, 236 + hr() * 330, 152 + hr() * 52, 1.2); ctx.fill(); }
+  }
+  else if (!jam) for (let i = 0; i < n; i++) { ctx.save(); ctx.translate(262 + (i % 6) * 55, 168 + Math.floor(i / 6) * 16); ctx.scale(.7, .45); drawLeaf(ctx, 0, 0, true, b); ctx.restore(); }
   ctx.fillStyle = 'rgba(255,255,255,.35)';
-  for (let i = 0; i < 8; i++) { const k = (t * 1.3 + i * .37) % 1; circle(ctx, 260 + ((i * 53) % 280), 186 - k * 14, 3 + k * 4); ctx.fill(); }
+  for (let i = 0; i < 8; i++) { const k = (t * 1.3 + i * .37) % 1; circle(ctx, 260 + ((i * 53) % 280), 188 - k * 14, 3 + k * 4); ctx.fill(); }
   ctx.restore();
+  if (look === 'sutlac' || look === 'helva') {
+    const a = Math.sin(t * 2.2) * .12;
+    ctx.save(); ctx.translate(430 + Math.sin(t * 2.2) * 30, 182); ctx.rotate(.55 + a);
+    ctx.fillStyle = 'rgba(0,0,0,.15)'; ellipse(ctx, 4, 4, 13, 7); ctx.fill();
+    const wd = ctx.createLinearGradient(-6, 0, 6, 0); wd.addColorStop(0, '#94602f'); wd.addColorStop(.5, '#d29a5c'); wd.addColorStop(1, '#8a5628');
+    ctx.fillStyle = wd; roundRect(ctx, -5, -150, 10, 146, 5); ctx.fill(); ellipse(ctx, 0, 0, 13, 7); ctx.fill();
+    ctx.restore();
+  }
+  stoveFlames(ctx, t);
   ctx.fillStyle = 'rgba(255,255,255,.4)';
   for (let i = 0; i < 4; i++) { const k = (t * .5 + i / 4) % 1; circle(ctx, 340 + i * 40 + Math.sin(t + i) * 12, 150 - k * 130, 12 + k * 24); ctx.fill(); }
 }
@@ -2653,10 +3167,15 @@ function drawBoard(canvas, mode) {
   if (K && K.dough) {
     renderAny(ctx, K);
     drawCuts(ctx, K);
+    if (mode === 'cut') drawCutter(ctx);
     if (eggFx.length) drawEggFx(ctx);
     if (mode === 'cut' && cutDrag) {
       ctx.save(); ctx.setLineDash([10, 8]); ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(58,34,22,.8)';
       ctx.beginPath(); ctx.moveTo(cutDrag.x1, cutDrag.y1); ctx.lineTo(cutDrag.x2, cutDrag.y2); ctx.stroke(); ctx.restore();
+    }
+    if (K.stage === 'stir' && DISH[K.dough].toss) {
+      if (drawing && lastPt && K.stir < 1) drawServers(ctx, lastPt.x, lastPt.y + 10, .35 + Math.sin(Date.now() / 85) * .2);
+      else drawServers(ctx, 420, 360, .7);
     }
     if (K.stage === 'stir' && K.stir < 1) {
       ctx.fillStyle = 'rgba(58,34,22,.25)'; roundRect(ctx, 150, 452, 200, 14, 7); ctx.fill();
@@ -2715,10 +3234,39 @@ function drawEggFx(ctx) {
     ctx.restore();
   }
 }
+// pizza tekerleği kesik boyunca yuvarlanır
+let cutFx = null;
+const CUT_MS = 380;
+const cutFxK = () => cutFx ? Math.min(1, (Date.now() - cutFx.t0) / CUT_MS) : 1;
+function drawCutter(ctx) {
+  if (!cutFx) return;
+  const age = Date.now() - cutFx.t0;
+  if (age > CUT_MS + 220) { cutFx = null; return; }
+  const k = cutFxK(), e = k < 1 ? k * k * (3 - 2 * k) : 1, f = cutFx;
+  const x = f.ax + (f.bx - f.ax) * e, y = f.ay + (f.by - f.ay) * e - (age > CUT_MS ? (age - CUT_MS) * .25 : 0);
+  ctx.save(); ctx.globalAlpha = age > CUT_MS ? 1 - (age - CUT_MS) / 220 : 1;
+  ctx.translate(x, y);
+  const back = Math.atan2(-f.uy, -f.ux), hx = Math.cos(back) * 46, hy = Math.sin(back) * 46 - 34;
+  ctx.fillStyle = 'rgba(40,20,5,.22)'; ellipse(ctx, 6, 10, 26, 8, Math.atan2(f.uy, f.ux)); ctx.fill();
+  ctx.lineCap = 'round';
+  ctx.strokeStyle = '#8f979c'; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(hx * .45, hy * .45); ctx.stroke();
+  ctx.strokeStyle = '#c0392b'; ctx.lineWidth = 13; ctx.beginPath(); ctx.moveTo(hx * .45, hy * .45); ctx.lineTo(hx * 1.5, hy * 1.5); ctx.stroke();
+  ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(hx * .55 - 3, hy * .55 - 3); ctx.lineTo(hx * 1.4 - 3, hy * 1.4 - 3); ctx.stroke();
+  const g = ctx.createRadialGradient(-6, -6, 2, 0, 0, 24); g.addColorStop(0, '#f4f7f8'); g.addColorStop(.7, '#c3cbcf'); g.addColorStop(1, '#7f8a90');
+  ctx.fillStyle = g; circle(ctx, 0, 0, 23); ctx.fill();
+  ctx.strokeStyle = '#6d777d'; ctx.lineWidth = 1.5; circle(ctx, 0, 0, 23); ctx.stroke();
+  const rot = e * 9;
+  ctx.strokeStyle = 'rgba(90,100,106,.6)'; ctx.lineWidth = 1.5;
+  for (let i = 0; i < 3; i++) { const a = rot + i * 2.09; ctx.beginPath(); ctx.moveTo(Math.cos(a) * 7, Math.sin(a) * 7); ctx.lineTo(Math.cos(a) * 19, Math.sin(a) * 19); ctx.stroke(); }
+  ctx.fillStyle = '#5d676c'; circle(ctx, 0, 0, 6); ctx.fill(); ctx.fillStyle = '#e8ecee'; circle(ctx, -1.5, -1.5, 2); ctx.fill();
+  ctx.restore();
+}
 function drawCuts(ctx, d) {
   if (!d.cuts || !d.cuts.length) return;
   ctx.save(); ctx.clip(PATHS[d.dough]); ctx.lineCap = 'round';
-  for (const c of d.cuts) {
+  for (let c of d.cuts) {
+    const k = cutFx && cutFx.c === c ? cutFxK() : 1;
+    if (k < 1) c = { x1: cutFx.ax, y1: cutFx.ay, x2: cutFx.ax + (cutFx.bx - cutFx.ax) * k, y2: cutFx.ay + (cutFx.by - cutFx.ay) * k };
     ctx.strokeStyle = 'rgba(60,28,10,.75)'; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(c.x1, c.y1); ctx.lineTo(c.x2, c.y2); ctx.stroke();
     ctx.strokeStyle = 'rgba(255,240,210,.55)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(c.x1 + 3, c.y1 + 3); ctx.lineTo(c.x2 + 3, c.y2 + 3); ctx.stroke();
   }
@@ -2862,6 +3410,11 @@ const GREET = [
   (p, h) => `${cap(p)} lütfen ${h}, çok acıktım.`,
   (p, h) => `Hayırlı işler ${h}. ${cap(p)} rica ediyorum.`,
   (p, h) => `Selam ${h}! ${cap(p)} olsun, zahmet olmazsa.`,
+  (p, h) => `İyi günler ${h}. Kokusu sokağa kadar geliyor! ${cap(p)} alayım.`,
+  (p, h) => `${cap(h)}, öğle arasındayım, ${p} yetişir mi?`,
+  (p, h) => `Hayırlı olsun ${h}, dükkan çok güzel olmuş. ${cap(p)} rica edeceğim.`,
+  (p, h) => `Komşu tavsiye etti ${h}. ${cap(p)} deneyeyim bakalım.`,
+  (p, h) => `Merhabalar! Bugün canım ${p} çekti ${h}.`,
 ];
 // müşteriler ustaya nasıl seslenir: abla, abi, usta; yaşlılar gençlere evladım der
 function hitap(c) {
@@ -2885,7 +3438,8 @@ function ticketHTML() {
   let body;
   if (o.fromBatch) body = `<p class="recipe-note">Bu yemeği sabah hazırladın. Mutfaktaki yeşil kutudan bir ${PREP[o.dish].unit} ver.</p>`;
   else if (o.riddle && !o.asked) body = `<p class="quote">“${o.riddle}”</p>`;
-  else if (D.variants) body = '<p class="recipe-note gen-note">Malzemeleri tarifine göre koy. Hatırlamıyorsan tarif defterine bak.</p>';
+  else if (D.variants && SET.diff === 'hard') body = '<p class="recipe-note gen-note">Malzemeleri tarifine göre koy. Hatırlamıyorsan tarif defterine bak.</p>';
+  else if (D.variants) body = `<p class="recipe-note recipe-list">${cap(reqList((variantOf(o) || D.variants[0]).req))}</p>`;
   else if (o.half) body = `<ul>${o.items.map((i, n) => `<li><span class="half">${n + 1}. yarı</span><span>${ING[i.type].name}</span><em class="${i.bol ? 'bol' : ''}">${qtyText(i)}</em></li>`).join('')}</ul>`;
   else if (!o.items.length) body = '<ul><li><span>Malzemesiz, sade</span></li></ul>';
   else body = `<ul>${o.items.map(i => `<li><span>${ING[i.type].label || ING[i.type].name}</span><em class="${i.bol ? 'bol' : ''}">${qtyText(i)}</em></li>`).join('')}</ul>`;
@@ -2904,7 +3458,7 @@ function bookHTML() {
       return `<section><h3>${D.name}</h3><p>${what}</p><p class="how">${k === 'gozleme' ? 'Sacda' : 'Fırında'} pişir, ${D.slices === 1 ? 'kesmeden ver' : D.slices + ' dilim kes'}.</p></section>`;
     }
     const how = { bowl: 'Kasede iyice karıştır ve servis et.', tray: 'En az 3 kat yufka ser, iç harcı ve sosu ekle. Fırında pişir, 9 dilim kes.', sarma: 'İç harcı kasede karıştır, yapraklara sar, tencerede pişir.', cookie: 'Hamuru kasede yoğur, kurabiyelere şekil ver, fırında pişir. Üstüne istersen pudra şekeri.', jam: 'Malzemeleri tencereye koy, kıvamını tutturana kadar kaynat.' }[D.kind];
-    const how2 = (D.how || how) + (D.learn ? ' (Hayriye Teyze\'nin tarifi)' : '') + (isPrep(k) ? ' Sabah hazırlanır, gün boyu porsiyon porsiyon satılır.' : '');
+    const how2 = (D.how || how) + (D.learn ? ` (${D.teyze || 'Hayriye Teyze'}'nin tarifi)` : '') + (isPrep(k) ? ' Sabah hazırlanır, gün boyu porsiyon porsiyon satılır.' : '');
     return `<section><h3>${D.name}</h3>${D.variants.filter(v => v.day <= S.day).map(v => `<p><b>${v.label ? cap(v.label) : 'Klasik'}${dietMark(v.req)}:</b> ${reqList(v.req)}</p>`).join('')}<p class="how">${how2}</p></section>`;
   }).join('');
 }
@@ -3070,9 +3624,10 @@ function evalFlat(o, d) {
   const top = scores.length ? scores.reduce((a, c) => a + c, 0) / scores.length : 1;
   return finish(o, (top * .5 + bs * .3 + sl * .2) * (ok ? 1 : .25) - extra, issues, ok, d);
 }
-const HAPPY = ['Ellerine sağlık usta, harika olmuş!', 'Mis gibi! Tam istediğim gibi.', 'Oh be, nefis! Yine gelirim.', 'Bu ne güzellik! Afiyetle yerim.'];
-const OK = ['Fena değil.', 'İdare eder.', 'Güzel ama tam değil.'];
-const BAD = ['Bu ne böyle?!', 'Usta, olmamış bu.', 'Hiç beğenmedim.'];
+const HAPPY = ['Ellerine sağlık usta, harika olmuş!', 'Mis gibi! Tam istediğim gibi.', 'Oh be, nefis! Yine gelirim.', 'Bu ne güzellik! Afiyetle yerim.',
+  'Annemin yaptığı gibi olmuş, ellerine sağlık!', 'Valla bu mahallenin en iyisi burası.', 'Tadı damağımda kalacak, teşekkürler!', 'Kokusuyla bile doyurdun usta!'];
+const OK = ['Fena değil.', 'İdare eder.', 'Güzel ama tam değil.', 'Yenir, ama daha iyisini yaparsın.', 'Eh işte, bir dahakine.'];
+const BAD = ['Bu ne böyle?!', 'Usta, olmamış bu.', 'Hiç beğenmedim.', 'Bunu ben mi sipariş ettim?!', 'Kusura bakma ama olmamış.'];
 
 // ---------- sabah hazırlığı, market, depo ----------
 const batchesOf = k => S.batches.filter(b => b.dish === k && b.left > 0);
@@ -3164,12 +3719,12 @@ function drawTeapot(x, full) {
 }
 // ince belli çay bardağı, tabağı, kesme şekeri ve kaşığıyla
 function teaGlassPath(ctx) {
-  ctx.beginPath(); ctx.moveTo(-10, 0);
-  ctx.bezierCurveTo(-15, -6, -14, -19, -8.5, -30);
-  ctx.bezierCurveTo(-5, -38, -12, -50, -15, -62);
-  ctx.lineTo(15, -62);
-  ctx.bezierCurveTo(12, -50, 5, -38, 8.5, -30);
-  ctx.bezierCurveTo(14, -19, 15, -6, 10, 0);
+  ctx.beginPath(); ctx.moveTo(-10.5, 0);
+  ctx.bezierCurveTo(-14.8, -4, -15.2, -17, -10.8, -27);
+  ctx.bezierCurveTo(-9.2, -32, -11, -47, -15.5, -62);
+  ctx.lineTo(15.5, -62);
+  ctx.bezierCurveTo(11, -47, 9.2, -32, 10.8, -27);
+  ctx.bezierCurveTo(15.2, -17, 14.8, -4, 10.5, 0);
   ctx.closePath();
 }
 function drawTeaGlass(ctx, cx, by, s = 1, t = 0, steam = true) {
@@ -3183,13 +3738,18 @@ function drawTeaGlass(ctx, cx, by, s = 1, t = 0, steam = true) {
   ctx.fillStyle = '#c3cbd1'; ellipse(ctx, 13.5, 4.8, 4, 2.2, -.3); ctx.fill();
   ctx.save(); teaGlassPath(ctx); ctx.clip();
   ctx.fillStyle = 'rgba(225,240,245,.55)'; ctx.fillRect(-16, -63, 32, 12);
-  const g = ctx.createLinearGradient(0, -52, 0, 0); g.addColorStop(0, '#d0521f'); g.addColorStop(1, '#7c1f0b');
+  const g = ctx.createLinearGradient(-14, 0, 14, 0); g.addColorStop(0, '#8e2410'); g.addColorStop(.35, '#c8461a'); g.addColorStop(.6, '#b13a15'); g.addColorStop(1, '#6e1a08');
   ctx.fillStyle = g; ctx.fillRect(-16, -52, 32, 52);
-  ctx.fillStyle = '#e46e30'; ellipse(ctx, 0, -52, 14, 2.4); ctx.fill();
-  ctx.fillStyle = 'rgba(255,255,255,.5)'; ellipse(ctx, 0, -1.5, 9.5, 2.2); ctx.fill();
-  ctx.strokeStyle = 'rgba(255,255,255,.75)'; ctx.lineWidth = 2.5;
-  ctx.beginPath(); ctx.moveTo(-11.5, -58); ctx.bezierCurveTo(-9, -48, -5, -38, -6, -32); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(-7.5, -25); ctx.bezierCurveTo(-11.5, -18, -11.5, -10, -8.5, -4); ctx.stroke();
+  const g2 = ctx.createLinearGradient(0, -52, 0, 0); g2.addColorStop(0, 'rgba(240,120,40,.35)'); g2.addColorStop(1, 'rgba(60,10,0,.35)');
+  ctx.fillStyle = g2; ctx.fillRect(-16, -52, 32, 52);
+  ctx.fillStyle = '#d9622a'; ellipse(ctx, 0, -52, 13.5, 2.4); ctx.fill();
+  ctx.fillStyle = 'rgba(255,190,120,.5)'; ellipse(ctx, -3, -52.4, 6, 1); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,.45)'; ellipse(ctx, 0, -1.5, 9.5, 2.2); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,.75)'; ctx.lineWidth = 2.2;
+  ctx.beginPath(); ctx.moveTo(-12.5, -58); ctx.bezierCurveTo(-10.5, -50, -9, -40, -8.6, -31); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-10, -23); ctx.bezierCurveTo(-12.5, -17, -12.5, -10, -9.5, -4); ctx.stroke();
+  ctx.strokeStyle = 'rgba(255,255,255,.3)'; ctx.lineWidth = 1.4;
+  ctx.beginPath(); ctx.moveTo(11.5, -55); ctx.bezierCurveTo(10, -46, 8.8, -38, 8.6, -31); ctx.stroke();
   ctx.restore();
   ctx.strokeStyle = '#66757e'; ctx.lineWidth = 1.6; teaGlassPath(ctx); ctx.stroke();
   ctx.fillStyle = 'rgba(235,245,250,.6)'; ellipse(ctx, 0, -62, 15, 2.6); ctx.fill(); ctx.lineWidth = 1.2; ctx.stroke();
@@ -3376,15 +3936,21 @@ const EVENTS = {
     lines: ['Kolay gelsin evladım! Ben Hayriye, üst sokakta otururum.', 'Senin yemeklerini çok övüyorlar. Sana annemden kalma bir tarif vereyim: elmalı kurabiye!', 'Un, tereyağı, şeker, yumurta, rendelenmiş elma ve tarçın. Hamuru yoğur, şekil ver, fırına at. İstersen üstüne pudra şekeri.'] },
   teyze2: { who: HAYRIYE, mood: 'happy', end: 'Ellerine sağlık teyze', unlock: 'recel', after: () => { S.learned.recel = true; },
     lines: ['Yine ben geldim evladım! Kurabiyeyi herkes çok sevmiş, duydum.', 'Bu sefer de portakal reçeli tarifimi vereyim.', 'Portakal kabuklarını şeker ve biraz suyla tencereye koy, limon sık. Kıvamını iyi tut, ne sulu olsun ne yansın!'] },
+  teyze3: { who: NAZIFE, mood: 'happy', end: 'Eline sağlık Nazife Teyze', unlock: 'sutlac', after: () => { S.learned.sutlac = true; S.ev.teyze3 = S.day; },
+    lines: ['Hayırlı işler evladım! Ben Nazife, Hayriye\'nin kapı komşusuyum.', 'Hayriye senin reçelini anlata anlata bitiremedi. Ben de sana sütlaç tarifimi vereyim, mahallede benimki meşhurdur!', 'Pirinci azıcık suyla haşla, sütü ve şekeri ekle, karıştırarak koyulaştır. Dibi tutmasın! Kaseye dök, üstüne tarçın.'] },
+  teyze4: { who: ZEHRA, mood: 'happy', end: 'Ellerine sağlık Zehra Teyze', unlock: 'helva', after: () => { S.learned.helva = true; },
+    lines: ['Kolay gelsin yavrum. Ben Zehra, karşı apartmanda otururum. Nazife\'yle her sabah çay içeriz.', 'Senin sütlacını yemiş, çok övdü. Benden de irmik helvası olsun; kavrulurken kokusu bütün sokağı sarar.', 'Tereyağında irmiği pembeleşene kadar kavur, sütle şekeri ekle, irmik suyunu çekene kadar karıştır. İstersen üstüne Antep fıstığı!'] },
 };
 function pendingEvent() {
   if (S.day >= 2 && !S.ev.rival1 && S.dayServed === 0) return 'rival1';
   if (S.day >= 2 && !S.learned.kurabiye && S.dayServed >= 2) return 'teyze1';
   if (S.day >= 3 && S.learned.kurabiye && !S.learned.recel && S.dayServed >= 2) return 'teyze2';
   if (S.day >= 4 && S.ev.rival1 && !S.ev.rival2 && S.dayServed >= 1) return 'rival2';
+  if (S.day >= 5 && S.learned.recel && !S.learned.sutlac && S.dayServed >= 2) return 'teyze3';
+  if (S.day >= 7 && S.learned.sutlac && !S.learned.helva && S.ev.teyze3 && S.ev.teyze3 !== true && S.ev.teyze3 < S.day && S.dayServed >= 2) return 'teyze4';
   return null;
 }
-const nameTag = () => cust.regular ? `${cust.name} · müdavim` : cust.special === 'rival2' ? `${cust.name} · rakip` : cust.maker ? `${cust.name} · yapımcı` : cust.fid ? cust.name : cust.critic ? `${cust.name} · eleştirmen` : cust.gicik ? `${cust.name} · huysuz` : cust.name;
+const nameTag = () => cust.regular ? `${cust.name} · müdavim` : cust.special === 'rival2' ? `${cust.name} · rakip` : cust.fid ? cust.name : cust.critic ? `${cust.name} · eleştirmen` : cust.gicik ? `${cust.name} · huysuz` : cust.name;
 // ünün yüksekse ve müdavimin çoksa müşteriler daha sık gelir
 const PAT_SEC = { flat: 80, bowl: 60, tray: 75, sarma: 100, cookie: 90, jam: 60, manti: 115 };
 function patienceSeconds() {
@@ -3453,7 +4019,7 @@ function nextCustomer() {
     cust.pat = 1; cust.patT = patienceSeconds();
     const intro = cust.special === 'rival2' ? 'Yine ben, Kâmil. Bakalım yemeklerin övüldüğü kadar iyi mi? '
       : cust.regular ? pick(['Yine ben geldim usta! ', 'Selam usta, beni hatırladın mı? ', 'Geçen sefer çok beğenmiştim, yine geldim! ']) : '';
-    let line = cust.hi ? cust.hi(orderPhrase(order)) + orderExtras(order) : intro + (order.riddle || (intro ? `${cap(orderPhrase(order))} alabilir miyim?` : pick(GREET)(orderPhrase(order), hitap(cust)))) + orderExtras(order);
+    let line = cust.hi ? said(cust.hi, orderPhrase(order)) + orderExtras(order) + (cust.solo && !cust.partner && !cust.duo && Math.random() < .5 ? ' ' + said(cust.solo) : '') : intro + (order.riddle || (intro ? `${cap(orderPhrase(order))} alabilir miyim?` : pick(GREET)(orderPhrase(order), hitap(cust)))) + orderExtras(order);
     if (cust.critic) line = `İyi günler. Gurme Fikret, Lezzet Gazetesi. ${cap(orderPhrase(order))} rica edeyim.${orderExtras(order)} Not alacağım, haberiniz olsun.`;
     if (cust.gicik) line = pick(['Of, neyse… ', 'Hıh. ', 'Çabuk ol bakalım! ']) + line;
     if (cust.diet && !cust.hi) line += ' ' + pick(DIET_HI[cust.diet]);
@@ -3530,7 +4096,7 @@ function partnerTurn() {
   order = makeOrder(cust.fav ? pick(cust.fav) : null, cust.diet); delete order.riddle;
   if (cust.easy) order.easy = true;
   phase = 'order'; cust.pat = 1; cust.patT = patienceSeconds(); sfx.bell();
-  say(nameTag(), cust.hi(orderPhrase(order)) + orderExtras(order));
+  say(nameTag(), said(cust.hi, orderPhrase(order)) + orderExtras(order));
   renderPanel();
 }
 // huysuz müşteri mutfaktayken fikrini değiştirir
@@ -3832,7 +4398,7 @@ function serveNow() {
   cust.mood = olay ? 'angry' : result.total >= (cust.gicik ? .92 : .85) && !result.issues.length ? 'happy' : result.stars >= 3 ? 'meh' : 'angry';
   const issue = result.issues[0] ? ' ' + result.issues[0].t : '';
   let line = cust.mood === 'happy' ? pick(HAPPY) : (cust.mood === 'meh' ? pick(OK) : pick(BAD)) + issue;
-  if (cust.fid) line = cust.mood === 'happy' ? pick(cust.happy) : cust.meh(result.issues[0] ? result.issues[0].t : 'Biraz eksik olmuş.');
+  if (cust.fid) line = cust.mood === 'happy' ? said(cust.happy) : said(cust.meh, result.issues[0] ? result.issues[0].t : 'Biraz eksik olmuş.');
   if (cust.gicik) line = cust.mood === 'happy' ? 'Hıh… Peki, kabul ediyorum, güzel olmuş.' : (cust.mood === 'meh' ? 'Bu mu yani? Neyse…' : 'Rezalet!') + issue;
   if (cust.critic) line = result.stars >= 5 ? 'Mükemmel. Bunu gazetede yazacağım.' : result.stars >= 3 ? 'Hmm. Fena değil, not ettim.' + issue : 'Hayal kırıklığı. Okurlarımı uyarmam gerekecek.' + issue;
   if (result.refund && !cust.polite && !olay) line += ' Paramı geri ver!';
@@ -3922,11 +4488,12 @@ function renderDecor() {
   const wrap = $('#decor'); wrap.innerHTML = '';
   if (!S.decor.wall) S.decor.wall = 'boya_krem';
   for (const d of DECOR) {
-    const owned = !d.price || hasDecor(d.id), using = d.group === 'boya' && S.decor.wall === d.id;
+    const owned = !d.price || hasDecor(d.id), using = (d.group === 'boya' && S.decor.wall === d.id) || (d.group === 'lamba' && owned && activeLamp() === d.id);
     const el = document.createElement('div'); el.className = 'upg' + (using ? ' using' : owned ? ' owned' : '');
     let act;
-    if (using) act = '<em>Duvarda ✓</em>';
+    if (using) act = d.group === 'lamba' ? '<em>Asılı ✓</em>' : '<em>Duvarda ✓</em>';
     else if (owned && d.group === 'boya') act = '<button class="btn" type="button">Duvarı boya</button>';
+    else if (owned && d.group === 'lamba') act = '<button class="btn" type="button">Bunu as</button>';
     else if (owned) act = '<em>Dükkanda ✓</em>';
     else act = `<button class="btn" type="button" ${S.money < d.price ? 'disabled' : ''}>Satın al · ${d.price}₺</button>`;
     el.innerHTML = `<b>${d.name}</b><span>${d.desc}</span>${act}`;
@@ -3935,6 +4502,7 @@ function renderDecor() {
       if (!owned) { if (S.money < d.price) return; S.money -= d.price; S.decor[d.id] = true; sfx.coin(); }
       else tone(660, .08, 'triangle', .04);
       if (d.group === 'boya') S.decor.wall = d.id;
+      if (d.group === 'lamba') S.decor.lamp = d.id;
       checkBadges(); save(); renderDecor(); renderUpgrades(); hud();
     };
     wrap.appendChild(el);
@@ -3970,6 +4538,8 @@ function buildDoughButtons() {
       if (k === 'menemen' || k === 'tofumenemen') { drawSahan(x, 56, 38, .55, .36, 0, k === 'tofumenemen'); return; }
       if (k === 'kunefe') { x.fillStyle = '#c4703a'; ellipse(x, 56, 40, 40, 22); x.fill(); drawPortion(x, 'kadayif', 56, 38, 5); drawPortion(x, 'antep', 56, 38, 3); return; }
       if (D.kind === 'cookie') { x.translate(56, 38); x.scale(.55, .55); drawCookie(x, -32, 0, .45, { tarcin: true }); drawCookie(x, 32, 0, .45, { pudra: true }); return; }
+      if (k === 'sutlac') { drawSutlacBowl(x, 56, 36, .5, .42); return; }
+      if (k === 'helva') { drawHelvaPlate(x, 56, 34, .55, .5); return; }
       if (D.kind === 'jam') { drawJar(x, 56, 42, .55, .38); return; }
       if (D.kind === 'bowl') {
         x.translate(56, 38); x.scale(.17, .17); x.translate(-250, -250);
@@ -4060,7 +4630,9 @@ function applyAt(p) {
   if (K.stage === 'stir') {
     if (lastPt) {
       K.stir = Math.min(1, K.stir + Math.hypot(p.x - lastPt.x, p.y - lastPt.y) / (2600 * [1, .65, .42][Math.min(2, perk('mikser'))]));
-      const now = performance.now(); if (now - lastSmear > 120) { sfx.smear(); lastSmear = now; }
+      const now = performance.now(), toss = DISH[K.dough].toss;
+      if (toss) tossAt = Date.now();
+      if (now - lastSmear > (toss ? 150 : 120)) { toss ? sfx.toss() : sfx.smear(); lastSmear = now; }
       if (K.stir >= 1) { setHint('Güzelce karıştı!'); tone(880, .15, 'sine', .05); updateActions(); drawing = false; }
     }
     lastPt = p; return;
@@ -4122,13 +4694,15 @@ cutC.addEventListener('pointerup', () => {
   if (perk('bicak')) { const ang = Math.atan2(c.y2 - c.y1, c.x2 - c.x1), snap = Math.round(ang / (Math.PI / 4)) * (Math.PI / 4), mx = (c.x1 + c.x2) / 2, my = (c.y1 + c.y2) / 2; c.x1 = mx - Math.cos(snap) * len / 2; c.y1 = my - Math.sin(snap) * len / 2; c.x2 = mx + Math.cos(snap) * len / 2; c.y2 = my + Math.sin(snap) * len / 2; }
   // kesiği kenarların dışına kadar uzat, düzgün dursun
   const ux = (c.x2 - c.x1) / len, uy = (c.y2 - c.y1) / len, how = DISH[K.dough].cut, P = PATHS[K.dough] || PATHS.borek;
-  let over = false;
-  for (let s = -700; s <= 700 && !over; s += 8) over = hit.isPointInPath(P, c.x1 + ux * s, c.y1 + uy * s);
+  let over = false, sMin = 1e9, sMax = -1e9;
+  for (let s = -700; s <= 700; s += 8) if (hit.isPointInPath(P, c.x1 + ux * s, c.y1 + uy * s)) { over = true; sMin = Math.min(sMin, s); sMax = Math.max(sMax, s); }
   if (!over) { $('#cutHint').textContent = 'Kesik hamurun üstünden geçmeli.'; sfx.bad(); return; }
   if (how === 'radial' && Math.abs((250 - c.x1) * uy - (250 - c.y1) * ux) > 48) { $('#cutHint').textContent = 'Lahmacunu tam ortasından geçecek şekilde kes.'; sfx.bad(); return; }
   if (how === 'cross' && Math.abs(ux) > Math.abs(uy)) { $('#cutHint').textContent = 'Enine kes: parmağını yukarıdan aşağıya sürükle.'; sfx.bad(); return; }
-  K.cuts.push({ x1: c.x1 - ux * 400, y1: c.y1 - uy * 400, x2: c.x2 + ux * 400, y2: c.y2 + uy * 400 });
-  sfx.knife(); updateCutInfo();
+  const cut = { x1: c.x1 - ux * 400, y1: c.y1 - uy * 400, x2: c.x2 + ux * 400, y2: c.y2 + uy * 400 };
+  K.cuts.push(cut);
+  cutFx = { c: cut, ax: c.x1 + ux * (sMin - 26), ay: c.y1 + uy * (sMin - 26), bx: c.x1 + ux * (sMax + 26), by: c.y1 + uy * (sMax + 26), ux, uy, t0: Date.now() };
+  sfx.slice(); updateCutInfo();
 });
 cutC.addEventListener('pointercancel', () => { cutDrag = null; });
 
@@ -4138,16 +4712,26 @@ $('#bakeBtn').onclick = kitchenNext;
 $('#pullBtn').onclick = pull;
 $('#undoCutBtn').onclick = () => {
   if (cutMode !== 'cut') { const i = K.rollOrder.pop(); if (i !== undefined) K.rolls[i] = false; }
-  else K.cuts.pop();
+  else { K.cuts.pop(); cutFx = null; }
   updateCutInfo();
 };
 $('#serveBtn').onclick = () => {
   if (cutMode !== 'cut') { if (!rolledCount(K)) { $('#cutHint').textContent = cutMode === 'wrap' ? 'Önce birkaç yaprak sar.' : cutMode === 'fold' ? 'Önce birkaç mantı kapat.' : 'Önce birkaç kurabiye şekillendir.'; return; } startBake(); }
   else serve();
 };
-$('#bookBtn').onclick = () => { $('#bookBody').innerHTML = bookHTML(); $('#book').hidden = false; $('#bookClose').focus(); };
-$('#bookClose').onclick = () => { $('#book').hidden = true; };
-$('#book').addEventListener('click', e => { if (e.target.id === 'book') $('#book').hidden = true; });
+// tarif defteri kapatıldığı sayfadan açılır
+let bookTop = 0;
+try { bookTop = +localStorage.getItem('afiyet-olsun-book') || 0; } catch (e) {}
+function closeBook() {
+  const c = $('#book .book-card'); bookTop = c.scrollTop; $('#book').hidden = true;
+  try { localStorage.setItem('afiyet-olsun-book', String(Math.round(bookTop))); } catch (e) {}
+}
+$('#bookBtn').onclick = () => {
+  $('#bookBody').innerHTML = bookHTML(); $('#book').hidden = false;
+  $('#book .book-card').scrollTop = bookTop; $('#bookClose').focus({ preventScroll: true });
+};
+$('#bookClose').onclick = closeBook;
+$('#book').addEventListener('click', e => { if (e.target.id === 'book') closeBook(); });
 $('#muteBtn').onclick = () => {
   muted = !muted; $('#hMute').textContent = muted ? '🔇' : '🔊'; $('#muteBtn').setAttribute('aria-label', muted ? 'Sesi aç' : 'Sesi kapat');
   if (muted) Music.stop(); else Music.start();
