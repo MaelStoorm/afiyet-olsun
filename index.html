@@ -1078,6 +1078,7 @@ if (!Array.isArray(S.batches)) S.batches = [];
 if (typeof S.cay !== 'number') S.cay = 0;
 if (S.inv) delete S.inv.kpeynir;
 if (!S.mkList || typeof S.mkList !== 'object') S.mkList = {};
+if (!S.cat || typeof S.cat !== 'object') S.cat = { fed: 0, day: 0 };
 const dishOpen = k => (!DISH[k].day || S.day >= DISH[k].day) && (!DISH[k].upg || has(DISH[k].upg)) && (!DISH[k].learn || !!S.learned[DISH[k].learn]);
 const ingOpen = k => !ING[k].upg || has(ING[k].upg);
 const kindOf = k => DISH[k].kind;
@@ -1190,6 +1191,8 @@ const sfx = {
       glide('triangle', [[0, 2100 * k], [.05, 3500 * k], [len, 2400 * k]], .006, { delay: d });
     }
   },
+  meow: () => { glide('sawtooth', [[0, 520], [.12, 780], [.4, 560]], .03, { filter: ['bandpass', 1150], q: 1.3, attack: .05 }); glide('triangle', [[0, 1040], [.12, 1560], [.4, 1120]], .008, { attack: .05 }); },
+  purr: () => { for (let i = 0; i < 14; i++) noise(.06, 'lowpass', 170, .09, 1.2, i * .075); },
   // uzaktan gök gürültüsü
   thunder: () => { noise(2.2, 'lowpass', 140, .16, .7); noise(1.4, 'lowpass', 260, .07, .8, .25); noise(.9, 'lowpass', 90, .12, .7, .5); },
   // vapur düdüğü: kısa ve uzun iki kalın ses
@@ -1847,6 +1850,7 @@ function drawShop(ctx, t) {
   ctx.fillStyle = '#e8e2d6'; for (let i = 0; i < 4; i++) for (let j = 0; j < 2; j++) { roundRect(ctx, 56 + i * 28, 272 + j * 14, 20, 9, 3); ctx.fill(); }
   // çay
   drawTeaGlass(ctx, 716, 292, .72, t, true);
+  if (catInside()) { const up = cust && !walk; drawCat(ctx, CAT_X - (up ? 0 : 4), 294, up ? .95 : 1.1, t, up ? 'sit' : 'sleep'); }
   // served plate
   if (plate) {
     ctx.fillStyle = 'rgba(0,0,0,.18)'; ellipse(ctx, 520, 304, 98, 20); ctx.fill();
@@ -1913,6 +1917,91 @@ function drawLamp(ctx, x, t) {
   ctx.restore();
 }
 // pencereden Boğaz: köprü, deniz, vapur ve martılar
+// dükkanın kedisi: 3. günden sonra kapıya aç bir sarman gelir; üç gün beslenince dükkana yerleşir.
+// O gün mamasını yerse tezgahta uyur (müşteri gelince uyanır), yemezse camın önünde bekler.
+const CAT_NAME = 'Sarman';
+const catOn = () => S.day >= 3;
+const catHome = () => S.cat.fed >= 3;
+const catFedToday = () => S.cat.day === S.day;
+const catInside = () => catHome() && catFedToday();
+let catPetAt = -9;
+function feedCat() {
+  if (catFedToday()) return;
+  if (S.money < 5) { toast('Mama için 5₺ lazım.'); return; }
+  S.money -= 5; S.cat.day = S.day; S.cat.fed++; sfx.meow(); save(); hud();
+  if (S.cat.fed === 3) toast(`🐈 ${CAT_NAME} artık dükkanın kedisi! Tezgahta uyuyacak, müşteriler bayılacak.`);
+  else if (!catHome()) toast(`🐈 Kedi mamayı afiyetle yedi. ${3 - S.cat.fed} gün daha beslersen dükkana alışacak.`);
+  else toast(`🐈 ${CAT_NAME} mamasını yedi, mırlıyor.`);
+  renderMorning();
+}
+const CAT_HI = ['Aa, şu kediye bak, ne tatlı uyuyor!', 'Kediniz çok güzelmiş, maşallah.', 'Tezgahtaki kedi buranın maskotu mu?', 'Ben de böyle bir sarman sahiplenmek istiyorum.'];
+// sarman kedi: oturur (pose 'sit') ya da kıvrılıp uyur ('sleep'); taban (x, y), boyu s
+function drawCat(ctx, x, y, s, t, pose) {
+  const fur = '#e8933a', dark = '#c0661c', light = '#fbe3c4', pink = '#f2a0a0';
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.fillStyle = 'rgba(0,0,0,.16)'; ellipse(ctx, 0, 1, pose === 'sleep' ? 26 : 20, 3.5); ctx.fill();
+  const ear = (ex, ey, dir) => {
+    ctx.fillStyle = fur; ctx.beginPath(); ctx.moveTo(ex - 5 * dir, ey + 4); ctx.lineTo(ex + 1 * dir, ey - 9); ctx.lineTo(ex + 7 * dir, ey + 3); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = pink; ctx.beginPath(); ctx.moveTo(ex - 2 * dir, ey + 2); ctx.lineTo(ex + 1.2 * dir, ey - 5); ctx.lineTo(ex + 4 * dir, ey + 2); ctx.closePath(); ctx.fill();
+  };
+  if (pose === 'sleep') {
+    const br = 1 + Math.sin(t * 1.6) * .035;
+    ctx.save(); ctx.scale(1, br);
+    ctx.strokeStyle = fur; ctx.lineWidth = 7; ctx.beginPath(); ctx.moveTo(20, -5); ctx.quadraticCurveTo(26, 4, 4, 3); ctx.quadraticCurveTo(-14, 3, -20, -1); ctx.stroke();
+    ctx.fillStyle = fur; ellipse(ctx, 2, -10, 22, 10.5); ctx.fill();
+    ctx.strokeStyle = dark; ctx.lineWidth = 2.2;
+    for (const sx of [-4, 4, 12]) { ctx.beginPath(); ctx.moveTo(sx, -19.5); ctx.quadraticCurveTo(sx + 2.5, -14, sx + 1, -9); ctx.stroke(); }
+    ctx.restore();
+    ctx.strokeStyle = fur; ctx.lineWidth = 6.5; ctx.beginPath(); ctx.moveTo(-18, -1); ctx.quadraticCurveTo(-24, -3, -26, 1); ctx.stroke();
+    ctx.strokeStyle = dark; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-25, -1.5); ctx.lineTo(-27, 1.5); ctx.stroke();
+    ear(-21, -19, -1); ear(-10, -21, 1);
+    ctx.fillStyle = fur; circle(ctx, -15, -12, 10); ctx.fill();
+    ctx.fillStyle = light; ellipse(ctx, -16, -8.5, 5.5, 3.6); ctx.fill();
+    ctx.strokeStyle = '#5a3416'; ctx.lineWidth = 1.2;
+    for (const ex of [-20, -11]) { ctx.beginPath(); ctx.arc(ex, -13, 2.2, .2, Math.PI - .2); ctx.stroke(); }
+    ctx.fillStyle = pink; circle(ctx, -15.5, -10, 1.1); ctx.fill();
+    ctx.strokeStyle = dark; ctx.lineWidth = 1.6; for (const sx of [-18, -15, -12]) { ctx.beginPath(); ctx.moveTo(sx, -21.5); ctx.lineTo(sx + .5, -18.5); ctx.stroke(); }
+    const zk = (t * .45) % 1;
+    ctx.fillStyle = `rgba(90,70,60,${.7 * (1 - zk)})`; ctx.font = `800 ${8 + zk * 5}px "Baloo 2", sans-serif`; ctx.textAlign = 'left';
+    ctx.fillText('z', -6 + zk * 8, -26 - zk * 16); if (zk > .4) ctx.fillText('z', -1 + zk * 10, -36 - zk * 14);
+  } else {
+    const sw = Math.sin(t * 2.2) * .5;
+    ctx.strokeStyle = fur; ctx.lineWidth = 6.5; ctx.beginPath(); ctx.moveTo(12, -4); ctx.quadraticCurveTo(26, -6, 24 + sw * 6, -20); ctx.quadraticCurveTo(23 + sw * 8, -27, 18 + sw * 9, -29); ctx.stroke();
+    ctx.strokeStyle = dark; ctx.lineWidth = 6.5; ctx.beginPath(); ctx.moveTo(21 + sw * 7, -25); ctx.quadraticCurveTo(20 + sw * 8, -28, 18 + sw * 9, -29); ctx.stroke();
+    ctx.fillStyle = fur; ellipse(ctx, -9, -7, 9, 7.5); ctx.fill(); ellipse(ctx, 9, -7, 9, 7.5); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(-13, -4); ctx.bezierCurveTo(-16, -22, -9, -32, 0, -32); ctx.bezierCurveTo(9, -32, 16, -22, 13, -4); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = light; ellipse(ctx, 0, -16, 7, 11); ctx.fill();
+    ctx.strokeStyle = dark; ctx.lineWidth = 2; for (const [sx, sy] of [[-13, -12], [-14, -18], [13, -12], [14, -18]]) { ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(sx + (sx < 0 ? 4 : -4), sy - 1); ctx.stroke(); }
+    ctx.fillStyle = light; ellipse(ctx, -5, -1.5, 4.2, 2.6); ctx.fill(); ellipse(ctx, 5, -1.5, 4.2, 2.6); ctx.fill();
+    const hy = -40, tilt = Math.sin(t * .8) * .06;
+    ctx.save(); ctx.translate(0, hy); ctx.rotate(tilt);
+    ear(-9, -8, -1); ear(9, -8, 1);
+    ctx.fillStyle = fur; ellipse(ctx, 0, 0, 13.5, 12); ctx.fill();
+    ctx.strokeStyle = dark; ctx.lineWidth = 1.8; for (const sx of [-3, 0, 3]) { ctx.beginPath(); ctx.moveTo(sx, -11); ctx.lineTo(sx, -7); ctx.stroke(); }
+    ctx.fillStyle = light; ellipse(ctx, 0, 5, 7, 4.8); ctx.fill();
+    const blink = (t % 4.3) < .14;
+    for (const ex of [-5, 5]) {
+      if (blink) { ctx.strokeStyle = '#3a2216'; ctx.lineWidth = 1.3; ctx.beginPath(); ctx.moveTo(ex - 2.6, 0); ctx.lineTo(ex + 2.6, 0); ctx.stroke(); continue; }
+      ctx.fillStyle = '#8cc152'; ellipse(ctx, ex, 0, 2.8, 3.3); ctx.fill();
+      ctx.fillStyle = '#1c1a17'; ellipse(ctx, ex, 0, 1, 2.8); ctx.fill();
+      ctx.fillStyle = '#fff'; circle(ctx, ex + .9, -1.3, .7); ctx.fill();
+    }
+    ctx.fillStyle = pink; ctx.beginPath(); ctx.moveTo(-1.6, 3); ctx.lineTo(1.6, 3); ctx.lineTo(0, 4.8); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = '#5a3416'; ctx.lineWidth = .9; ctx.beginPath(); ctx.moveTo(0, 4.8); ctx.quadraticCurveTo(-1.5, 7, -3, 6); ctx.moveTo(0, 4.8); ctx.quadraticCurveTo(1.5, 7, 3, 6); ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.lineWidth = .7;
+    for (const d of [-1, 1]) for (const k of [-1, 0, 1]) { ctx.beginPath(); ctx.moveTo(d * 5, 5 + k * .8); ctx.lineTo(d * 15, 4 + k * 2.6); ctx.stroke(); }
+    ctx.restore();
+  }
+  // sevilince kalpler
+  const pk = t - catPetAt;
+  if (pk >= 0 && pk < 1.6) for (let i = 0; i < 3; i++) {
+    const k = clamp(pk / 1.6 - i * .12, 0, 1); if (!k) continue;
+    ctx.fillStyle = `rgba(226,70,90,${1 - k})`; const hx = -8 + i * 8 + Math.sin(k * 6 + i) * 3, hy = -50 - k * 34;
+    ctx.beginPath(); ctx.moveTo(hx, hy + 3); ctx.bezierCurveTo(hx - 6, hy - 2, hx - 3, hy - 7, hx, hy - 3.5); ctx.bezierCurveTo(hx + 3, hy - 7, hx + 6, hy - 2, hx, hy + 3); ctx.fill();
+  }
+  ctx.restore();
+}
+const CAT_X = 768;
 // günün havası: ilk iki gün açık, sonra günlerin aşağı yukarı beşte biri yağmurlu, birkaçı karlı
 // gün numarasından hesaplanır, kayıt açılıp kapansa da değişmez
 function weatherOf(day) {
@@ -2124,6 +2213,7 @@ function drawWindowView(ctx, t) {
     }
     ctx.fillStyle = '#f7fafc'; ctx.beginPath(); ctx.moveTo(292, 232); ctx.lineTo(292, 226); ctx.quadraticCurveTo(312, 221, 332, 225); ctx.quadraticCurveTo(352, 229, 372, 224); ctx.quadraticCurveTo(402, 220, 432, 226); ctx.lineTo(432, 232); ctx.closePath(); ctx.fill();
   }
+  if (catOn() && !catInside()) drawCat(ctx, 414, 232, .5, t, 'sit');
   ctx.fillStyle = 'rgba(255,255,255,.13)';
   ctx.beginPath(); ctx.moveTo(300, 64); ctx.lineTo(322, 64); ctx.lineTo(292, 112); ctx.lineTo(292, 78); ctx.closePath(); ctx.fill();
   ctx.beginPath(); ctx.moveTo(380, 150); ctx.lineTo(392, 150); ctx.lineTo(370, 190); ctx.lineTo(366, 176); ctx.closePath(); ctx.fill();
@@ -3536,6 +3626,12 @@ function dishCost(d) {
 
 // ---------- UI refs ----------
 const stageC = $('#stageC'), boardC = $('#board'), ovenC = $('#ovenC'), cutC = $('#cutC');
+// tezgahtaki kediyi sev
+stageC.addEventListener('pointerdown', e => {
+  if (!catInside() || $('#shop').hidden) return;
+  const r = stageC.getBoundingClientRect(), x = (e.clientX - r.left) / r.width * 800, y = (e.clientY - r.top) / r.height * 450;
+  if (Math.abs(x - CAT_X) < 34 && y > 236 && y < 300) { catPetAt = performance.now() / 1000; sfx.purr(); buzz(12); }
+});
 const bubble = $('#bubble'), panel = $('#panel'), hint = $('#hint');
 
 function show(id) { for (const s of ['shop', 'morning', 'kitchen', 'oven', 'cut', 'dayend']) $('#' + s).hidden = s !== id; }
@@ -4086,6 +4182,12 @@ function renderMorning() {
   const tea = card(x => drawTeapot(x, S.cay > 0), '🫖 Çay', S.cay > 0 ? `Demlik dolu: ${S.cay} bardak.` : `Demlik boş. Çay paketi: ${stock('caypaketi')}`, [[S.cay > 0 ? 'Tazele' : 'Çayı demle', () => brewTea(tea), S.cay > 0 ? '' : 'primary']], S.cay > 0);
   tea.insertBefore(Object.assign(document.createElement('div'), { className: 'tea-bar', innerHTML: '<i></i>' }), tea.querySelector('button'));
   tea.querySelector('.tea-bar i').style.width = Math.min(100, S.cay / (has('cay') ? 30 : 24) * 100) + '%';
+  if (catOn()) {
+    const fed = catFedToday(), home = catHome();
+    const info = home ? (fed ? `${CAT_NAME} tok ve mutlu, tezgahta mırlıyor.` : `${CAT_NAME} mamasını bekliyor. Karnı doyarsa tezgahta uyur, müşteriler daha sabırlı bekler.`)
+      : fed ? 'Karnı doydu, camın önünde güneşleniyor.' : `Kapının önünde aç bir sarman kedi miyavlıyor.${S.cat.fed ? ` ${S.cat.fed} gündür besliyorsun, sana alışıyor.` : ''}`;
+    card(x => drawCat(x, 56, 66, 1.05, 0, fed && home ? 'sleep' : 'sit'), home ? `🐈 ${CAT_NAME}` : '🐈 Kapıdaki kedi', info, fed ? [] : [['Mama ver · 5₺', feedCat, 'primary']], fed);
+  }
   for (const k of Object.keys(PREP).filter(dishOpen)) {
     const D = DISH[k], vs = D.variants.filter(v => v.day <= S.day), bs = batchesOf(k);
     const ready = bs.length ? 'Hazır: ' + bs.map(b => `${b.left} ${PREP[k].unit}${vs.length > 1 ? ' ' + (D.variants.find(v => v.id === b.variant).label || '') : ''}`).join(', ') : 'Henüz hazırlanmadı.';
@@ -4248,6 +4350,7 @@ function patienceSeconds() {
   s *= 1 + .06 * decorCount();
   if (cust.tea) s += 12;
   if (cust.regular) s += 10;
+  if (catInside()) s *= 1.08;
   if (cust.gicik) s *= .7;
   if (cust.easy) s *= 1.3;
   if (cust.special === 'rival2') s *= .85;
@@ -4314,6 +4417,7 @@ function nextCustomer() {
     let line = cust.hi ? said(cust.hi, orderPhrase(order)) + orderExtras(order) + (cust.solo && !cust.partner && !cust.duo && Math.random() < .5 ? ' ' + said(cust.solo) : '') : intro + (order.riddle || (intro ? `${cap(orderPhrase(order))} alabilir miyim?` : pick(GREET)(orderPhrase(order), hitap(cust)))) + orderExtras(order);
     if (cust.critic) line = `İyi günler. Gurme Fikret, Lezzet Gazetesi. ${cap(orderPhrase(order))} rica edeyim.${orderExtras(order)} Not alacağım, haberiniz olsun.`;
     if (cust.gicik) line = pick(['Of, neyse… ', 'Hıh. ', 'Çabuk ol bakalım! ']) + line;
+    if (catInside() && !cust.critic && !cust.gicik && Math.random() < .18) line += ' ' + pick(CAT_HI);
     if (cust.diet && !cust.hi) line += ' ' + pick(DIET_HI[cust.diet]);
     if (cust.partner && cust.fid) line += ` ${cust.partner.name} ${daDe(cust.partner.name)} benimle, sonra o da sipariş verecek.`;
     say(nameTag(), line);
