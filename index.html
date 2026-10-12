@@ -1331,6 +1331,13 @@ function fit(canvas, lw, lh) {
 }
 
 // ---------- ingredient sprites (500-unit dish space) ----------
+// düz maydanoz yaprağı: tabandan açılan, ucu üç loblu ve dişli; +x yönüne bakar
+function parsleyLeaf(ctx, len, fill, edge) {
+  ctx.beginPath(); ctx.moveTo(0, 0);
+  for (let i = 0; i <= 16; i++) { const a = -.85 + 1.7 * i / 16, q = len * (.58 + .42 * Math.pow(Math.cos(a * 3.7), 2)) * (i % 2 ? .86 : 1); ctx.lineTo(Math.cos(a) * q, Math.sin(a) * q); }
+  ctx.closePath(); ctx.fillStyle = fill; ctx.fill(); ctx.strokeStyle = edge; ctx.lineWidth = 1; ctx.lineJoin = 'round'; ctx.stroke();
+  ctx.strokeStyle = 'rgba(210,245,180,.7)'; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(len * .8, 0); ctx.moveTo(len * .3, 0); ctx.lineTo(len * .62, -len * .3); ctx.moveTo(len * .3, 0); ctx.lineTo(len * .62, len * .3); ctx.stroke();
+}
 function drawPiece(ctx, type, x, y, rot, seed, b = 0) {
   const r = mulberry(seed);
   ctx.save(); ctx.translate(x, y); ctx.rotate(rot);
@@ -1362,14 +1369,13 @@ function drawPiece(ctx, type, x, y, rot, seed, b = 0) {
       ctx.strokeStyle = '#256a20'; ctx.lineWidth = 1.5; circle(ctx, 0, 0, 12.6); ctx.stroke();
       ctx.fillStyle = '#f3efc6'; ellipse(ctx, -2, 1, 1.8, 1.1); ctx.fill(); ellipse(ctx, 2.5, -1.5, 1.8, 1.1); ctx.fill();
       break;
-    case 'maydanoz':
-      for (let i = 0; i < 5; i++) {
-        const a = i * 1.26 + r(), px = Math.cos(a) * 7, py = Math.sin(a) * 7;
-        ctx.fillStyle = i % 2 ? '#2f8f3a' : '#3fa548';
-        for (let k = 0; k < 3; k++) { const b2 = a + (k - 1) * .9; circle(ctx, px + Math.cos(b2) * 3.5, py + Math.sin(b2) * 3.5, 3.6); ctx.fill(); }
-      }
-      ctx.strokeStyle = '#1f6a28'; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.moveTo(-7, 7); ctx.lineTo(5, -5); ctx.stroke();
+    case 'maydanoz': {
+      // düz yapraklı maydanoz dalı: ince sap, ucunda üç dişli yaprak
+      const sc = .85 + r() * .3; ctx.scale(sc, sc);
+      ctx.strokeStyle = '#5c9a3c'; ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(-14, 9); ctx.quadraticCurveTo(-6, 5, -1, 0); ctx.stroke();
+      for (const [a, len] of [[-1.05, 11], [0, 13.5], [1.05, 11]]) { ctx.save(); ctx.translate(-1, 0); ctx.rotate(a - .5); parsleyLeaf(ctx, len, a ? '#3e9c41' : '#348f38', '#1f6a28'); ctx.restore(); }
       break;
+    }
     case 'mantar':
       ctx.fillStyle = '#efe2c8'; ctx.beginPath(); ctx.arc(0, 0, 13, Math.PI, 0); ctx.quadraticCurveTo(13, 4, 5, 4); ctx.lineTo(4, 12); ctx.quadraticCurveTo(0, 14, -4, 12); ctx.lineTo(-5, 4); ctx.quadraticCurveTo(-13, 4, -13, 0); ctx.closePath(); ctx.fill();
       ctx.strokeStyle = '#9a7048'; ctx.lineWidth = 2; ctx.stroke();
@@ -1390,16 +1396,31 @@ function drawPiece(ctx, type, x, y, rot, seed, b = 0) {
       break;
     }
     case 'peynir': {
-      ctx.fillStyle = '#fdfcf4'; ctx.strokeStyle = '#d6cfb6'; ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      for (let i = 0; i < 5; i++) { const a = i / 5 * Math.PI * 2, rad = 8 + r() * 4; ctx.lineTo(Math.cos(a) * rad, Math.sin(a) * rad); }
-      ctx.closePath(); ctx.fill(); ctx.stroke();
+      // ufalanmış beyaz peynir: köşeli parça, gölgesi ve bir iki kırıntı
+      const m = clamp((b - .4) / .4, 0, 1), body = mix([253, 252, 245], [244, 214, 150], m * .55);
+      const chunk = (cx, cy, rad, n) => { const pts = []; for (let i = 0; i < n; i++) { const a = i / n * 6.283 + r() * .35, q = rad * (.72 + r() * .38); pts.push([cx + Math.cos(a) * q, cy + Math.sin(a) * q]); } return pts; };
+      const poly = pts => { ctx.beginPath(); pts.forEach(([px, py], i) => i ? ctx.lineTo(px, py) : ctx.moveTo(px, py)); ctx.closePath(); };
+      for (const pts of [chunk(0, 0, 13.5, 7), chunk(12.5, 8.5, 5.2, 5)]) {
+        ctx.save(); ctx.translate(1.5, 2.5); poly(pts); ctx.fillStyle = 'rgba(90,70,40,.22)'; ctx.fill(); ctx.restore();
+        poly(pts); ctx.fillStyle = rgb(body); ctx.fill(); ctx.strokeStyle = '#bdb59a'; ctx.lineWidth = 1.3; ctx.lineJoin = 'round'; ctx.stroke();
+      }
+      ctx.fillStyle = 'rgba(255,255,255,.9)'; ellipse(ctx, -4, -4.5, 5, 2.4, -.4); ctx.fill();
+      ctx.fillStyle = 'rgba(190,180,150,.55)'; circle(ctx, 4, 2.5, 1.3); ctx.fill(); circle(ctx, -3, 4.5, 1); ctx.fill(); circle(ctx, 1, -1, .8); ctx.fill();
       break;
     }
-    case 'ispanak':
-      ctx.fillStyle = '#2c6a29'; ellipse(ctx, 0, 0, 15, 8); ctx.fill();
-      ctx.strokeStyle = '#59a24c'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(-12, 0); ctx.lineTo(12, 0); ctx.stroke();
+    case 'ispanak': {
+      // ıspanak yaprağı: kaşık gibi geniş, açık damarlı, kısa saplı
+      const sc = .9 + r() * .3; ctx.scale(sc, sc);
+      const leaf = () => { ctx.beginPath(); ctx.moveTo(-14, 0); ctx.bezierCurveTo(-12, -11, 5, -15, 15, -5); ctx.quadraticCurveTo(19, 0, 15, 5); ctx.bezierCurveTo(5, 15, -12, 11, -14, 0); ctx.closePath(); };
+      ctx.save(); ctx.translate(1.5, 2.5); leaf(); ctx.fillStyle = 'rgba(30,60,20,.25)'; ctx.fill(); ctx.restore();
+      const g = ctx.createLinearGradient(0, -12, 0, 12); g.addColorStop(0, '#55a43c'); g.addColorStop(1, '#2c7027');
+      leaf(); ctx.fillStyle = g; ctx.fill(); ctx.strokeStyle = '#1d4f17'; ctx.lineWidth = 1.4; ctx.stroke();
+      ctx.strokeStyle = '#7cb85a'; ctx.lineWidth = 2.6; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(-14, 0); ctx.lineTo(-22, 1.5); ctx.stroke();
+      ctx.strokeStyle = 'rgba(200,240,170,.85)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(-14, 0); ctx.quadraticCurveTo(0, -1, 14, -1); ctx.stroke();
+      ctx.lineWidth = .9; for (const vx of [-8, -1, 6]) { ctx.beginPath(); ctx.moveTo(vx, -.6); ctx.lineTo(vx + 5, -8); ctx.moveTo(vx, -.4); ctx.lineTo(vx + 5, 7.5); ctx.stroke(); }
+      ctx.fillStyle = 'rgba(255,255,255,.16)'; ellipse(ctx, -2, -5.5, 8, 2.4, -.15); ctx.fill();
       break;
+    }
     case 'pastirma':
       ctx.fillStyle = '#8e2a1f'; ctx.beginPath(); ctx.moveTo(-16, -6); ctx.quadraticCurveTo(0, -12, 16, -6); ctx.lineTo(14, 6); ctx.quadraticCurveTo(0, 1, -14, 7); ctx.closePath(); ctx.fill();
       ctx.strokeStyle = '#c2541f'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(-16, -6); ctx.quadraticCurveTo(0, -12, 16, -6); ctx.stroke();
@@ -1446,11 +1467,18 @@ function drawPiece(ctx, type, x, y, rot, seed, b = 0) {
       ctx.fillStyle = '#fffbe2'; ellipse(ctx, 0, 3, 3, 1.6); ctx.fill();
       break;
     }
-    case 'patates':
-      roundRect(ctx, -8, -8, 16, 16, 4); ctx.fillStyle = '#f1d08a'; ctx.fill();
-      ctx.strokeStyle = '#c99c48'; ctx.lineWidth = 1.5; ctx.stroke();
-      ctx.fillStyle = 'rgba(255,255,255,.5)'; roundRect(ctx, -5, -5, 6, 4, 2); ctx.fill();
+    case 'patates': {
+      // haşlanmış patates küpü: üstü açık, yanı koyu, pişince kenarları kızarır
+      const c0 = mix([248, 222, 150], [236, 178, 86], clamp(b * 1.3, 0, 1));
+      ctx.rotate(-rot + (r() - .5) * .5);
+      ctx.fillStyle = 'rgba(90,60,20,.24)'; roundRect(ctx, -8, -6, 22, 21, 4.5); ctx.fill();
+      ctx.fillStyle = rgb(c0, -.16); roundRect(ctx, -11, -11, 22, 22, 4.5); ctx.fill();
+      ctx.fillStyle = rgb(c0); roundRect(ctx, -11, -11, 18, 18, 4); ctx.fill();
+      ctx.strokeStyle = rgb(c0, -.4); ctx.lineWidth = 1.5; roundRect(ctx, -11, -11, 22, 22, 4.5); ctx.stroke();
+      ctx.fillStyle = 'rgba(255,255,255,.55)'; roundRect(ctx, -8, -8, 8.5, 4, 2); ctx.fill();
+      if (b > .45) { ctx.fillStyle = `rgba(150,80,20,${clamp(b - .45, 0, .4)})`; circle(ctx, 4, 4, 1.5); ctx.fill(); circle(ctx, -4, 3, 1.1); ctx.fill(); }
       break;
+    }
   }
   ctx.restore();
 }
@@ -2289,7 +2317,8 @@ function ambience(t) {
   }
   const lap = Math.floor((t * 7 + 136) / 196);
   if (AMB.ferry < 0) AMB.ferry = lap;
-  if (lap !== AMB.ferry) { AMB.ferry = lap; if (lap % 2 === 0) sfx.horn(); }
+  // vapur her geçişte değil, beş geçişte bir öter (iki dakikada bir kadar)
+  if (lap !== AMB.ferry) { AMB.ferry = lap; if (lap % 5 === 0) sfx.horn(); }
 }
 let flashAt = -9;
 function drawWindowView(ctx, t) {
@@ -2817,6 +2846,16 @@ PATHS.borek = (() => { const p = new Path2D(); rr(p, 70, 120, 360, 260, 16); ret
 const pstyle = t => Object.assign({}, ING[t], PSTYLE[t] || {});
 ING.pirinc.edge = '#b5a882'; ING.un.edge = '#cfc4a8'; ING.seker.edge = '#cfccc0';
 
+// ceviz içi: iki loblu, kıvrımlı
+function drawWalnut(ctx, x, y, rot, s = 1) {
+  ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.scale(s, s);
+  ctx.fillStyle = '#a9743c'; ctx.strokeStyle = '#6b431c'; ctx.lineWidth = 1;
+  for (const d of [-1, 1]) { ctx.beginPath(); ctx.ellipse(d * 4, 0, 5, 7.5, d * .15, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); }
+  ctx.strokeStyle = 'rgba(80,45,15,.75)'; ctx.lineWidth = .9;
+  for (const d of [-1, 1]) { ctx.beginPath(); ctx.moveTo(d * 2, -6); ctx.quadraticCurveTo(d * 7, -3, d * 3, 0); ctx.quadraticCurveTo(d * 7, 3, d * 2.5, 6); ctx.stroke(); }
+  ctx.fillStyle = 'rgba(255,230,180,.35)'; ellipse(ctx, -5, -3, 1.6, 2.6); ctx.fill();
+  ctx.restore();
+}
 function drawPortion(ctx, type, x, y, seed) {
   const I = pstyle(type), cols = I.colors || [], r = mulberry(seed);
   ctx.save(); ctx.translate(x, y);
@@ -2846,27 +2885,58 @@ function drawPortion(ctx, type, x, y, seed) {
       }
       break;
     case 'blob':
-      ctx.fillStyle = cols[0]; for (let i = 0; i < 4; i++) { circle(ctx, (r() - .5) * 24, (r() - .5) * 24, 12 + r() * 8); ctx.fill(); }
-      ctx.fillStyle = 'rgba(255,255,255,.25)'; ellipse(ctx, -4, -6, 6, 3); ctx.fill();
+      if (type === 'tereyagi') {
+        // iki küçük tereyağı parçası
+        for (const [bx, by, w] of [[-12, -4, 24], [9, 8, 18]]) {
+          ctx.fillStyle = 'rgba(120,90,20,.18)'; roundRect(ctx, bx - w / 2 + 2, by - w * .35 + 3, w, w * .7, 4); ctx.fill();
+          ctx.fillStyle = '#e8c85a'; roundRect(ctx, bx - w / 2, by - w * .35, w, w * .7, 4); ctx.fill();
+          ctx.fillStyle = '#f9e494'; roundRect(ctx, bx - w / 2, by - w * .35, w, w * .42, 4); ctx.fill();
+          ctx.strokeStyle = '#c29a2e'; ctx.lineWidth = 1.3; roundRect(ctx, bx - w / 2, by - w * .35, w, w * .7, 4); ctx.stroke();
+          ctx.fillStyle = 'rgba(255,255,255,.6)'; roundRect(ctx, bx - w / 2 + 3, by - w * .35 + 2.5, w * .4, 2.6, 1.3); ctx.fill();
+        }
+        break;
+      }
+      // kaşıkla konmuş bir topak: üst üste üç kat, ucu kıvrık
+      ctx.fillStyle = 'rgba(0,0,0,.1)'; ellipse(ctx, 2, 7, 27, 12); ctx.fill();
+      for (const [dx, dy, rx, ry] of [[0, 2, 25, 14], [-2, -6, 17, 10], [1, -13, 9, 6]]) {
+        ellipse(ctx, dx, dy, rx, ry); ctx.fillStyle = cols[0]; ctx.fill(); ctx.strokeStyle = 'rgba(40,20,10,.2)'; ctx.lineWidth = 1.4; ctx.stroke();
+      }
+      ctx.strokeStyle = cols[0]; ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(1, -16); ctx.quadraticCurveTo(4, -22, 9, -20); ctx.stroke();
+      ctx.fillStyle = 'rgba(255,255,255,.38)'; ellipse(ctx, -8, -2, 7, 3, -.3); ctx.fill(); ellipse(ctx, -3, -9, 4, 2, -.3); ctx.fill();
       break;
-    case 'liquid':
-      ctx.fillStyle = cols[0]; ctx.beginPath();
-      for (let i = 0; i <= 14; i++) { const a = i / 14 * 6.283, rad = 30 + (i % 14 ? r() * 10 : 0); if (i) ctx.lineTo(Math.cos(a) * rad, Math.sin(a) * rad); else ctx.moveTo(rad, 0); }
-      ctx.closePath(); ctx.fill();
-      ctx.fillStyle = 'rgba(255,255,255,.35)'; ellipse(ctx, -8, -10, 10, 4, -.4); ctx.fill();
+    case 'liquid': {
+      // yuvarlak hatlı bir gölcük: kenarı koyu, üstünde parlama
+      const n = 10, pts = [];
+      for (let i = 0; i < n; i++) { const a = i / n * 6.283, rad = 26 + r() * 9; pts.push([Math.cos(a) * rad, Math.sin(a) * rad * .82]); }
+      const puddle = () => { ctx.beginPath(); const md = (p, q) => [(p[0] + q[0]) / 2, (p[1] + q[1]) / 2], s0 = md(pts[n - 1], pts[0]); ctx.moveTo(s0[0], s0[1]);
+        for (let i = 0; i < n; i++) { const q = pts[(i + 1) % n], m2 = md(pts[i], q); ctx.quadraticCurveTo(pts[i][0], pts[i][1], m2[0], m2[1]); } ctx.closePath(); };
+      ctx.save(); ctx.translate(2, 3); puddle(); ctx.fillStyle = 'rgba(0,0,0,.08)'; ctx.fill(); ctx.restore();
+      puddle(); ctx.fillStyle = cols[0]; ctx.fill(); ctx.strokeStyle = type === 'sut' ? 'rgba(120,140,160,.6)' : 'rgba(60,40,20,.25)'; ctx.lineWidth = 1.6; ctx.stroke();
+      if (type === 'sut') { ctx.save(); ctx.scale(.72, .72); puddle(); ctx.restore(); ctx.strokeStyle = 'rgba(190,205,220,.55)'; ctx.lineWidth = 1.2; ctx.stroke(); }
+      ctx.fillStyle = 'rgba(255,255,255,.5)'; ellipse(ctx, -9, -9, 11, 3.6, -.35); ctx.fill(); circle(ctx, 9, -11, 2.2); ctx.fill();
       break;
+    }
     case 'rings':
-      ctx.strokeStyle = cols[0]; ctx.lineWidth = 3;
-      for (let i = 0; i < 9; i++) { circle(ctx, (r() - .5) * 64, (r() - .5) * 64, 5); ctx.stroke(); }
+      // doğranmış taze soğan: yeşil ve beyaz halkalar
+      for (let i = 0; i < 16; i++) {
+        const a = r() * 6.283, d = Math.sqrt(r()) * 26, px = Math.cos(a) * d, py = Math.sin(a) * d * .85, white = i % 4 === 0, R = 4.5 + r() * 2;
+        ctx.fillStyle = white ? '#f2f8e4' : '#d8eec0'; circle(ctx, px, py, R); ctx.fill();
+        ctx.strokeStyle = white ? '#b9d99a' : cols[0]; ctx.lineWidth = 2.4; ctx.stroke();
+        ctx.strokeStyle = 'rgba(40,100,30,.35)'; ctx.lineWidth = .8; circle(ctx, px, py, R * .45); ctx.stroke();
+      }
       break;
-    case 'dice':
-      ctx.fillStyle = 'rgba(0,0,0,.10)'; ellipse(ctx, 2, 5, 30, 24); ctx.fill();
-      for (let i = 0; i < 20; i++) {
-        ctx.fillStyle = cols[i % cols.length]; const a = r() * 6.283, dd = Math.sqrt(r()) * 24, px = Math.cos(a) * dd, py = Math.sin(a) * dd * .85;
-        if (I.small) ellipse(ctx, px, py, 4.6, 3, r() * 3); else roundRect(ctx, px - 5.5, py - 5.5, 11, 11, 2.5);
+    case 'dice': {
+      // kuruyemiş ve sarımsak tane tane çizilir, gri tabak gölgesi yok
+      const bit = I.small || type === 'ceviz', n = type === 'ceviz' ? 10 : I.small ? 26 : 20;
+      if (!bit) { ctx.fillStyle = 'rgba(0,0,0,.10)'; ellipse(ctx, 2, 5, 30, 24); ctx.fill(); }
+      for (let i = 0; i < n; i++) {
+        ctx.fillStyle = cols[i % cols.length]; const a = r() * 6.283, dd = Math.sqrt(r()) * (bit ? 26 : 24), px = Math.cos(a) * dd, py = Math.sin(a) * dd * .85;
+        if (bit) { drawBit(ctx, type, px, py, r() * 6.28, type === 'ceviz' ? 1.05 : 1.25); continue; }
+        roundRect(ctx, px - 5.5, py - 5.5, 11, 11, 2.5);
         ctx.fill(); ctx.strokeStyle = 'rgba(60,30,10,.25)'; ctx.lineWidth = 1; ctx.stroke();
       }
       break;
+    }
     case 'leaves':
       for (let i = 0; i < 9; i++) {
         const px = (r() - .5) * 44, py = (r() - .5) * 40, a = r() * 3;
@@ -4314,6 +4384,196 @@ function refreshCounts() {
     c.textContent = n; c.classList.toggle('zero', !n); el.classList.toggle('empty', !n);
   });
 }
+// yeni malzeme ikonları: demet yeşillikler, şişeler, kavanozlar, kasede kuruyemiş
+function spinachLeaf(x, L, W) {
+  // kökü (0,0), yaprak +x yönüne uzanır
+  const s = L * .28;
+  x.strokeStyle = '#8cc466'; x.lineWidth = 2.4; x.lineCap = 'round'; x.beginPath(); x.moveTo(0, 0); x.lineTo(s + 2, 0); x.stroke();
+  x.beginPath(); x.moveTo(s, 0); x.bezierCurveTo(s + L * .12, -W, L * .78, -W * 1.12, L, -W * .12); x.quadraticCurveTo(L * 1.04, 0, L, W * .12); x.bezierCurveTo(L * .78, W * 1.12, s + L * .12, W, s, 0); x.closePath();
+  const g = x.createLinearGradient(0, -W, 0, W); g.addColorStop(0, '#5fb043'); g.addColorStop(1, '#2a6b25');
+  x.fillStyle = g; x.fill(); x.strokeStyle = '#1d4f17'; x.lineWidth = 1.2; x.lineJoin = 'round'; x.stroke();
+  x.strokeStyle = 'rgba(205,240,175,.85)'; x.lineWidth = 1.3; x.beginPath(); x.moveTo(s, 0); x.lineTo(L * .94, 0); x.stroke();
+  x.lineWidth = .8;
+  for (let i = 0; i < 3; i++) { const vx = s + (L - s) * (.16 + i * .24), d = (L - s) * .17; x.beginPath(); x.moveTo(vx, 0); x.lineTo(vx + d, -W * .62); x.moveTo(vx, 0); x.lineTo(vx + d, W * .62); x.stroke(); }
+}
+// sap demetini bağlayan kırmızı ip
+function bunchTie(x, cx, cy, a = 0) {
+  x.save(); x.translate(cx, cy); x.rotate(a);
+  x.fillStyle = '#c0392b'; roundRect(x, -6.5, -3, 13, 6, 2); x.fill(); x.strokeStyle = '#7d1f15'; x.lineWidth = 1; x.stroke();
+  x.strokeStyle = '#c0392b'; x.lineWidth = 1.6; x.lineCap = 'round'; x.beginPath(); x.moveTo(5, 1); x.quadraticCurveTo(12, 2, 14, 8); x.stroke();
+  x.restore();
+}
+function bottleIcon(x, cx, o) {
+  const w = o.w || 13, top = o.top || 14, sh = o.sh || 33, bot = 63, nw = o.nw || 4.5;
+  const path = () => {
+    x.beginPath(); x.moveTo(cx - nw, top + 5); x.lineTo(cx - nw, sh - 9); x.bezierCurveTo(cx - nw, sh - 2, cx - w, sh - 3, cx - w, sh + 6);
+    x.lineTo(cx - w, bot - 4); x.quadraticCurveTo(cx - w, bot, cx - w + 4, bot); x.lineTo(cx + w - 4, bot); x.quadraticCurveTo(cx + w, bot, cx + w, bot - 4);
+    x.lineTo(cx + w, sh + 6); x.bezierCurveTo(cx + w, sh - 3, cx + nw, sh - 2, cx + nw, sh - 9); x.lineTo(cx + nw, top + 5); x.closePath();
+  };
+  x.fillStyle = 'rgba(0,0,0,.13)'; ellipse(x, cx + 3, bot + 1, w + 7, 3); x.fill();
+  x.save(); path(); x.clip();
+  x.fillStyle = o.glass || 'rgba(222,236,240,.75)'; x.fillRect(cx - w - 2, top, 2 * w + 4, bot - top + 2);
+  const lv = o.level != null ? o.level : sh - 5, g = x.createLinearGradient(cx - w, 0, cx + w, 0);
+  g.addColorStop(0, o.liq[1]); g.addColorStop(.35, o.liq[0]); g.addColorStop(1, o.liq[1]);
+  x.fillStyle = g; x.fillRect(cx - w - 2, lv, 2 * w + 4, bot - lv + 2);
+  x.fillStyle = 'rgba(255,255,255,.35)'; x.fillRect(cx - w - 2, lv, 2 * w + 4, 1.4);
+  x.restore();
+  path(); x.strokeStyle = o.edge || '#4d6670'; x.lineWidth = 1.6; x.lineJoin = 'round'; x.stroke();
+  x.fillStyle = o.lab[0]; roundRect(x, cx - w + 2, sh + 9, 2 * w - 4, 19, 3); x.fill(); x.strokeStyle = o.lab[2] || 'rgba(0,0,0,.35)'; x.lineWidth = 1; x.stroke();
+  iconText(x, o.text, cx, sh + 18.6, 2 * w - 7, 8, o.lab[1]);
+  x.fillStyle = 'rgba(255,255,255,.6)'; roundRect(x, cx - w + 2.5, sh + 4, 2.6, bot - sh - 9, 1.3); x.fill(); roundRect(x, cx - nw + 1.2, top + 8, 1.6, sh - top - 16, .8); x.fill();
+  x.fillStyle = o.cap || '#c0392b'; roundRect(x, cx - nw - 1.8, top - 1, 2 * nw + 3.6, 8, 2); x.fill(); x.strokeStyle = 'rgba(0,0,0,.4)'; x.lineWidth = 1; x.stroke();
+  x.strokeStyle = 'rgba(255,255,255,.35)'; for (let i = 0; i < 4; i++) { const px = cx - nw + .5 + i * (2 * nw - 1) / 3; x.beginPath(); x.moveTo(px, top); x.lineTo(px, top + 6); x.stroke(); }
+}
+// macun kavanozu: salça, tahin
+function pasteJar(x, cx, col, dark, label, lid) {
+  const W = 40, L = cx - W / 2, T = 22, H = 44;
+  x.fillStyle = 'rgba(0,0,0,.13)'; ellipse(x, cx + 2, T + H + 1, 25, 3.5); x.fill();
+  x.save(); roundRect(x, L, T, W, H, 8); x.clip();
+  x.fillStyle = 'rgba(222,236,241,.7)'; x.fillRect(L, T, W, H);
+  x.fillStyle = col; x.fillRect(L, T + 5, W, H);
+  x.strokeStyle = dark; x.lineWidth = 1.3; x.lineCap = 'round';
+  for (const [sx, sy] of [[L + 6, T + 10], [L + 26, T + 12], [L + 10, T + 38], [L + 28, T + 40]]) { x.beginPath(); x.moveTo(sx, sy); x.quadraticCurveTo(sx + 5, sy - 3, sx + 9, sy + 1); x.stroke(); }
+  x.fillStyle = 'rgba(255,255,255,.55)'; roundRect(x, L + 3.5, T + 6, 4, H - 12, 2); x.fill();
+  x.restore();
+  x.strokeStyle = '#5f7a86'; x.lineWidth = 2; roundRect(x, L, T, W, H, 8); x.stroke();
+  x.fillStyle = lid; roundRect(x, L + 1, T - 8, W - 2, 11, 3); x.fill(); x.strokeStyle = 'rgba(0,0,0,.4)'; x.lineWidth = 1.2; x.stroke();
+  x.strokeStyle = 'rgba(255,255,255,.4)'; for (let i = 0; i < 6; i++) { x.beginPath(); x.moveTo(L + 6 + i * 5.5, T - 6); x.lineTo(L + 6 + i * 5.5, T + 1); x.stroke(); }
+  x.fillStyle = '#fff8ec'; roundRect(x, L + 3, T + 16, W - 6, 17, 3); x.fill(); x.strokeStyle = '#8a5a2e'; x.lineWidth = 1.2; x.stroke();
+  iconText(x, label, cx, T + 24.8, W - 10, 9, '#3a2216');
+}
+// küçük taneler: kuş üzümü, fıstık, Antep fıstığı, sarımsak, ceviz
+function drawBit(ctx, type, px, py, a, s = 1) {
+  ctx.save(); ctx.translate(px, py); ctx.rotate(a); ctx.scale(s, s);
+  if (type === 'ceviz') { ctx.restore(); drawWalnut(ctx, px, py, a, .85 * s); return; }
+  ctx.fillStyle = 'rgba(60,35,15,.18)'; ellipse(ctx, 1, 1.6, 5.6, 3.6); ctx.fill();
+  if (type === 'kusuzumu') {
+    ctx.fillStyle = '#3d2030'; ellipse(ctx, 0, 0, 4.4, 3.4); ctx.fill(); ctx.strokeStyle = '#1e0f17'; ctx.lineWidth = .8; ctx.stroke();
+    ctx.strokeStyle = 'rgba(140,90,120,.6)'; ctx.lineWidth = .7; ctx.beginPath(); ctx.moveTo(-2.4, -.6); ctx.quadraticCurveTo(0, 1.2, 2.2, -.8); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,.45)'; circle(ctx, -1.6, -1.4, .9); ctx.fill();
+  } else if (type === 'fistik') {
+    ctx.fillStyle = '#f1e2b6'; ctx.beginPath(); ctx.moveTo(-5, 0); ctx.quadraticCurveTo(-3, -3.2, 3, -2.4); ctx.quadraticCurveTo(5.6, 0, 3, 2.4); ctx.quadraticCurveTo(-3, 3.2, -5, 0); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = '#a98c4c'; ctx.lineWidth = .8; ctx.stroke(); ctx.fillStyle = '#c9ab66'; circle(ctx, -4, 0, .9); ctx.fill();
+  } else if (type === 'antepK') {
+    ctx.fillStyle = '#dcc79c'; ellipse(ctx, 0, 0, 5.4, 3.6); ctx.fill(); ctx.strokeStyle = '#9c8458'; ctx.lineWidth = .8; ctx.stroke();
+    ctx.fillStyle = '#7aac35'; ellipse(ctx, .4, -.3, 3.8, 2.1); ctx.fill(); ctx.fillStyle = '#a9348a'; ellipse(ctx, -2.2, -.3, 1.2, 1.6); ctx.fill();
+  } else if (type === 'antep') {
+    ctx.fillStyle = '#86b83e'; ctx.beginPath(); ctx.moveTo(-3.6, -1.6); ctx.lineTo(1, -3); ctx.lineTo(3.8, .4); ctx.lineTo(.6, 3); ctx.lineTo(-3.2, 2); ctx.closePath(); ctx.fill(); ctx.strokeStyle = '#4f7a1c'; ctx.lineWidth = .8; ctx.lineJoin = 'round'; ctx.stroke();
+    ctx.fillStyle = '#a9348a'; ellipse(ctx, -2.4, .2, .9, 1.3); ctx.fill(); ctx.fillStyle = 'rgba(230,250,190,.6)'; ellipse(ctx, .4, -1, 1.6, .8); ctx.fill();
+  } else if (type === 'sarimsak') {
+    ctx.fillStyle = '#fbf7e8'; roundRect(ctx, -3.2, -3, 6.4, 6, 1.6); ctx.fill(); ctx.strokeStyle = '#c9b98a'; ctx.lineWidth = .9; ctx.stroke();
+    ctx.fillStyle = 'rgba(230,214,160,.7)'; ctx.fillRect(-3.2, 1, 6.4, 2);
+  }
+  ctx.restore();
+}
+// ahşap kasede bir avuç tane
+function bowlIcon(x, k, n) {
+  const cx = 56;
+  x.fillStyle = 'rgba(0,0,0,.13)'; ellipse(x, cx + 2, 67, 34, 3.5); x.fill();
+  x.fillStyle = '#6f421d'; ellipse(x, cx, 42, 32, 8); x.fill();
+  const r = mulberry(31);
+  for (let i = 0; i < n; i++) { const u = r() * 2 - 1; drawBit(x, k, cx + u * 26, 41 - (1 - u * u) * 9 * r() + r() * 4, r() * 6.28, k === 'ceviz' ? 1.15 : 1.5); }
+  const g = x.createLinearGradient(0, 42, 0, 66); g.addColorStop(0, '#b77a3e'); g.addColorStop(1, '#7c4a20');
+  x.fillStyle = g; x.beginPath(); x.moveTo(cx - 32, 44); x.quadraticCurveTo(cx - 30, 64, cx, 65); x.quadraticCurveTo(cx + 30, 64, cx + 32, 44); x.quadraticCurveTo(cx, 52, cx - 32, 44); x.closePath(); x.fill();
+  x.strokeStyle = '#4e2c10'; x.lineWidth = 1.4; x.stroke();
+  x.strokeStyle = 'rgba(255,220,170,.35)'; x.lineWidth = 1.2; x.beginPath(); x.moveTo(cx - 24, 52); x.quadraticCurveTo(cx, 58, cx + 24, 52); x.stroke();
+}
+Object.assign(ICON, {
+  ispanak(x) {
+    x.fillStyle = 'rgba(0,0,0,.12)'; ellipse(x, 58, 62, 44, 4); x.fill();
+    x.save(); x.translate(72, 59); x.rotate(-.1); spinachLeaf(x, 30, 8.5); x.restore();
+    for (const [a, L, W] of [[-.66, 50, 11.5], [.3, 46, 11], [-.34, 60, 12.5], [.02, 58, 12.5]]) { x.save(); x.translate(14, 46); x.rotate(a); spinachLeaf(x, L, W); x.restore(); }
+    bunchTie(x, 24, 44.5, 1.5);
+  },
+  maydanoz(x) {
+    x.fillStyle = 'rgba(0,0,0,.12)'; ellipse(x, 56, 62, 44, 4); x.fill();
+    const X0 = 12, Y0 = 46, tops = [[-.62, 40], [-.36, 54], [-.1, 64], [.14, 56], [.36, 42]];
+    x.lineCap = 'round';
+    for (const [a, L] of tops) { x.strokeStyle = '#5c9a3c'; x.lineWidth = 1.8; x.beginPath(); x.moveTo(X0, Y0); x.lineTo(X0 + Math.cos(a) * L, Y0 + Math.sin(a) * L); x.stroke(); }
+    tops.forEach(([a, L], i) => {
+      const tx = X0 + Math.cos(a) * L, ty = Y0 + Math.sin(a) * L;
+      for (const [da, len] of [[-.9, 10], [.9, 10], [0, 12]]) { x.save(); x.translate(tx, ty); x.rotate(a + da); parsleyLeaf(x, len, da ? '#3e9c41' : '#348f38', '#1f6a28'); x.restore(); }
+      const mx = X0 + Math.cos(a) * L * .64, my = Y0 + Math.sin(a) * L * .64;
+      x.save(); x.translate(mx, my); x.rotate(a + (i % 2 ? -1 : 1)); parsleyLeaf(x, 8, '#47a64a', '#1f6a28'); x.restore();
+    });
+    bunchTie(x, 21, 45.5, 1.5);
+  },
+  salca(x) {
+    pasteJar(x, 46, '#b8261a', '#7e130c', 'SALÇA', '#c0392b');
+    x.fillStyle = '#e2412c'; circle(x, 88, 54, 12); x.fill(); x.strokeStyle = '#9a2213'; x.lineWidth = 1.3; x.stroke();
+    x.fillStyle = 'rgba(255,255,255,.4)'; ellipse(x, 83, 49, 4, 2.2, -.5); x.fill();
+    x.fillStyle = '#3c8a2c'; for (let i = 0; i < 5; i++) { const a = i / 5 * 6.283; ellipse(x, 88 + Math.cos(a) * 3.6, 42.5 + Math.sin(a) * 1.8, 3.8, 1.4, a); x.fill(); }
+  },
+  tahin(x) {
+    pasteJar(x, 46, '#c79a5e', '#8d6430', 'TAHİN', '#8a5a2e');
+    const r = mulberry(7);
+    for (let i = 0; i < 16; i++) { x.fillStyle = i % 3 ? '#f3e7c8' : '#d8c29a'; ellipse(x, 80 + r() * 22, 56 + r() * 9, 1.6, 1, r() * 3); x.fill(); x.strokeStyle = '#b39a6c'; x.lineWidth = .5; x.stroke(); }
+  },
+  zeytinyagi(x) {
+    bottleIcon(x, 44, { liq: ['#c9b52e', '#8d7f14'], glass: 'rgba(196,220,190,.6)', edge: '#3f5d33', lab: ['#fbf3dc', '#2f5b23', '#6d7f3a'], text: 'ZEYTİN|YAĞI', cap: '#c79a2a', w: 14 });
+    x.strokeStyle = '#6b5a2c'; x.lineWidth = 1.6; x.lineCap = 'round'; x.beginPath(); x.moveTo(72, 40); x.quadraticCurveTo(88, 42, 104, 34); x.stroke();
+    x.fillStyle = '#5f8a3a'; for (const [lx, ly, a] of [[80, 37, -.6], [92, 43, .5], [98, 33, -.4]]) { ellipse(x, lx, ly, 6.5, 2.2, a); x.fill(); }
+    for (const [ox, oy] of [[84, 50], [96, 52]]) { x.fillStyle = '#6f8f22'; ellipse(x, ox, oy, 5.2, 6.6, .3); x.fill(); x.strokeStyle = '#3f5a12'; x.lineWidth = 1; x.stroke(); x.fillStyle = 'rgba(255,255,255,.45)'; ellipse(x, ox - 1.6, oy - 2.4, 1.6, 1, .3); x.fill(); }
+  },
+  yag(x) {
+    bottleIcon(x, 44, { liq: ['#f6d24a', '#d9a51c'], glass: 'rgba(240,244,236,.7)', edge: '#8a7a3a', lab: ['#2f7d32', '#ffffff', '#1d5a20'], text: 'SIVI|YAĞ', cap: '#e8a516', w: 14, sh: 30, nw: 5.5 });
+    x.fillStyle = '#f2b41c'; for (let i = 0; i < 12; i++) { const a = i / 12 * 6.283; ellipse(x, 88 + Math.cos(a) * 10, 46 + Math.sin(a) * 10, 5.5, 2.4, a); x.fill(); }
+    x.strokeStyle = '#b97c0a'; x.lineWidth = .7; for (let i = 0; i < 12; i++) { const a = i / 12 * 6.283; ellipse(x, 88 + Math.cos(a) * 10, 46 + Math.sin(a) * 10, 5.5, 2.4, a); x.stroke(); }
+    x.fillStyle = '#5a3a1c'; circle(x, 88, 46, 7); x.fill(); x.fillStyle = '#3a2410'; for (let i = 0; i < 9; i++) { circle(x, 88 + Math.cos(i * 2.4) * (i % 3 + 1) * 1.8, 46 + Math.sin(i * 2.4) * (i % 3 + 1) * 1.8, .8); x.fill(); }
+    x.strokeStyle = '#4f8a2f'; x.lineWidth = 2.2; x.beginPath(); x.moveTo(88, 56); x.quadraticCurveTo(90, 62, 87, 67); x.stroke();
+  },
+  nar(x) {
+    bottleIcon(x, 44, { liq: ['#7a1424', '#3e0810'], glass: 'rgba(230,214,218,.6)', edge: '#4a1a22', lab: ['#fbf3dc', '#8a1a2a', '#8a5a2e'], text: 'NAR|EKŞİSİ', cap: '#8a1a2a', w: 13 });
+    // yarım nar
+    x.fillStyle = '#b8282c'; circle(x, 88, 52, 14); x.fill(); x.strokeStyle = '#6e1216'; x.lineWidth = 1.3; x.stroke();
+    x.fillStyle = '#f4e2c8'; circle(x, 88, 52, 11); x.fill();
+    const r = mulberry(3); x.fillStyle = '#c4122a';
+    for (let i = 0; i < 26; i++) { const a = r() * 6.283, d = Math.sqrt(r()) * 9; ellipse(x, 88 + Math.cos(a) * d, 52 + Math.sin(a) * d, 1.9, 1.5, a); x.fill(); }
+    x.fillStyle = 'rgba(255,255,255,.5)'; for (let i = 0; i < 8; i++) { circle(x, 84 + r() * 9, 47 + r() * 9, .6); x.fill(); }
+    x.fillStyle = '#8a1a1e'; x.beginPath(); x.moveTo(85, 38.5); x.lineTo(88, 34); x.lineTo(91, 38.5); x.closePath(); x.fill();
+  },
+  serbet(x) {
+    // cam sürahi
+    x.translate(56, 40); x.scale(.88, .88); x.translate(-56, -40);
+    const cx = 46, path = () => { x.beginPath(); x.moveTo(cx - 12, 14); x.lineTo(cx + 12, 14); x.quadraticCurveTo(cx + 13, 22, cx + 19, 34); x.quadraticCurveTo(cx + 23, 60, cx + 14, 66); x.lineTo(cx - 14, 66); x.quadraticCurveTo(cx - 23, 60, cx - 19, 34); x.quadraticCurveTo(cx - 13, 22, cx - 12, 14); x.closePath(); };
+    x.fillStyle = 'rgba(0,0,0,.13)'; ellipse(x, cx + 3, 67, 26, 3); x.fill();
+    x.strokeStyle = '#8b9aa3'; x.lineWidth = 3; x.lineCap = 'round'; x.beginPath(); x.moveTo(cx + 13, 22); x.bezierCurveTo(cx + 34, 20, cx + 34, 48, cx + 19, 50); x.stroke();
+    x.save(); path(); x.clip(); x.fillStyle = 'rgba(226,238,242,.7)'; x.fillRect(cx - 24, 12, 48, 56);
+    const g = x.createLinearGradient(cx - 20, 0, cx + 20, 0); g.addColorStop(0, '#d98a1c'); g.addColorStop(.4, '#f6c04a'); g.addColorStop(1, '#d08218');
+    x.fillStyle = g; x.fillRect(cx - 24, 30, 48, 40); x.fillStyle = 'rgba(255,255,255,.4)'; x.fillRect(cx - 24, 30, 48, 1.5);
+    x.fillStyle = 'rgba(255,255,255,.55)'; roundRect(x, cx - 15, 34, 3, 26, 1.5); x.fill(); x.restore();
+    path(); x.strokeStyle = '#6f8691'; x.lineWidth = 1.6; x.lineJoin = 'round'; x.stroke();
+    x.beginPath(); x.moveTo(cx - 12, 14); x.quadraticCurveTo(cx - 16, 12, cx - 17, 9); x.stroke();
+    // limon dilimi
+    x.fillStyle = '#e8bf1e'; circle(x, 90, 54, 11); x.fill(); x.fillStyle = '#fbeea0'; circle(x, 90, 54, 8.6); x.fill();
+    x.strokeStyle = '#efc42a'; x.lineWidth = 1.2; for (let i = 0; i < 8; i++) { const a = i * .785; x.beginPath(); x.moveTo(90, 54); x.lineTo(90 + Math.cos(a) * 8.6, 54 + Math.sin(a) * 8.6); x.stroke(); }
+  },
+  sarimsak(x) {
+    x.translate(56, 40); x.scale(.86, .86); x.translate(-56, -40);
+    x.fillStyle = 'rgba(0,0,0,.12)'; ellipse(x, 52, 67, 32, 3.5); x.fill();
+    const bulb = () => { x.beginPath(); x.moveTo(44, 16); x.bezierCurveTo(48, 26, 72, 28, 70, 48); x.quadraticCurveTo(68, 64, 44, 64); x.quadraticCurveTo(20, 64, 18, 48); x.bezierCurveTo(16, 28, 40, 26, 44, 16); x.closePath(); };
+    const g = x.createRadialGradient(36, 40, 4, 44, 46, 30); g.addColorStop(0, '#ffffff'); g.addColorStop(.7, '#f1eadb'); g.addColorStop(1, '#dccdb0');
+    bulb(); x.fillStyle = g; x.fill(); x.strokeStyle = '#a8957a'; x.lineWidth = 1.5; x.stroke();
+    x.save(); bulb(); x.clip(); x.lineCap = 'round';
+    for (const dx of [-17, -8, 0, 8, 17]) { x.strokeStyle = 'rgba(150,130,100,.55)'; x.lineWidth = 1.1; x.beginPath(); x.moveTo(44, 20); x.quadraticCurveTo(44 + dx * 1.6, 42, 44 + dx, 64); x.stroke();
+      x.strokeStyle = 'rgba(170,90,140,.35)'; x.lineWidth = 2.2; x.beginPath(); x.moveTo(44 + dx * 1.2, 40); x.quadraticCurveTo(44 + dx * 1.3, 52, 44 + dx * .95, 62); x.stroke(); }
+    x.restore();
+    x.strokeStyle = '#b9a37c'; x.lineWidth = 3; x.lineCap = 'round'; x.beginPath(); x.moveTo(44, 17); x.lineTo(43, 9); x.stroke();
+    x.strokeStyle = '#c9b48c'; x.lineWidth = 1; for (const dx of [-5, -2, 1, 4]) { x.beginPath(); x.moveTo(44 + dx * .6, 64); x.lineTo(44 + dx, 68); x.stroke(); }
+    // iki diş
+    for (const [px, py, a] of [[84, 56, -.5], [98, 52, .4]]) {
+      x.save(); x.translate(px, py); x.rotate(a);
+      x.fillStyle = '#f8f2e2'; x.beginPath(); x.moveTo(0, -11); x.quadraticCurveTo(9, -2, 6, 7); x.quadraticCurveTo(0, 10, -6, 7); x.quadraticCurveTo(-7, -2, 0, -11); x.closePath(); x.fill();
+      x.strokeStyle = '#a8957a'; x.lineWidth = 1.2; x.stroke();
+      x.strokeStyle = 'rgba(170,90,140,.4)'; x.lineWidth = 1.6; x.beginPath(); x.moveTo(3.5, -3); x.quadraticCurveTo(5, 2, 3.5, 6); x.stroke();
+      x.restore();
+    }
+  },
+  ceviz: x => bowlIcon(x, 'ceviz', 9),
+  antep: x => bowlIcon(x, 'antepK', 30),
+  fistik: x => bowlIcon(x, 'fistik', 34),
+  kusuzumu: x => bowlIcon(x, 'kusuzumu', 38),
+});
 function drawIngIcon(x, k) {
   if (ICON[k]) return ICON[k](x);
   if (SPICES.includes(k)) return drawSpiceJar(x, k);
