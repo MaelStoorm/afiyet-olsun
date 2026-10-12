@@ -78,6 +78,13 @@ button:focus-visible{outline:3px solid var(--cini);outline-offset:2px}
 .decor-prev{width:100%;max-width:560px;aspect-ratio:16/9;display:block;border-radius:14px;border:3px solid var(--wood-dark);margin:0 auto 10px}
 .upg.using{border-color:var(--cini);background:var(--cini-soft)}
 .upg.using em{font-style:normal;color:var(--cini);font-weight:800}
+.upg.trying{border-color:#e3a23b;background:#fff4d9}
+.upg .acts{display:flex;gap:6px;flex-wrap:wrap}
+.upg .acts .btn{font-size:14px;padding:7px 10px}
+.decor-try{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;max-width:560px;margin:-2px auto 12px;font-weight:800;text-align:center}
+.decor-try[hidden]{display:none}
+.decor-try .btn{font-size:15px;padding:8px 14px}
+.decor-try span{flex-basis:100%}
 
 /* Stage */
 .stage{position:relative;width:100%;aspect-ratio:16/9;border-radius:18px;overflow:hidden;border:4px solid var(--wood-dark);background:#f4dcbc;box-shadow:0 6px 0 rgba(111,66,29,.25)}
@@ -609,8 +616,9 @@ button:focus-visible{outline:3px solid var(--cini);outline-offset:2px}
       </div>
       <div class="shop-list">
         <h3>Dükkanı süsle</h3>
-        <p class="recipe-note" style="margin-bottom:8px">Aldığın süsler dükkanda hemen görünür. Güzel bir dükkanda müşteriler daha sabırlı bekler.</p>
+        <p class="recipe-note" style="margin-bottom:8px">Bir süsü almadan önce "Dene"ye bas, dükkanda nasıl durduğuna bak. Güzel bir dükkanda müşteriler daha sabırlı bekler.</p>
         <canvas class="decor-prev" id="decorPrev" aria-label="Dükkanın görünümü"></canvas>
+        <div class="decor-try" id="decorTry" hidden><span id="decorTryName"></span><button class="btn go" id="decorTryBuy" type="button"></button><button class="btn" id="decorTryOff" type="button">Vazgeç</button></div>
         <div id="decor" class="upgrades"></div>
       </div>
       <button class="btn go big" id="newDayBtn" type="button">Yeni güne başla</button>
@@ -1402,6 +1410,9 @@ const TYPES = [
   { names: ['Ceren', 'Elif', 'Selin', 'Defne', 'Melis'], hair: ['long', 'bun'], colors: ['#3b2618', '#7a4a22', '#c98b3c', '#1f1a17'], glasses: .25, shirt: ['#e07a5f', '#3d8b8b', '#f2b134', '#8f6bb3'] },
   { names: ['Mehmet', 'Onur', 'Emre', 'Burak', 'Kerem'], hair: ['short'], colors: ['#2b1d14', '#5b3a1e', '#1a1a1a'], mustache: .25, glasses: .3, shirt: ['#2f7d4f', '#c7462e', '#36558f', '#e3a23b'] },
 ];
+// amcalar vegan ya da vejetaryen gelmez; eski kayıtlarda öyle kalmış müdavimler de düzelir
+const noDiet = name => TYPES[0].names.includes(name);
+for (const r of S.regulars) if (r.look && noDiet(r.look.name)) delete r.look.diet;
 const LOOK_KEYS = ['name', 'hair', 'hairColor', 'skin', 'skinDark', 'shirt', 'scarf', 'mustache', 'glasses', 'diet', 'stripes', 'glassArt', 'tee', 'trim', 'jacket', 'strap', 'print', 'beard', 'earring', 'necklace', 'collar', 'bowtie'];
 const lookOf = c => Object.fromEntries(LOOK_KEYS.map(k => [k, c[k]]));
 function makeFriend(id) {
@@ -1409,7 +1420,17 @@ function makeFriend(id) {
   if (id === 'egemen') f.glasses = Math.random() < .5 ? 'clear' : 'black';
   return f;
 }
+// aynı kişi üst üste gelmesin: son üç müşteriden biri çıkarsa yeniden seçilir
 function makeCustomer() {
+  const recent = S.recent || [];
+  let c;
+  for (let i = 0; i < 8; i++) {
+    c = makeCustomerOnce();
+    if (!recent.includes(c.name) && !(c.partner && recent.includes(c.partner.name))) break;
+  }
+  return c;
+}
+function makeCustomerOnce() {
   // arkadaşlar ilk servisten sonra ara sıra uğrar, her biri günde bir kez; çiftler bazen birlikte gelir
   if (S.dayServed >= 1 && Math.random() < .22) {
     if (!S.friendsDay || S.friendsDay.day !== S.day) S.friendsDay = { day: S.day, ids: [] };
@@ -1423,7 +1444,7 @@ function makeCustomer() {
   if (S.day >= 2 && S.ev.gicikDay !== S.day && Math.random() < .1) { return Object.assign({}, pick(GICIK), { mood: 'idle', seed: Math.random() * 100 }); }
   if (S.regulars.length && Math.random() < .35) { const r = pick(S.regulars); return Object.assign({}, r.look, { mood: 'idle', seed: Math.random() * 100, regular: r }); }
   const c = makeStranger();
-  if (S.day >= 2 && Math.random() < .12) c.diet = Math.random() < .5 ? 'vegan' : 'vejetaryen';
+  if (S.day >= 2 && !noDiet(c.name) && Math.random() < .12) c.diet = Math.random() < .5 ? 'vegan' : 'vejetaryen';
   return c;
 }
 const KAMIL = { name: 'Kebapçı Kâmil', hair: 'chef', hairColor: '#2b1d14', skin: '#eac09a', skinDark: '#d09f75', shirt: '#8f2a1f', scarf: null, mustache: true, glasses: false };
@@ -1794,7 +1815,7 @@ function drawShop(ctx, t) {
   ctx.fillStyle = '#2a3238'; ctx.font = '800 12px "Nunito", sans-serif'; ctx.textAlign = 'right'; ctx.fillText(S.money + '₺', 116, 260);
   ctx.fillStyle = '#e8e2d6'; for (let i = 0; i < 4; i++) for (let j = 0; j < 2; j++) { roundRect(ctx, 56 + i * 28, 272 + j * 14, 20, 9, 3); ctx.fill(); }
   // çay
-  drawTeaGlass(ctx, 716, 292, 1.05, t, true);
+  drawTeaGlass(ctx, 716, 292, .72, t, true);
   // served plate
   if (plate) {
     ctx.fillStyle = 'rgba(0,0,0,.18)'; ellipse(ctx, 520, 304, 98, 20); ctx.fill();
@@ -1809,7 +1830,8 @@ function drawShop(ctx, t) {
     if (plate.dough === 'helva') drawHelvaPlate(ctx, 520, 280, plate.bake, .85, true);
     if (plate.dough === 'menemen' || plate.dough === 'tofumenemen') drawSahan(ctx, 520, 286, plate.bake, .55, 0, plate.dough === 'tofumenemen');
     }
-    if (plate.drink) drawDrink(ctx, plate.drink, 632, 262, .9);
+    if (plate.drink === 'cay') drawDrink(ctx, 'cay', 632, 270, .74);
+    else if (plate.drink) drawDrink(ctx, plate.drink, 632, 262, .9);
   }
 }
 
@@ -4040,6 +4062,7 @@ function nextCustomer() {
   }
   const critic = !ev && criticDay(S.day) && S.dayServed >= 2 && !(S.critic && S.critic.day === S.day);
   cust = ev === 'rival2' ? Object.assign({}, KAMIL, { mood: 'meh', seed: 1, special: 'rival2' }) : critic ? Object.assign({}, FIKRET, { mood: 'idle', seed: 2 }) : makeCustomer();
+  S.recent = [...(S.recent || []), cust.name, ...(cust.partner ? [cust.partner.name] : [])].slice(-3);
   if (!S.tut && !ev && !cust.diet && !cust.gicik && !cust.critic) {
     order = { dish: 'lahmacun', items: [{ type: 'kiyma', bol: false }, { type: 'maydanoz', bol: false }], slices: 2, tutorial: true };
     tutStep = 0;
@@ -4523,33 +4546,71 @@ function renderUpgrades() {
     wrap.appendChild(d);
   }
 }
+// denenen süs yalnızca önizlemede görünür, satın alınana kadar dükkana geçmez
+let tryDecor = null;
+function buyDecor(d) {
+  if (S.money < d.price) return;
+  S.money -= d.price; S.decor[d.id] = true; sfx.coin();
+  if (d.group === 'boya') S.decor.wall = d.id;
+  if (d.group === 'lamba') S.decor.lamp = d.id;
+  if (tryDecor === d.id) tryDecor = null;
+  checkBadges(); save(); renderDecor(); renderUpgrades(); hud();
+}
+function drawDecorPrev() {
+  const d = tryDecor && DECOR.find(x => x.id === tryDecor), real = S.decor;
+  if (d) { S.decor = Object.assign({}, real, { [d.id]: true }); if (d.group === 'boya') S.decor.wall = d.id; if (d.group === 'lamba') S.decor.lamp = d.id; }
+  // önizlemede müşteri ve tabak olmadan boş dükkan görünür
+  const c0 = cust, p0 = plate; cust = null; plate = null;
+  let ctx;
+  try { ctx = fit($('#decorPrev'), 800, 450); drawShop(ctx, performance.now() / 1000); } finally { S.decor = real; cust = c0; plate = p0; }
+  if (d) {
+    ctx.font = '800 22px "Baloo 2", sans-serif'; ctx.textAlign = 'left';
+    const label = 'Deneme: ' + d.name, w = ctx.measureText(label).width + 28;
+    ctx.fillStyle = 'rgba(58,34,22,.82)'; roundRect(ctx, 14, 404, w, 34, 17); ctx.fill();
+    ctx.fillStyle = '#fff4e2'; ctx.fillText(label, 28, 428);
+  }
+}
 function renderDecor() {
   const wrap = $('#decor'); wrap.innerHTML = '';
   if (!S.decor.wall) S.decor.wall = 'boya_krem';
+  if (tryDecor && hasDecor(tryDecor)) tryDecor = null;
   for (const d of DECOR) {
     const owned = !d.price || hasDecor(d.id), using = (d.group === 'boya' && S.decor.wall === d.id) || (d.group === 'lamba' && owned && activeLamp() === d.id);
-    const el = document.createElement('div'); el.className = 'upg' + (using ? ' using' : owned ? ' owned' : '');
+    const el = document.createElement('div'); el.className = 'upg' + (using ? ' using' : owned ? ' owned' : tryDecor === d.id ? ' trying' : '');
     let act;
     if (using) act = d.group === 'lamba' ? '<em>Asılı ✓</em>' : '<em>Duvarda ✓</em>';
     else if (owned && d.group === 'boya') act = '<button class="btn" type="button">Duvarı boya</button>';
     else if (owned && d.group === 'lamba') act = '<button class="btn" type="button">Bunu as</button>';
     else if (owned) act = '<em>Dükkanda ✓</em>';
-    else act = `<button class="btn" type="button" ${S.money < d.price ? 'disabled' : ''}>Satın al · ${d.price}₺</button>`;
+    else act = `<div class="acts"><button class="btn try" type="button">${tryDecor === d.id ? 'Denemeyi kapat' : 'Dene'}</button><button class="btn buy" type="button" ${S.money < d.price ? 'disabled' : ''}>Satın al · ${d.price}₺</button></div>`;
     el.innerHTML = `<b>${d.name}</b><span>${d.desc}</span>${act}`;
-    const btn = el.querySelector('button');
-    if (btn) btn.onclick = () => {
-      if (!owned) { if (S.money < d.price) return; S.money -= d.price; S.decor[d.id] = true; sfx.coin(); }
-      else tone(660, .08, 'triangle', .04);
+    const tryBtn = el.querySelector('.try'), buyBtn = el.querySelector('.buy'), btn = el.querySelector('button');
+    if (tryBtn) tryBtn.onclick = () => {
+      tryDecor = tryDecor === d.id ? null : d.id; tone(tryDecor ? 720 : 520, .07, 'triangle', .035); renderDecor();
+      if (tryDecor) $('#decorPrev').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    };
+    if (buyBtn) buyBtn.onclick = () => buyDecor(d);
+    else if (btn) btn.onclick = () => {
+      tone(660, .08, 'triangle', .04);
       if (d.group === 'boya') S.decor.wall = d.id;
       if (d.group === 'lamba') S.decor.lamp = d.id;
       checkBadges(); save(); renderDecor(); renderUpgrades(); hud();
     };
     wrap.appendChild(el);
   }
-  drawShop(fit($('#decorPrev'), 800, 450), performance.now() / 1000);
+  const d = tryDecor && DECOR.find(x => x.id === tryDecor), bar = $('#decorTry');
+  bar.hidden = !d;
+  if (d) {
+    $('#decorTryName').textContent = `${d.name} böyle duruyor. Beğendin mi?`;
+    const b = $('#decorTryBuy'); b.textContent = `Satın al · ${d.price}₺`; b.disabled = S.money < d.price;
+    b.onclick = () => buyDecor(d);
+    $('#decorTryOff').onclick = () => { tryDecor = null; tone(520, .07, 'triangle', .035); renderDecor(); };
+    if (S.money < d.price) $('#decorTryName').textContent = `${d.name} böyle duruyor. Almak için ${d.price - S.money}₺ daha lazım.`;
+  }
+  drawDecorPrev();
 }
 $('#newDayBtn').onclick = () => {
-  S.day++; S.time = OPEN; S.dayServed = 0; S.dayEarn = 0; S.dayCost = 0; S.dayStars = 0; S.cay = 0;
+  tryDecor = null; S.day++; S.time = OPEN; S.dayServed = 0; S.dayEarn = 0; S.dayCost = 0; S.dayStars = 0; S.cay = 0;
   const keep = perk('buzdolabi'), had = S.batches.reduce((a, b) => a + b.left, 0);
   S.batches = keep ? S.batches.filter(b => b.day >= S.day - 1) : [];
   const left = S.batches.reduce((a, b) => a + b.left, 0), lost = had - left;
