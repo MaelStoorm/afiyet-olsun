@@ -925,6 +925,24 @@ const DRINK_FIT = {
   humus: ['limonata', 'ayran'], mercimekkoftesi: ['cay', 'limonata', 'ayran'], ezme: ['ayran', 'salgam'], haydari: ['limonata', 'ayran'],
   kurabiye: ['cay'], recel: ['cay'], sutlac: ['cay'], helva: ['cay'], mercimek: [], mantarcorba: [], domatescorba: [],
 };
+// simitçi: sabah tablasından simit ve poğaça alınır, çayın yanına sorulur; akşama bayatlar
+const PASTRY = {
+  simit:  { name: 'Simit', price: 10, pack: [10, 30], ask: ['Yanına bir de simit alayım.', 'Yanına susamlı, halka gibi, çıtır bir şey ver.'] },
+  pogaca: { name: 'Poğaça', price: 12, pack: [10, 35], ask: ['Yanına bir poğaça da olsun.', 'Yanına yumuşacık, peynirli, fırından bir şey ver.'] },
+};
+const pastryLeft = k => S.pastry && S.pastry.day === S.day ? S.pastry[k] || 0 : 0;
+// telefonla mahalle siparişi: kurye sabah yemeğinden birkaç porsiyon paketletip götürür
+const PHONE_PLACES = ['Köşedeki muhasebe ofisi', 'Karşıdaki kuaför', 'Mahalle muhtarlığı', 'Berber Ali Abi', 'Köşe eczanesi', 'Üst sokaktaki inşaat ekibi', 'İlkokulun öğretmenler odası'];
+// İdil'in seramik atölyesinden hediyeler: ün arttıkça gelir, dükkanda durur
+const GIFTS = [
+  { id: 'kase', rep: 60, name: 'çini desenli seramik kase',
+    lines: ['Selam! Bugün sipariş için gelmedim, sana bir şey getirdim.', 'Mahallede herkes dükkanını konuşuyor. Atölyede senin için çini desenli bir kase yaptım, fırından yeni çıktı!', 'Rafına koyarsın, müşterilerin de görür. Hayırlı işler!'] },
+  { id: 'vazo', rep: 75, name: 'lacivert sırlı seramik vazo',
+    lines: ['Yine ben! Ünün iyice yayıldı, atölyedeki herkes buradan bahsediyor.', 'Sana lacivert sırlı bir vazo yaptım. İçine Göksu papatya koydu, tezgaha çok yakışır!'] },
+  { id: 'tabak', rep: 90, name: 'dükkanın adı yazılı duvar tabağı',
+    lines: ['Duydum duydum, mahallenin bir numarası artık sensin!', 'Bunu kutlamak lazım. Atölyede kocaman bir duvar tabağı yaptım, üstünde dükkanının adı yazıyor.', 'Duvara as, gelen herkes görsün. Seninle gurur duyuyorum!'] },
+];
+const nextGift = () => GIFTS.find(g => !(S.gifts || []).includes(g.id));
 const BREADS = {
   beyaz:   { name: 'Beyaz ekmek', price: 5, ask: ['Yanına beyaz ekmek olsun.', 'Yanına bembeyaz, yumuşacık bir dilim ver.'] },
   tahilli: { name: 'Tahıllı ekmek', price: 8, ask: ['Yanına tahıllı ekmek olsun lütfen.', 'Yanına içi tohumlu, kepekli bir dilim ver.'] },
@@ -1722,6 +1740,9 @@ const KAMIL = { name: 'Kebapçı Kâmil', hair: 'chef', hairColor: '#2b1d14', sk
 const NAZIFE = { name: 'Nazife Teyze', hair: 'scarf', hairColor: '#5a3a22', skin: '#f1c8a4', skinDark: '#d9a982', shirt: '#2f6f73', scarf: '#e3b23c', mustache: false, glasses: false };
 const ZEHRA = { name: 'Zehra Teyze', hair: 'bun', hairColor: '#cfcac4', skin: '#e8b892', skinDark: '#c99670', shirt: '#b8463a', mustache: false, glasses: true };
 const RIFAT = { name: 'Rıfat Amca', hair: 'cap', capColor: '#24385a', hairColor: '#cfcac4', skin: '#d9a57c', skinDark: '#bb8259', shirt: '#d8cba9', mustache: true, glasses: false };
+const KURYE = { name: 'Kurye Murat', hair: 'cap', capColor: '#c0392b', hairColor: '#2b1d14', skin: '#d9a57c', skinDark: '#bb8259', shirt: '#c0392b', mustache: false, glasses: false, kurye: true,
+  happy: ['Sıcak sıcak götürüyorum, eline sağlık usta!', 'Paket tamam, motor hazır. Bahşişi de getiririm!', 'Bunu yiyen bir daha arar usta, haberin olsun.'],
+  meh: [i => `Götürürüm ama… ${i}`, i => `Tamam usta, yalnız… ${i}`] };
 const HAYRIYE = { name: 'Hayriye Teyze', hair: 'scarf', hairColor: '#8b5a2b', skin: '#f6d2b4', skinDark: '#e2b48f', shirt: '#7a3b5a', scarf: '#7d4fa0', mustache: false, glasses: true };
 // Egemen'in arkadaşları (çizgi karakter olarak)
 const TAN_LIGHT = ['mercimek', 'mantarcorba', 'domatescorba', 'coban', 'ezme', 'haydari', 'humus', 'kisir', 'sutlac', 'helva'];
@@ -1732,11 +1753,11 @@ const TAN_FULL = [
 ];
 const FRIENDS = {
   bilge: { name: 'Bilge', diet: 'vegan', polite: true, pair: 'tan', hair: 'bob', hairColor: '#4a2e1c', skin: '#f6d2b4', skinDark: '#e2b48f', shirt: '#fbf6e8', stripes: '#f2c23a', tee: true, trim: '#f2c23a', necklace: 'beads', mustache: false, glasses: false,
-    hi: [p => `Merhaba, kolay gelsin! Rica etsem ${p} hazırlar mısınız? Veganım, içinde hayvansal hiçbir şey olmasın lütfen. Atölyede çömlek çarkından kalkamadım, çok acıktım.`,
-      p => `Merhabalar! Ellerim hâlâ çamurlu, kusura bakmayın. ${cap(p)} alabilir miyim? Hayvansal ürün olmasın lütfen, veganım.`,
-      p => `Kolay gelsin! Bugün fırından yeni vazolar çıktı, kutlamak istiyorum. ${cap(p)} rica edebilir miyim? Vegan olsun lütfen.`],
-    happy: ['Çok teşekkür ederim, ellerinize sağlık! Size kendi yaptığım bir çömlek tabak getireceğim.', 'Harika olmuş, gerçekten çok teşekkürler!',
-      'Bu kadar özenli hazırlamanız çok hoşuma gitti, teşekkür ederim.', 'Çok lezzetli! Atölyedeki herkese burayı anlatacağım.'],
+    hi: [p => `Merhaba, kolay gelsin! Rica etsem ${p} hazırlar mısınız? Veganım, içinde hayvansal hiçbir şey olmasın lütfen. Bütün gün toplantıdan toplantıya koştum, çok acıktım.`,
+      p => `Merhabalar! Bugün bisikletle geldim, karnım zil çalıyor. ${cap(p)} alabilir miyim? Hayvansal ürün olmasın lütfen, veganım.`,
+      p => `Kolay gelsin! Bugün güzel bir haber aldım, kutlamak istiyorum. ${cap(p)} rica edebilir miyim? Vegan olsun lütfen.`],
+    happy: ['Çok teşekkür ederim, ellerinize sağlık! Bir gün size kendi tarifimden vegan bir tatlı getireceğim.', 'Harika olmuş, gerçekten çok teşekkürler!',
+      'Bu kadar özenli hazırlamanız çok hoşuma gitti, teşekkür ederim.', 'Çok lezzetli! İşteki herkese burayı anlatacağım.'],
     meh: [i => `Çok naziksiniz, teşekkür ederim. Sadece… ${i}`, i => `Emeğinize sağlık, ama söylemeden edemeyeceğim… ${i}`],
     solo: ['Tan bugün gelemedi, selamı var.', 'Tan işte kaldı, ben yalnız geldim.'],
     olay: t => `Ah… Bunun içinde ${t} var. Veganım demiştim, gerçekten çok üzüldüm. Bunu yiyemem, kusura bakmayın.` },
@@ -1747,12 +1768,12 @@ const FRIENDS = {
       p => `Selam! Menüye baktım ama karar veremedim. Sen ${p} yap, gerisini dert etme.`],
     happy: ['Oha, efsane olmuş! Eline sağlık usta.', 'Bayıldım! Yine gelirim.', 'Bu ne ya, parmaklarımı yiyeceğim!', 'Usta sen bu işi biliyorsun, helal olsun.'],
     meh: [() => 'Olsun usta, ben yine de yerim, afiyet olsun bana!', () => 'Eh, aç ayı oynamaz. Yerim ben bunu!', () => 'Biraz değişik olmuş ama sorun yok, hepsi gider.'],
-    solo: ['Bilge atölyede, çömleklerinden kalkamıyor.', 'Bilge sonra gelecekmiş, ben önden geldim.'] },
+    solo: ['Bilge işte, toplantıdan çıkamadı.', 'Bilge sonra gelecekmiş, ben önden geldim.'] },
   idil: { name: 'İdil', diet: 'vejetaryen', polite: true, pair: 'goksu', hair: 'shoulder', hairColor: '#a3753f', hairStreak: '#e2c07c', skin: '#f6d2b4', skinDark: '#e2b48f', shirt: '#fbf8f0', glassArt: true, tee: true, trim: '#2a2420', jacket: '#2b2d33', strap: '#c7302a', mustache: false, glasses: false,
     hi: [p => `Merhaba! Etsiz bir şey rica edebilir miyim? ${cap(p)} çok güzel olur.`,
-      p => `Merhabalar, kolay gelsin! Vitray atölyesinden geliyorum, ${p} alabilir miyim? Et olmasın lütfen.`,
+      p => `Merhabalar, kolay gelsin! Seramik atölyesinden geliyorum, ellerim hâlâ çamurlu. ${cap(p)} alabilir miyim? Et olmasın lütfen.`,
       p => `Selam! Bugün canım ${p} çekti. Vejetaryenim, et koymazsanız çok sevinirim.`],
-    happy: ['Ellerinize sağlık! Renkleri öyle güzel ki vitrayını yapasım geldi.', 'Çok teşekkür ederim, nefis olmuş!',
+    happy: ['Ellerinize sağlık! Renkleri öyle güzel ki atölyede bir tabağa resmini yapasım geldi.', 'Çok teşekkür ederim, nefis olmuş!',
       'Tam istediğim gibi, sağ olun! Göksu da buna bayılır.', 'Bu tabak bir sanat eseri gibi, teşekkürler!'],
     meh: [i => `Teşekkür ederim, çok tatlısınız. Ama… ${i}`, i => `Güzel olmuş aslında, yalnız… ${i}`],
     solo: ['Göksu bugün gelemedi, ona da selam söyleyeyim.', 'Bugün tek başımayım, Göksu işte kaldı.'],
@@ -2048,6 +2069,7 @@ function drawShop(ctx, t) {
   ctx.fillStyle = '#7b4a22'; ctx.fillRect(470, 196, 320, 12); ctx.fillStyle = '#9a6234'; ctx.fillRect(470, 196, 320, 3);
   drawShelfJar(ctx, 542, 'tursu'); drawShelfJar(ctx, 592, 'zeytin'); drawShelfJar(ctx, 641, 'biber');
   drawShelfJar(ctx, 766, 'recel');
+  { const g = S.gifts || []; if (g.includes('kase')) drawGiftKase(ctx, 497, 196); if (g.includes('tabak')) drawGiftTabak(ctx, 752, 108); if (g.includes('vazo')) drawGiftVazo(ctx, 768, 302, t); }
   // bakır cezve
   const cz = ctx.createLinearGradient(680, 0, 726, 0); cz.addColorStop(0, '#9c4f22'); cz.addColorStop(.45, '#e09358'); cz.addColorStop(1, '#a5562a');
   ctx.fillStyle = cz; ctx.beginPath(); ctx.moveTo(682, 196); ctx.lineTo(688, 166); ctx.lineTo(718, 166); ctx.lineTo(724, 196); ctx.closePath(); ctx.fill();
@@ -2117,6 +2139,7 @@ function drawShop(ctx, t) {
     if (plate.dough === 'menemen' || plate.dough === 'tofumenemen') drawSahan(ctx, 520, 286, plate.bake, .55, 0, plate.dough === 'tofumenemen');
     }
     if (plate.bread) drawBreadSlice(ctx, plate.bread, 640, 284, .9);
+    if (plate.pastry && plate.pastry !== 'yok') drawPastry(ctx, plate.pastry, 412, 292, .95);
     if (plate.drink === 'cay') drawDrink(ctx, 'cay', 632, 270, .74);
     else if (plate.drink) drawDrink(ctx, plate.drink, 632, 262, .9);
   }
@@ -3473,6 +3496,71 @@ function drawSoupBowl(ctx, x, y, b, s = 1, dish = 'mercimek') {
   }
   ctx.restore();
 }
+// simit ve poğaça
+function drawPastry(ctx, kind, x, y, s = 1) {
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+  ctx.fillStyle = 'rgba(0,0,0,.14)'; ellipse(ctx, 0, 14, 26, 5); ctx.fill();
+  if (kind === 'simit') {
+    ctx.fillStyle = '#a5531f'; ellipse(ctx, 0, 0, 25, 16); ctx.fill();
+    const g = ctx.createLinearGradient(0, -16, 0, 16); g.addColorStop(0, '#d9873e'); g.addColorStop(1, '#9a4818');
+    ctx.fillStyle = g; ellipse(ctx, 0, -1, 23.5, 14.5); ctx.fill();
+    ctx.fillStyle = '#f6e7cf'; ellipse(ctx, 0, -1, 9, 4.6); ctx.fill(); ctx.strokeStyle = '#7a3812'; ctx.lineWidth = 1.2; ctx.stroke();
+    ctx.strokeStyle = 'rgba(90,40,10,.35)'; ctx.lineWidth = 1.4; for (let i = 0; i < 6; i++) { const a = i * 1.047 + .3; ctx.beginPath(); ctx.moveTo(Math.cos(a) * 11, Math.sin(a) * 6); ctx.quadraticCurveTo(Math.cos(a + .35) * 18, Math.sin(a + .35) * 11, Math.cos(a + .5) * 22, Math.sin(a + .5) * 13.5); ctx.stroke(); }
+    const r = mulberry(7); ctx.fillStyle = '#fbf0d0';
+    for (let i = 0; i < 46; i++) { const a = r() * 6.283, d = 12 + r() * 10; ellipse(ctx, Math.cos(a) * d, -1 + Math.sin(a) * d * .6, 1.3, .7, r() * 3); ctx.fill(); }
+  } else {
+    const g = ctx.createRadialGradient(-6, -8, 2, 0, 0, 24); g.addColorStop(0, '#f6c66a'); g.addColorStop(1, '#c47a2a');
+    ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(0, 2, 24, 13, 0, Math.PI, 0); ctx.quadraticCurveTo(24, 12, 0, 13); ctx.quadraticCurveTo(-24, 12, -24, 2); ctx.fill();
+    ctx.strokeStyle = '#8a4e18'; ctx.lineWidth = 1.2; ctx.stroke();
+    ctx.fillStyle = 'rgba(255,240,200,.45)'; ellipse(ctx, -8, -5, 7, 2.5, -.3); ctx.fill();
+    ctx.fillStyle = '#2a1a10'; for (const [cx, cy] of [[-6, -3], [2, -6], [9, -2], [-1, 1], [5, 3]]) { ellipse(ctx, cx, cy, 1.2, .7, .4); ctx.fill(); }
+  }
+  ctx.restore();
+}
+// simitçi tablası: yuvarlak tahta tabla, simitler ve poğaçalar
+function drawSimitTray(x) {
+  x.fillStyle = 'rgba(0,0,0,.12)'; ellipse(x, 56, 58, 48, 8); x.fill();
+  x.fillStyle = '#9a6234'; ellipse(x, 56, 50, 48, 14); x.fill(); x.fillStyle = '#c08a52'; ellipse(x, 56, 47, 45, 12); x.fill();
+  for (const [px, py, k, sc] of [[34, 38, 'simit', .62], [62, 32, 'simit', .62], [82, 42, 'pogaca', .6], [50, 48, 'pogaca', .6], [76, 52, 'simit', .55]]) drawPastry(x, k, px, py, sc);
+}
+// İdil'in seramik hediyeleri
+function drawGiftKase(ctx, x, y) {
+  ctx.save(); ctx.translate(x, y);
+  ctx.fillStyle = '#f7f2e8'; ctx.beginPath(); ctx.moveTo(-22, -16); ctx.quadraticCurveTo(-20, 0, 0, 2); ctx.quadraticCurveTo(20, 0, 22, -16); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = '#1d4fa0'; ctx.lineWidth = 2.2; ctx.stroke();
+  ctx.fillStyle = '#1d4fa0'; for (let i = -2; i <= 2; i++) { ctx.beginPath(); ctx.moveTo(i * 8, -12); ctx.lineTo(i * 8 + 3, -8); ctx.lineTo(i * 8, -4); ctx.lineTo(i * 8 - 3, -8); ctx.closePath(); ctx.fill(); }
+  ctx.fillStyle = '#c0392b'; for (let i = -2; i <= 1; i++) { circle(ctx, i * 8 + 4, -8, 1.5); ctx.fill(); }
+  ctx.fillStyle = '#e8dfcf'; ellipse(ctx, 0, -16, 22, 4); ctx.fill(); ctx.strokeStyle = '#1d4fa0'; ctx.lineWidth = 1.6; ctx.stroke();
+  ctx.fillStyle = '#16807f'; roundRect(ctx, -8, 1, 16, 3, 1.5); ctx.fill();
+  ctx.restore();
+}
+function drawGiftVazo(ctx, x, y, t) {
+  ctx.save(); ctx.translate(x, y);
+  for (const [a, h, c] of [[-.35, 34, '#fbfaf5'], [0, 40, '#f2c23a'], [.32, 33, '#fbfaf5'], [-.12, 28, '#fbfaf5'], [.18, 30, '#f2c23a']]) {
+    const sw = Math.sin(t * 1.3 + a * 5) * .03, tx = Math.sin(a + sw) * h, ty = -46 - Math.cos(a + sw) * h * .8;
+    ctx.strokeStyle = '#4f8a2f'; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(0, -44); ctx.quadraticCurveTo(tx * .4, ty + 12, tx, ty); ctx.stroke();
+    ctx.fillStyle = c; for (let k = 0; k < 8; k++) { const pa = k * .785; ellipse(ctx, tx + Math.cos(pa) * 4.2, ty + Math.sin(pa) * 4.2, 3.4, 1.6, pa); ctx.fill(); }
+    ctx.fillStyle = '#e8a920'; circle(ctx, tx, ty, 2.6); ctx.fill();
+  }
+  const g = ctx.createLinearGradient(-16, 0, 16, 0); g.addColorStop(0, '#16336e'); g.addColorStop(.45, '#3a64b8'); g.addColorStop(1, '#14295a');
+  ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(-7, -46); ctx.lineTo(7, -46); ctx.quadraticCurveTo(6, -36, 15, -22); ctx.quadraticCurveTo(20, -8, 10, 0); ctx.lineTo(-10, 0); ctx.quadraticCurveTo(-20, -8, -15, -22); ctx.quadraticCurveTo(-6, -36, -7, -46); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = '#f2c23a'; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.moveTo(-15, -20); ctx.quadraticCurveTo(0, -16, 15, -20); ctx.stroke();
+  ctx.fillStyle = 'rgba(255,255,255,.35)'; roundRect(ctx, -10, -30, 3, 18, 1.5); ctx.fill();
+  ctx.fillStyle = '#0f2148'; ellipse(ctx, 0, -46, 7, 2); ctx.fill();
+  ctx.restore();
+}
+function drawGiftTabak(ctx, x, y) {
+  ctx.save(); ctx.translate(x, y);
+  ctx.strokeStyle = '#6f421d'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(-14, -30); ctx.lineTo(0, -44); ctx.lineTo(14, -30); ctx.stroke();
+  ctx.fillStyle = 'rgba(0,0,0,.15)'; circle(ctx, 2, 3, 33); ctx.fill();
+  ctx.fillStyle = '#f7f2e8'; circle(ctx, 0, 0, 33); ctx.fill(); ctx.strokeStyle = '#1d4fa0'; ctx.lineWidth = 4; circle(ctx, 0, 0, 30); ctx.stroke();
+  ctx.fillStyle = '#16807f'; for (let i = 0; i < 12; i++) { const a = i * .5236; circle(ctx, Math.cos(a) * 30, Math.sin(a) * 30, 2.2); ctx.fill(); }
+  ctx.fillStyle = '#c0392b'; for (let i = 0; i < 6; i++) { const a = i * 1.047; ctx.save(); ctx.rotate(a); ellipse(ctx, 0, -9, 3.2, 6.5); ctx.fill(); ctx.restore(); }
+  ctx.fillStyle = '#f2c23a'; circle(ctx, 0, 0, 3.5); ctx.fill();
+  ctx.fillStyle = '#1d4fa0'; ctx.font = '800 7px "Baloo 2", sans-serif'; ctx.textAlign = 'center';
+  const nm = (S.player && S.player.name ? S.player.name + ' Usta' : 'Afiyet Olsun'); ctx.fillText(nm.length > 14 ? 'Afiyet Olsun' : nm, 0, 21);
+  ctx.restore();
+}
 // bir dilim ekmek: beyaz ya da tahıllı
 function drawBreadSlice(ctx, kind, x, y, s = 1) {
   ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
@@ -4291,7 +4379,8 @@ function orderExtras(o) {
   if (DISH[o.dish].kind === 'manti' && o.count !== DISH[o.dish].count) parts.push(o.count + ' tane');
   const drink = o.drink ? ' ' + DRINKS[o.drink].ask[o.drinkRiddle && !o.asked ? 1 : 0] : '';
   const bread = o.bread ? ' ' + BREADS[o.bread].ask[o.breadRiddle && !o.asked ? 1 : 0] : '';
-  return pre + (parts.length ? ` ${cap(parts.join(' ve '))} olsun.` : '') + (o.wellDone ? ' İyi pişsin.' : '') + bread + drink;
+  const pastry = o.pastry ? ' ' + PASTRY[o.pastry].ask[o.pastryRiddle && !o.asked ? 1 : 0] : '';
+  return pre + (parts.length ? ` ${cap(parts.join(' ve '))} olsun.` : '') + (o.wellDone ? ' İyi pişsin.' : '') + bread + drink + pastry;
 }
 const GREET = [
   (p, h) => `Merhaba ${h}! ${cap(p)} alabilir miyim?`,
@@ -4327,17 +4416,19 @@ function ticketHTML() {
       <span class="tag">${o.count ? o.count + ' yaprak sar' : o.slices ? o.slices + ' dilim kes' : kindOf(o.dish) === 'tray' ? 'Bir tepsi' : 'Bir tencere'}</span>`;
   }
   let body;
-  if (o.fromBatch) body = `<p class="recipe-note">Bu yemeği sabah hazırladın. Mutfaktaki yeşil kutudan bir ${PREP[o.dish].unit} ver.</p>`;
+  if (o.phone) body = `<p class="recipe-note">📞 Mahalle siparişi: ${o.phone}. Yeşil kutuya dokun, ${o.count} ${PREP[o.dish].unit} birden paketlenir.</p>`;
+  else if (o.fromBatch) body = `<p class="recipe-note">Bu yemeği sabah hazırladın. Mutfaktaki yeşil kutudan bir ${PREP[o.dish].unit} ver.</p>`;
   else if (o.riddle && !o.asked) body = `<p class="quote">“${o.riddle}”</p>`;
   else if (D.variants && SET.diff === 'hard') body = '<p class="recipe-note gen-note">Malzemeleri tarifine göre koy. Hatırlamıyorsan tarif defterine bak.</p>';
   else if (D.variants) body = `<p class="recipe-note recipe-list">${cap(reqList((variantOf(o) || D.variants[0]).req, o.dish))}</p>`;
   else if (o.half) body = `<ul>${o.items.map((i, n) => `<li><span class="half">${n + 1}. yarı</span><span>${ING[i.type].name}</span><em class="${i.bol ? 'bol' : ''}">${qtyText(i)}</em></li>`).join('')}</ul>`;
   else if (!o.items.length) body = '<ul><li><span>Malzemesiz, sade</span></li></ul>';
   else body = `<ul>${o.items.map(i => `<li><span>${ING[i.type].label || ING[i.type].name}</span><em class="${i.bol ? 'bol' : ''}">${qtyText(i)}</em></li>`).join('')}</ul>`;
-  const tag = o.fromBatch ? '1 ' + PREP[o.dish].unit : D.kind === 'sarma' || D.kind === 'cookie' || D.kind === 'manti' ? `${o.count} tane` : D.unit ? D.unit : D.kind === 'jam' ? '1 kavanoz' : D.kind === 'bowl' ? '1 porsiyon' : (o.slices === 1 ? 'Kesilmesin' : slicesText(o.slices)) + (o.wellDone ? ' · iyi pişmiş' : '');
+  const tag = o.fromBatch ? (o.phone ? `Paket · ${o.count} ` : '1 ') + PREP[o.dish].unit : D.kind === 'sarma' || D.kind === 'cookie' || D.kind === 'manti' ? `${o.count} tane` : D.unit ? D.unit : D.kind === 'jam' ? '1 kavanoz' : D.kind === 'bowl' ? '1 porsiyon' : (o.slices === 1 ? 'Kesilmesin' : slicesText(o.slices)) + (o.wellDone ? ' · iyi pişmiş' : '');
   const title = o.riddle && !o.asked ? D.name : dishTitle(o);
   const drink = (o.drink ? `<span class="tag" style="margin-left:10px">+ İçecek: ${o.drinkRiddle && !o.asked ? '?' : DRINKS[o.drink].name}</span>` : '')
-    + (o.bread ? `<span class="tag" style="margin-left:10px">+ Ekmek: ${o.breadRiddle && !o.asked ? '?' : BREADS[o.bread].name}</span>` : '');
+    + (o.bread ? `<span class="tag" style="margin-left:10px">+ Ekmek: ${o.breadRiddle && !o.asked ? '?' : BREADS[o.bread].name}</span>` : '')
+    + (o.pastry ? `<span class="tag" style="margin-left:10px">+ Yanına: ${o.pastryRiddle && !o.asked ? '?' : PASTRY[o.pastry].name}</span>` : '');
   return `<div class="ticket-head"><span>Sipariş</span><span>${cust.name}</span></div>
     <div class="ticket-dish">${title}</div>${o.diet ? `<span class="diet">${DIET_TAG[o.diet]}</span>` : ''}${o.changed ? '<span class="chg">Değişti!</span>' : ''}${body}<span class="tag">${tag}</span>${drink}`;
 }
@@ -4389,10 +4480,15 @@ function finish(o, total, issues, ok, d) {
     if (d && d.bread === o.bread) { total += .02; dprice += BREADS[o.bread].price; }
     else { total -= .12; issues.push({ w: .45, t: d && d.bread ? `Ben ${lower(BREADS[o.bread].name)} istemiştim, ${lower(BREADS[d.bread].name)} gelmiş!` : 'Ekmek unutulmuş!' }); }
   }
+  if (o.pastry) {
+    if (d && d.pastry === o.pastry) { total += .02; dprice += PASTRY[o.pastry].price; }
+    else if (d && d.pastry === 'yok') { total -= .06; issues.push({ w: .3, t: `${PASTRY[o.pastry].name} kalmamış, olsun.` }); }
+    else { total -= .12; issues.push({ w: .45, t: d && d.pastry ? `Ben ${lower(PASTRY[o.pastry].name)} istemiştim, ${lower(PASTRY[d.pastry].name)} gelmiş!` : `${PASTRY[o.pastry].name} unutulmuş!` }); }
+  }
   // en ağır şikayet yıldızın üst sınırını belirler: eksik ana malzeme 2, eksik tarif malzemesi 3, istenmeyen şey 4 yıldız
   const worst = issues.reduce((m, i) => i.w > .12 ? Math.max(m, i.w) : m, 0);
   if (ok) total = Math.min(total, worst >= .95 ? .48 : worst >= .75 ? .66 : worst >= .4 ? .8 : worst > .12 ? .89 : 1);
-  const price = DISH[o.dish].price, refund = !ok || total < .3;
+  const qty = o.phone && d && d.prep ? Math.max(1, Math.min(o.count, d.prep.left)) : 1, price = DISH[o.dish].price * qty, refund = !ok || total < .3;
   const pay = refund ? 0 : round5(price * clamp(total, 0, 1)) + dprice;
   const tip = !refund && total >= .85 ? round5(price * .25 * (has('masa') ? 1.6 : 1) * (DIFF[SET.diff] || DIFF.normal).tip * (1 + .25 * perk('bahsis')) * (cust && cust.gicik && total >= .92 ? 2 : 1) * (isBayram() ? 1.25 : 1)) : 0;
   total = clamp(total, 0, 1);
@@ -4408,6 +4504,7 @@ function evalServe(o, d) {
     issues.push({ w: .6, t: `Ben ${V.label || 'klasik'} istemiştim, bu ${BV.label || 'klasik'} olmuş.` }); total *= .6;
   }
   if (b.issue && b.q < .9) issues.push({ w: 1 - b.q, t: b.issue });
+  if (ok && o.phone && b.left < o.count) { issues.push({ w: .5, t: `${o.count} ${PREP[o.dish].unit} istemişlerdi, ${b.left} ${PREP[o.dish].unit} çıkabildi.` }); total *= b.left / o.count; }
   return finish(o, total, issues, ok, d);
 }
 function evalRecipe(o, d) {
@@ -4917,6 +5014,16 @@ function renderMorning() {
   const tea = card(x => drawTeapot(x, S.cay > 0), '🫖 Çay', S.cay > 0 ? `Demlik dolu: ${S.cay} bardak.` : `Demlik boş. Çay paketi: ${stock('caypaketi')}`, [[S.cay > 0 ? 'Tazele' : 'Çayı demle', () => brewTea(tea), S.cay > 0 ? '' : 'primary']], S.cay > 0);
   tea.insertBefore(Object.assign(document.createElement('div'), { className: 'tea-bar', innerHTML: '<i></i>' }), tea.querySelector('button'));
   tea.querySelector('.tea-bar i').style.width = Math.min(100, S.cay / (has('cay') ? 30 : 24) * 100) + '%';
+  if (S.day >= 2) {
+    const ps = pastryLeft('simit'), pp = pastryLeft('pogaca'), buy = k => {
+      const [n, pr] = PASTRY[k].pack;
+      if (S.money < pr) { toast('Kasada yeterli para yok.'); sfx.bad(); return; }
+      if (!S.pastry || S.pastry.day !== S.day) S.pastry = { day: S.day, simit: 0, pogaca: 0 };
+      S.pastry[k] += n; S.money -= pr; S.dayCost += pr; save(); hud(); sfx.coin(); toast(`🥯 ${n} ${lower(PASTRY[k].name)} alındı: −${pr}₺`); renderMorning();
+    };
+    card(drawSimitTray, '🥯 Simitçi', ps || pp ? `Tablada ${ps} simit, ${pp} poğaça. Çayın yanına sorulur, akşama bayatlar.` : 'Simitçi Hasan Abi kapıda! Simit ya da poğaça alırsan çayın yanına isteyen olur.',
+      [[`10 simit · ${PASTRY.simit.pack[1]}₺`, () => buy('simit'), ''], [`10 poğaça · ${PASTRY.pogaca.pack[1]}₺`, () => buy('pogaca'), '']], !!(ps || pp));
+  }
   if (catOn()) {
     const fed = catFedToday(), home = catHome();
     const info = home ? (fed ? `${CAT_NAME} tok ve mutlu, tezgahta mırlıyor.` : `${CAT_NAME} mamasını bekliyor. Karnı doyarsa tezgahta uyur, müşteriler daha sabırlı bekler.`)
@@ -5075,6 +5182,10 @@ EVENTS.balikci = { who: RIFAT, mood: 'happy', end: 'Sağ ol Rıfat Amca', unlock
   after: () => { S.learned.balik = true; S.ev.balikci = S.day; for (const k of ['balik', 'ekmek', 'marul']) S.inv[k] = (S.inv[k] || 0) + 6; },
   lines: ['Kolay gelsin usta! Ben Rıfat, Karaköy\'de kırk yıl kayıkta balık ekmek yaptım.', 'Pencereden boğazı görünce dayanamadım, içeri girdim. Bu manzaraya balık ekmek yakışır!',
     'Uskumruyu közde ızgara yap, yarım ekmeğe koy. Üstüne marul, soğan, bir de limon sık. Ekmeği de ızgarada azıcık kızart.', 'Teknemden altı uskumru, altı da ekmek getirdim, senin olsun. Gerisini balıkçı tezgahından alırsın!'] };
+EVENTS.hediye = { who: FRIENDS.idil, mood: 'happy', end: 'Çok teşekkürler İdil!',
+  get lines() { return (nextGift() || GIFTS[0]).lines; },
+  get panel() { const g = nextGift() || GIFTS[0]; return `<strong>İdil'in hediyesi: ${g.name}.</strong> Dükkanda duruyor, müşteriler biraz daha sabırlı bekler.`; },
+  after: () => { const g = nextGift(); if (g) S.gifts = [...(S.gifts || []), g.id]; S.ev.hediye = S.day; } };
 function pendingEvent() {
   if (S.day >= 2 && !S.ev.rival1 && S.dayServed === 0) return 'rival1';
   if (S.day >= 2 && !S.learned.kurabiye && S.dayServed >= 2) return 'teyze1';
@@ -5083,6 +5194,7 @@ function pendingEvent() {
   if (S.day >= 5 && S.learned.recel && !S.learned.sutlac && S.dayServed >= 2) return 'teyze3';
   if (S.day >= 7 && S.learned.sutlac && !S.learned.helva && S.ev.teyze3 && S.ev.teyze3 !== true && S.ev.teyze3 < S.day && S.dayServed >= 2) return 'teyze4';
   if (S.day >= 6 && !S.learned.balik && S.dayServed >= 3 && S.ev.teyze3 !== S.day && S.ev.teyze4 !== S.day) return 'balikci';
+  { const g = nextGift(); if (g && S.day >= 3 && S.rep >= g.rep && S.dayServed >= 2 && S.ev.hediye !== S.day && ![S.ev.teyze3, S.ev.teyze4, S.ev.balikci].includes(S.day)) return 'hediye'; }
   return null;
 }
 const nameTag = () => cust.regular ? `${cust.name} · müdavim` : cust.special === 'rival2' ? `${cust.name} · rakip` : cust.fid ? cust.name : cust.critic ? `${cust.name} · eleştirmen` : cust.gicik ? `${cust.name} · huysuz` : cust.name;
@@ -5090,7 +5202,7 @@ const nameTag = () => cust.regular ? `${cust.name} · müdavim` : cust.special =
 const PAT_SEC = { flat: 80, bowl: 60, tray: 75, sarma: 100, cookie: 90, jam: 60, manti: 115 };
 function patienceSeconds() {
   let s = PAT_SEC[kindOf(order.dish)] || 80;
-  s *= 1 + .06 * decorCount();
+  s *= 1 + .06 * (decorCount() + (S.gifts || []).length);
   if (cust.tea) s += 12;
   if (cust.regular) s += 10;
   if (catInside()) s *= 1.08;
@@ -5126,6 +5238,13 @@ function enterCustomer(onArrive) {
   show('shop'); hud(); renderPanel();
   walkTo(330, 1000, onArrive);
 }
+function phoneOrder() {
+  if (S.day < 4 || S.dayServed < 2 || (S.phone && S.phone.day === S.day && S.phone.n >= 2) || Math.random() >= .12) return null;
+  const bs = S.batches.filter(b => b.left >= 3);
+  if (!bs.length) return null;
+  const b = pick(bs);
+  return { b, n: Math.min(b.left, 2 + Math.floor(Math.random() * 3)), place: pick(PHONE_PLACES) };
+}
 function nextCustomer() {
   if (S.dayServed > 0) S.time = Math.min(closeTime(), S.time + customerGap());
   if (S.time >= closeTime()) { endDay(); return; }
@@ -5138,21 +5257,33 @@ function nextCustomer() {
     return;
   }
   const critic = !ev && criticDay(S.day) && S.dayServed >= 2 && !(S.critic && S.critic.day === S.day);
-  cust = ev === 'rival2' ? Object.assign({}, KAMIL, { mood: 'meh', seed: 1, special: 'rival2' }) : critic ? Object.assign({}, FIKRET, { mood: 'idle', seed: 2 }) : makeCustomer();
+  const ph = !ev && !critic ? phoneOrder() : null;
+  cust = ev === 'rival2' ? Object.assign({}, KAMIL, { mood: 'meh', seed: 1, special: 'rival2' }) : critic ? Object.assign({}, FIKRET, { mood: 'idle', seed: 2 }) : ph ? Object.assign({}, KURYE, { mood: 'idle', seed: 5 }) : makeCustomer();
   S.recent = [...(S.recent || []), cust.name, ...(cust.partner ? [cust.partner.name] : [])].slice(-3);
   if (!S.tut && !ev && !cust.diet && !cust.gicik && !cust.critic) {
     order = { dish: 'lahmacun', items: [{ type: 'kiyma', bol: false }, { type: 'maydanoz', bol: false }], slices: 2, tutorial: true };
     tutStep = 0;
   } else {
+  if (ph) {
+    order = { dish: ph.b.dish, variant: ph.b.variant, items: [], fromBatch: true, count: ph.n, phone: ph.place };
+    const unit = PREP[ph.b.dish].unit, nm = lower(DISH[ph.b.dish].name);
+    cust.hi = [() => `Usta selam! ${ph.place} telefonla sipariş verdi: ${ph.n} ${unit} ${nm}. Paketle, ben motorla götüreyim!`];
+    S.phone = { day: S.day, n: (S.phone && S.phone.day === S.day ? S.phone.n : 0) + 1 };
+  } else {
   const fav = cust.fav && (cust.full || Math.random() < .6) ? cust.fav.filter(k => canOrder(k, cust.diet)) : [];
   if (cust.full && !fav.length) { cust.full = false; cust.hi = FRIENDS.tan.hi; }
   order = makeOrder(fav.length ? pick(fav) : cust.regular && Math.random() < .5 && dishOpen(cust.regular.fav) ? cust.regular.fav : null, cust.diet);
+  }
   if (cust.fid || cust.critic) delete order.riddle;
   if (cust.easy) order.easy = true;
-  if (!order.tutorial && DISH[order.dish].soup && Math.random() < .85) { order.bread = Math.random() < .55 ? 'beyaz' : 'tahilli'; order.breadRiddle = S.day >= 3 && Math.random() < .35; }
-  if (!order.tutorial && S.day >= 2 && cust.special !== 'rival2' && Math.random() < .3) {
+  if (!order.tutorial && !order.phone && DISH[order.dish].soup && Math.random() < .85) { order.bread = Math.random() < .55 ? 'beyaz' : 'tahilli'; order.breadRiddle = S.day >= 3 && Math.random() < .35; }
+  if (!order.tutorial && !order.phone && S.day >= 2 && cust.special !== 'rival2' && Math.random() < .3) {
     const fits = (DRINK_FIT[order.dish] || Object.keys(DRINKS)).filter(k => !(cust.diet === 'vegan' && k === 'ayran'));
     if (fits.length) { order.drink = fits.includes('cay') && (weatherOf(S.day) !== 'acik' || order.dish === 'gozleme') && Math.random() < .6 ? 'cay' : pick(fits); order.drinkRiddle = S.day >= 3 && Math.random() < .5; }
+  }
+  if (!order.tutorial && !order.phone && (order.drink === 'cay' || ['menemen', 'tofumenemen', 'borek'].includes(order.dish)) && Math.random() < .45) {
+    const av = Object.keys(PASTRY).filter(k => pastryLeft(k) > 0 && !(cust.diet === 'vegan' && k === 'pogaca'));
+    if (av.length) { order.pastry = pick(av); order.pastryRiddle = S.day >= 3 && Math.random() < .35; }
   }
   }
   enterCustomer(() => {
@@ -5199,7 +5330,7 @@ function renderPanel() {
   }
   if (phase === 'order') {
     const first = S.day === 1 && S.dayServed === 0 && !order.tutorial;
-    const canAsk = (order.riddle || order.drinkRiddle || order.breadRiddle) && !order.asked;
+    const canAsk = (order.riddle || order.drinkRiddle || order.breadRiddle || order.pastryRiddle) && !order.asked;
     panel.innerHTML = `<p>${first
       ? '<strong>Hoş geldin usta!</strong> Siparişi dinle, mutfakta doğru malzemeleri koy, pişir ve servis et. Tarifini bilmediğin yemek için mutfakta tarif defteri var. Dükkan 19:00\'da kapanıyor.'
       : canAsk ? `<strong>${cust.name}</strong> bilmece gibi konuşuyor. Anlamadıysan sorabilirsin ama memnuniyeti biraz düşer.`
@@ -5260,7 +5391,7 @@ function gicikTick(dt) {
   let o = null;
   for (let i = 0; i < 6 && !o; i++) {
     const c = makeOrder(order.dish, cust.diet);
-    delete c.riddle; c.drink = order.drink; c.drinkRiddle = order.drinkRiddle; c.bread = order.bread; c.breadRiddle = order.breadRiddle; c.asked = order.asked;
+    delete c.riddle; c.drink = order.drink; c.drinkRiddle = order.drinkRiddle; c.bread = order.bread; c.breadRiddle = order.breadRiddle; c.pastry = order.pastry; c.pastryRiddle = order.pastryRiddle; c.asked = order.asked;
     if (!c.fromBatch && c.dish === order.dish && orderPhrase(c) + orderExtras(c) !== orderPhrase(order) + orderExtras(order)) o = c;
   }
   if (!o) { order.changed = true; return; }
@@ -5271,7 +5402,7 @@ function gicikTick(dt) {
   toast(`😤 ${cust.name}: "Usta, fikrimi değiştirdim! ${cap(orderPhrase(o))} olsun.${orderExtras(o)}"`);
 }
 function adaptOrder(dd) {
-  const D = DISH[dd.dough], o = { dish: dd.dough, items: [], easy: true, drink: order.drink, drinkRiddle: order.drinkRiddle, bread: order.bread, breadRiddle: order.breadRiddle, asked: order.asked };
+  const D = DISH[dd.dough], o = { dish: dd.dough, items: [], easy: true, drink: order.drink, drinkRiddle: order.drinkRiddle, bread: order.bread, breadRiddle: order.breadRiddle, pastry: order.pastry, pastryRiddle: order.pastryRiddle, asked: order.asked };
   if (dd.prep) { o.variant = dd.prep.variant; o.fromBatch = true; return o; }
   if (D.kind === 'flat') {
     const types = [...new Set(dd.toppings.map(p => p.type))];
@@ -5471,20 +5602,30 @@ function serve() {
   if (order && order.prep && K && K.dough) { finishPrep(); return; }
   if (phase !== 'order' || !K || !K.dough) return;
   if (order.bread && K.bread === undefined) { openSide('bread'); return; }
+  if (order.pastry && K.pastry === undefined) { openSide('pastry'); return; }
   if (order.drink && K.drink === undefined) { openSide('drink'); return; }
   serveNow();
 }
 // servis öncesi yan seçim: çorbaya ekmek, yemeğe içecek
 function openSide(kind) {
-  const o = order, bread = kind === 'bread', L = bread ? BREADS : DRINKS, riddle = bread ? o.breadRiddle : o.drinkRiddle, want = bread ? o.bread : o.drink;
-  $('#drinkTtl').textContent = bread ? 'Yanına ekmek' : 'Yanına içecek';
+  const o = order, bread = kind === 'bread', pas = kind === 'pastry', L = bread ? BREADS : pas ? PASTRY : DRINKS;
+  const riddle = bread ? o.breadRiddle : pas ? o.pastryRiddle : o.drinkRiddle, want = bread ? o.bread : pas ? o.pastry : o.drink;
+  $('#drinkTtl').textContent = bread ? 'Yanına ekmek' : pas ? 'Yanına simit, poğaça' : 'Yanına içecek';
   $('#drinkQ').textContent = riddle && !o.asked ? `${cust.name} ne demişti? “${L[want].ask[1]}”` : `${cust.name} yanında ${bread ? 'hangi ekmeği' : 'ne'} istemişti?`;
   const row = $('#drinkRow'); row.innerHTML = '';
   for (const k of Object.keys(L)) {
     const b = document.createElement('button'); b.type = 'button'; b.className = 'drink';
-    b.appendChild(iconCanvas(x => bread ? drawBreadSlice(x, k, 56, 40, .95) : drawDrink(x, k, 56, 38, .9)));
-    const sp = document.createElement('span'); sp.textContent = k === 'cay' ? (S.cay > 0 ? `Çay · ${S.cay}` : 'Çay · demlik boş') : L[k].name; b.appendChild(sp);
+    b.appendChild(iconCanvas(x => bread ? drawBreadSlice(x, k, 56, 40, .95) : pas ? drawPastry(x, k, 56, 40, 1.1) : drawDrink(x, k, 56, 38, .9)));
+    const sp = document.createElement('span'); sp.textContent = k === 'cay' ? (S.cay > 0 ? `Çay · ${S.cay}` : 'Çay · demlik boş') : pas ? `${L[k].name} · ${pastryLeft(k) || 'bitti'}` : L[k].name; b.appendChild(sp);
     if (bread) { b.onclick = () => { K.bread = k; $('#drinkScr').hidden = true; sfx.plop(); serve(); }; row.appendChild(b); continue; }
+    if (pas) {
+      b.onclick = () => {
+        if (pastryLeft(k) <= 0) { K.pastry = 'yok'; toast(`${L[k].name} kalmadı!`); }
+        else { K.pastry = k; S.pastry[k]--; }
+        $('#drinkScr').hidden = true; sfx.plop(); serve();
+      };
+      row.appendChild(b); continue;
+    }
     b.onclick = () => {
       if (k === 'cay' && S.cay <= 0) {
         if (!stock('caypaketi')) {
@@ -5504,7 +5645,7 @@ function serveNow() {
   if (phase !== 'order' || !K || !K.dough) return;
   result = evaluate(order.easy && K.dough !== order.dish ? adaptOrder(K) : order, K);
   if (K.drink === 'cay') S.cay = Math.max(0, S.cay - 1);
-  if (K.prep) { K.prep.left--; S.batches = S.batches.filter(b => b.left > 0); }
+  if (K.prep) { K.prep.left -= order.phone ? Math.max(1, Math.min(order.count, K.prep.left)) : 1; S.batches = S.batches.filter(b => b.left > 0); }
   plate = K;
   const reg = cust.regular, bad = cust.diet ? usedTypes(K).filter(t => dietBad(cust.diet, t)) : [];
   let extraLine = '', olay = '';
@@ -5536,7 +5677,7 @@ function serveNow() {
     S.ev.rival2 = true;
     if (result.stars >= 4) { S.rep += 10; extraLine = 'Hmm… İtiraf edeyim, benimkinden güzel olmuş.'; result.notes.push({ t: 'Kâmil bile beğendi, ünün arttı!' }); }
     else { S.rep -= 5; extraLine = 'Hah! Bunu mu övüyorlar? Benim dükkanım daha iyi.'; result.notes.push({ t: 'Kâmil mahallede kötü konuşacak.', bad: true }); }
-  } else if (cust.fid || cust.gicik) {
+  } else if (cust.fid || cust.gicik || cust.kurye) {
     if (cust.gicik && result.total >= .92) { S.stats.gicik5 = true; result.notes.push({ t: `${cust.name} bile güldü, iki kat bahşiş!` }); }
   } else if (result.total >= .85) {
     if (reg) { reg.visits++; reg.fav = order.dish; }
@@ -5558,7 +5699,7 @@ function serveNow() {
   cust.mood = olay ? 'angry' : result.total >= (cust.gicik ? .92 : .85) && !result.issues.length ? 'happy' : result.stars >= 3 ? 'meh' : 'angry';
   const issue = result.issues[0] ? ' ' + result.issues[0].t : '';
   let line = cust.mood === 'happy' ? pick(HAPPY) : (cust.mood === 'meh' ? pick(OK) : pick(BAD)) + issue;
-  if (cust.fid) line = cust.mood === 'happy' ? said(cust.happy) : said(cust.meh, result.issues[0] ? result.issues[0].t : 'Biraz eksik olmuş.');
+  if (cust.fid || cust.kurye) line = cust.mood === 'happy' ? said(cust.happy) : said(cust.meh, result.issues[0] ? result.issues[0].t : 'Biraz eksik olmuş.');
   if (cust.gicik) line = cust.mood === 'happy' ? 'Hıh… Peki, kabul ediyorum, güzel olmuş.' : (cust.mood === 'meh' ? 'Bu mu yani? Neyse…' : 'Rezalet!') + issue;
   if (cust.critic) line = result.stars >= 5 ? 'Mükemmel. Bunu gazetede yazacağım.' : result.stars >= 3 ? 'Hmm. Fena değil, not ettim.' + issue : 'Hayal kırıklığı. Okurlarımı uyarmam gerekecek.' + issue;
   if (result.refund && !cust.polite && !olay) line += ' Paramı geri ver!';
