@@ -765,8 +765,8 @@ const ING = {
   peynir:   { name: 'Beyaz peynir', adj: 'peynirli', target: [8, 16], spacing: 24, cost: .6 },
   ispanak:  { name: 'Ispanak', adj: 'ıspanaklı', target: [8, 16], spacing: 26, cost: .4 },
   patates:  { name: 'Patates', adj: 'patatesli', target: [8, 16], spacing: 24, cost: .4 },
-  maydanoz: { name: 'Maydanoz', adj: 'maydanozlu', target: [6, 12], spacing: 26, cost: .3 },
-  domates:  { name: 'Domates', adj: 'domatesli', target: [5, 10], spacing: 32, cost: .8 },
+  maydanoz: { name: 'Maydanoz', adj: 'maydanozlu', target: [6, 12], spacing: 38, cost: .3 },
+  domates:  { name: 'Domates', adj: 'domatesli', target: [5, 10], spacing: 42, cost: .8 },
   biber:    { name: 'Sivri biber', adj: 'acılı', bolAdj: 'çok acılı', target: [5, 10], spacing: 30, cost: .5 },
   // kase ve tepsi malzemeleri: her dokunuş bir porsiyon ekler
   bulgur:     { name: 'Bulgur', style: 'grain', colors: ['#d9b26a', '#c79a4e', '#e8c98a'], cost: 1, main: true, mix: [212, 170, 100] },
@@ -1413,6 +1413,46 @@ function fit(canvas, lw, lh) {
 
 // ---------- ingredient sprites (500-unit dish space) ----------
 // düz maydanoz yaprağı: tabandan açılan, ucu üç loblu ve dişli; +x yönüne bakar
+// malzemeler hamurun üstünde daha iri görünsün (Egemen: boyutları büyüsün)
+const PIECE_SCALE = { kasar: 1.3, sucuk: 1.3, pastirma: 1.3, peynir: 1.3, ispanak: 1.35, patates: 1.3, biber: 1.4, sogan: 1.4, mantar: 1.4 };
+for (const [t, k] of Object.entries(PIECE_SCALE)) if (ING[t] && ING[t].spacing) ING[t].spacing = Math.round(ING[t].spacing * k);
+// sulu domates dilimi: koyu kabuk, beş çekirdek odası, parlaklık
+function tomSlice(c, R, r) {
+  c.fillStyle = '#b8231a'; circle(c, 0, 0, R); c.fill();
+  c.fillStyle = '#e9472f'; circle(c, 0, 0, R * .88); c.fill();
+  for (let i = 0; i < 5; i++) {
+    const a = i * 1.2566 + .3;
+    c.save(); c.translate(Math.cos(a) * R * .44, Math.sin(a) * R * .44); c.rotate(a);
+    c.fillStyle = '#f9917a'; ellipse(c, 0, 0, R * .3, R * .22); c.fill();
+    c.fillStyle = '#fde9ad'; for (const [sx, sy] of [[-R * .1, -R * .07], [R * .08, R * .06], [R * .12, -R * .08]]) { ellipse(c, sx, sy, R * .075, R * .045, r() * 3); c.fill(); }
+    c.restore();
+  }
+  c.fillStyle = '#f15f45'; circle(c, 0, 0, R * .17); c.fill();
+  c.fillStyle = 'rgba(255,255,255,.4)'; ellipse(c, -R * .42, -R * .5, R * .26, R * .09, -.7); c.fill();
+  c.strokeStyle = '#7e1810'; c.lineWidth = 1.3; circle(c, 0, 0, R); c.stroke();
+}
+function wholeTom(c, x, y, R) {
+  c.save(); c.translate(x, y);
+  const g = c.createRadialGradient(-R * .35, -R * .4, R * .1, 0, 0, R * 1.05); g.addColorStop(0, '#ff7a5c'); g.addColorStop(.55, '#e2372a'); g.addColorStop(1, '#b52218');
+  c.fillStyle = g; c.beginPath(); c.ellipse(0, 0, R * 1.06, R * .92, 0, 0, 6.283); c.fill();
+  c.strokeStyle = '#6e160e'; c.lineWidth = 1.6; c.stroke();
+  c.strokeStyle = 'rgba(120,20,10,.35)'; c.lineWidth = 1.2; c.beginPath(); c.moveTo(-R * .2, -R * .85); c.quadraticCurveTo(-R * .45, 0, -R * .25, R * .8); c.stroke();
+  c.fillStyle = 'rgba(255,255,255,.5)'; ellipse(c, -R * .45, -R * .38, R * .28, R * .12, -.6); c.fill();
+  c.fillStyle = '#3f8f2e'; c.strokeStyle = '#1f5a18'; c.lineWidth = 1;
+  c.beginPath(); for (let i = 0; i < 10; i++) { const a = -1.5708 + i * .6283, rr = i % 2 ? R * .14 : R * .42; c.lineTo(Math.cos(a) * rr, -R * .77 + Math.sin(a) * rr * .45); } c.closePath(); c.fill(); c.stroke();
+  c.fillStyle = '#5b7a2a'; roundRect(c, -1.5, -R * 1.02, 3, R * .25, 1.5); c.fill();
+  c.restore();
+}
+// kıyılmış maydanoz kırıntıları
+function parsleyFlakes(c, R, n, r, k = 1) {
+  for (let i = 0; i < n; i++) {
+    const a = r() * 6.283, d = Math.sqrt(r()) * R, s = (1.5 + r() * 2.1) * k;
+    c.save(); c.translate(Math.cos(a) * d, Math.sin(a) * d); c.rotate(r() * 3);
+    c.fillStyle = ['#2f8a36', '#3fa045', '#267530', '#4caf50'][i % 4];
+    c.beginPath(); c.moveTo(-s, 0); c.lineTo(-s * .3, -s * .8); c.lineTo(s, -s * .3); c.lineTo(s * .6, s * .7); c.lineTo(-s * .5, s * .6); c.closePath(); c.fill();
+    c.restore();
+  }
+}
 function parsleyLeaf(ctx, len, fill, edge) {
   ctx.beginPath(); ctx.moveTo(0, 0);
   for (let i = 0; i <= 16; i++) { const a = -.85 + 1.7 * i / 16, q = len * (.58 + .42 * Math.pow(Math.cos(a * 3.7), 2)) * (i % 2 ? .86 : 1); ctx.lineTo(Math.cos(a) * q, Math.sin(a) * q); }
@@ -1422,6 +1462,7 @@ function parsleyLeaf(ctx, len, fill, edge) {
 function drawPiece(ctx, type, x, y, rot, seed, b = 0) {
   const r = mulberry(seed);
   ctx.save(); ctx.translate(x, y); ctx.rotate(rot);
+  if (PIECE_SCALE[type]) ctx.scale(PIECE_SCALE[type], PIECE_SCALE[type]);
   switch (type) {
     case 'kasar': {
       const melt = clamp((b - 0.3) / 0.3, 0, 1);
@@ -1440,23 +1481,17 @@ function drawPiece(ctx, type, x, y, rot, seed, b = 0) {
       for (let i = 0; i < 5; i++) { circle(ctx, (r() - .5) * 16, (r() - .5) * 16, 1.6 + r() * 1.4); ctx.fill(); }
       break;
     case 'domates':
-      ctx.fillStyle = '#e2412c'; circle(ctx, 0, 0, 15); ctx.fill();
-      ctx.fillStyle = '#f27d5f'; circle(ctx, 0, 0, 10); ctx.fill();
-      ctx.fillStyle = '#fbe2a6';
-      for (let i = 0; i < 4; i++) { const a = i * Math.PI / 2 + .4; ellipse(ctx, Math.cos(a) * 5.5, Math.sin(a) * 5.5, 2.6, 1.6, a); ctx.fill(); }
+      tomSlice(ctx, 20, r);
       break;
     case 'biber':
       ctx.strokeStyle = '#3c9a35'; ctx.lineWidth = 5; circle(ctx, 0, 0, 10); ctx.stroke();
       ctx.strokeStyle = '#256a20'; ctx.lineWidth = 1.5; circle(ctx, 0, 0, 12.6); ctx.stroke();
       ctx.fillStyle = '#f3efc6'; ellipse(ctx, -2, 1, 1.8, 1.1); ctx.fill(); ellipse(ctx, 2.5, -1.5, 1.8, 1.1); ctx.fill();
       break;
-    case 'maydanoz': {
-      // düz yapraklı maydanoz dalı: ince sap, ucunda üç dişli yaprak
-      const sc = .85 + r() * .3; ctx.scale(sc, sc);
-      ctx.strokeStyle = '#5c9a3c'; ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(-14, 9); ctx.quadraticCurveTo(-6, 5, -1, 0); ctx.stroke();
-      for (const [a, len] of [[-1.05, 11], [0, 13.5], [1.05, 11]]) { ctx.save(); ctx.translate(-1, 0); ctx.rotate(a - .5); parsleyLeaf(ctx, len, a ? '#3e9c41' : '#348f38', '#1f6a28'); ctx.restore(); }
+    case 'maydanoz':
+      // ince kıyılmış maydanoz: bir tutam yeşil kırıntı
+      parsleyFlakes(ctx, 20, 26, r, 1.7);
       break;
-    }
     case 'mantar':
       ctx.fillStyle = '#efe2c8'; ctx.beginPath(); ctx.arc(0, 0, 13, Math.PI, 0); ctx.quadraticCurveTo(13, 4, 5, 4); ctx.lineTo(4, 12); ctx.quadraticCurveTo(0, 14, -4, 12); ctx.lineTo(-5, 4); ctx.quadraticCurveTo(-13, 4, -13, 0); ctx.closePath(); ctx.fill();
       ctx.strokeStyle = '#9a7048'; ctx.lineWidth = 2; ctx.stroke();
@@ -1643,6 +1678,8 @@ const lookOf = c => Object.fromEntries(LOOK_KEYS.map(k => [k, c[k]]));
 function makeFriend(id) {
   const f = Object.assign({}, FRIENDS[id], { fid: id, mood: 'idle', seed: Math.random() * 100 });
   if (id === 'egemen') f.glasses = Math.random() < .5 ? 'clear' : 'black';
+  // Tan bazen başka yerde balık ekmek yiyip tok gelir, hafif bir şey ister
+  if (id === 'tan' && Math.random() < .35) { f.full = true; f.fav = TAN_LIGHT; f.hi = TAN_FULL; }
   return f;
 }
 // aynı kişi üst üste gelmesin: son üç müşteriden biri çıkarsa yeniden seçilir
@@ -1687,6 +1724,12 @@ const ZEHRA = { name: 'Zehra Teyze', hair: 'bun', hairColor: '#cfcac4', skin: '#
 const RIFAT = { name: 'Rıfat Amca', hair: 'cap', capColor: '#24385a', hairColor: '#cfcac4', skin: '#d9a57c', skinDark: '#bb8259', shirt: '#d8cba9', mustache: true, glasses: false };
 const HAYRIYE = { name: 'Hayriye Teyze', hair: 'scarf', hairColor: '#8b5a2b', skin: '#f6d2b4', skinDark: '#e2b48f', shirt: '#7a3b5a', scarf: '#7d4fa0', mustache: false, glasses: true };
 // Egemen'in arkadaşları (çizgi karakter olarak)
+const TAN_LIGHT = ['mercimek', 'mantarcorba', 'domatescorba', 'coban', 'ezme', 'haydari', 'humus', 'kisir', 'sutlac', 'helva'];
+const TAN_FULL = [
+  p => `Selam usta! Az önce Karaköy'de balık ekmek yedim, çok aç değilim. Hafif bir şey olsun, ${p} yeter.`,
+  p => `Usta, sahilde balık ekmeği gömdüm geldim, karnım tok. Yine de uğramadan olmaz, ${p} alayım.`,
+  p => `Merhaba! Vapurdan inince dayanamadım, balık ekmek yedim. Şimdi hafif bir şey iyi gider: ${p} olur mu?`,
+];
 const FRIENDS = {
   bilge: { name: 'Bilge', diet: 'vegan', polite: true, pair: 'tan', hair: 'bob', hairColor: '#4a2e1c', skin: '#f6d2b4', skinDark: '#e2b48f', shirt: '#fbf6e8', stripes: '#f2c23a', tee: true, trim: '#f2c23a', necklace: 'beads', mustache: false, glasses: false,
     hi: [p => `Merhaba, kolay gelsin! Rica etsem ${p} hazırlar mısınız? Veganım, içinde hayvansal hiçbir şey olmasın lütfen. Atölyede çömlek çarkından kalkamadım, çok acıktım.`,
@@ -1697,7 +1740,7 @@ const FRIENDS = {
     meh: [i => `Çok naziksiniz, teşekkür ederim. Sadece… ${i}`, i => `Emeğinize sağlık, ama söylemeden edemeyeceğim… ${i}`],
     solo: ['Tan bugün gelemedi, selamı var.', 'Tan işte kaldı, ben yalnız geldim.'],
     olay: t => `Ah… Bunun içinde ${t} var. Veganım demiştim, gerçekten çok üzüldüm. Bunu yiyemem, kusura bakmayın.` },
-  tan: { name: 'Tan', easy: true, pair: 'bilge', hair: 'messy', hairColor: '#4a2e1c', skin: '#eac09a', skinDark: '#d09f75', shirt: '#a9d2ea', stripes: '#7a5534', tee: true, trim: '#7a5534', beard: 'stubble', earring: 'stud', strap: '#24345c', mustache: false, glasses: false,
+  tan: { name: 'Tan', easy: true, fav: ['balikekmek'], pair: 'bilge', hair: 'messy', hairColor: '#4a2e1c', skin: '#eac09a', skinDark: '#d09f75', shirt: '#a9d2ea', stripes: '#7a5534', tee: true, trim: '#7a5534', beard: 'stubble', earring: 'stud', strap: '#24345c', mustache: false, glasses: false,
     hi: [p => `Selam usta! Ne yaparsan yerim, sen bilirsin. Mesela ${p}?`,
       p => `Usta, işten yeni çıktım, kurt gibi açım! ${cap(p)} olur mu?`,
       p => `Naber usta! Bugün kafama göre takılıyorum, ${p} yapsana.`,
@@ -3663,11 +3706,7 @@ const ICON = {
     x.fillStyle = '#d6442a'; x.fillRect(50, 52, 12, 4);
   },
   domates(x) {
-    x.fillStyle = '#e2412c'; circle(x, 42, 41, 18); x.fill();
-    x.fillStyle = 'rgba(255,255,255,.35)'; ellipse(x, 35, 34, 6, 3, -.5); x.fill();
-    x.fillStyle = '#3c8a2c'; for (let i = 0; i < 5; i++) { const a = i / 5 * 6.283; ellipse(x, 42 + Math.cos(a) * 5, 24 + Math.sin(a) * 2.5, 5, 1.8, a); x.fill(); }
-    x.fillStyle = '#e2412c'; circle(x, 79, 45, 13); x.fill(); x.fillStyle = '#f27d5f'; circle(x, 79, 45, 9.5); x.fill();
-    x.fillStyle = '#fbe2a6'; for (let i = 0; i < 4; i++) { const a = i * 1.57 + .4; ellipse(x, 79 + Math.cos(a) * 5, 45 + Math.sin(a) * 5, 2.2, 1.3, a); x.fill(); }
+    wholeTom(x, 40, 40, 20); x.save(); x.translate(82, 46); tomSlice(x, 15, mulberry(5)); x.restore();
   },
   biber(x) {
     for (const [oy, rot] of [[30, -.1], [47, .08]]) {
@@ -4635,17 +4674,10 @@ Object.assign(ICON, {
     bunchTie(x, 24, 44.5, 1.5);
   },
   maydanoz(x) {
-    x.fillStyle = 'rgba(0,0,0,.12)'; ellipse(x, 56, 62, 44, 4); x.fill();
-    const X0 = 12, Y0 = 46, tops = [[-.62, 40], [-.36, 54], [-.1, 64], [.14, 56], [.36, 42]];
-    x.lineCap = 'round';
-    for (const [a, L] of tops) { x.strokeStyle = '#5c9a3c'; x.lineWidth = 1.8; x.beginPath(); x.moveTo(X0, Y0); x.lineTo(X0 + Math.cos(a) * L, Y0 + Math.sin(a) * L); x.stroke(); }
-    tops.forEach(([a, L], i) => {
-      const tx = X0 + Math.cos(a) * L, ty = Y0 + Math.sin(a) * L;
-      for (const [da, len] of [[-.9, 10], [.9, 10], [0, 12]]) { x.save(); x.translate(tx, ty); x.rotate(a + da); parsleyLeaf(x, len, da ? '#3e9c41' : '#348f38', '#1f6a28'); x.restore(); }
-      const mx = X0 + Math.cos(a) * L * .64, my = Y0 + Math.sin(a) * L * .64;
-      x.save(); x.translate(mx, my); x.rotate(a + (i % 2 ? -1 : 1)); parsleyLeaf(x, 8, '#47a64a', '#1f6a28'); x.restore();
-    });
-    bunchTie(x, 21, 45.5, 1.5);
+    x.fillStyle = '#c99556'; roundRect(x, 8, 30, 96, 34, 8); x.fill(); x.strokeStyle = '#8a5b2a'; x.lineWidth = 1.5; x.stroke();
+    x.save(); x.translate(46, 47); x.scale(1.5, .7); parsleyFlakes(x, 16, 70, mulberry(4)); x.restore();
+    x.save(); x.translate(84, 30); x.rotate(-.5); x.strokeStyle = '#5c9a3c'; x.lineWidth = 1.8; x.lineCap = 'round'; x.beginPath(); x.moveTo(-14, 10); x.lineTo(0, 0); x.stroke();
+    for (const [a, len] of [[-1.05, 10], [0, 12.5], [1.05, 10]]) { x.save(); x.rotate(a - .5); parsleyLeaf(x, len, a ? '#3e9c41' : '#348f38', '#1f6a28'); x.restore(); } x.restore();
   },
   salca(x) {
     pasteJar(x, 46, '#b8261a', '#7e130c', 'SALÇA', '#c0392b');
@@ -5112,7 +5144,8 @@ function nextCustomer() {
     order = { dish: 'lahmacun', items: [{ type: 'kiyma', bol: false }, { type: 'maydanoz', bol: false }], slices: 2, tutorial: true };
     tutStep = 0;
   } else {
-  const fav = cust.fav && Math.random() < .6 ? cust.fav.filter(k => canOrder(k, cust.diet)) : [];
+  const fav = cust.fav && (cust.full || Math.random() < .6) ? cust.fav.filter(k => canOrder(k, cust.diet)) : [];
+  if (cust.full && !fav.length) { cust.full = false; cust.hi = FRIENDS.tan.hi; }
   order = makeOrder(fav.length ? pick(fav) : cust.regular && Math.random() < .5 && dishOpen(cust.regular.fav) ? cust.regular.fav : null, cust.diet);
   if (cust.fid || cust.critic) delete order.riddle;
   if (cust.easy) order.easy = true;
