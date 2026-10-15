@@ -1749,6 +1749,8 @@ function makeFriend(id) {
   if (id === 'egemen') f.glasses = Math.random() < .5 ? 'clear' : 'black';
   // Tan bazen başka yerde balık ekmek yiyip tok gelir, hafif bir şey ister
   if (id === 'tan' && Math.random() < .35) { f.full = true; f.fav = TAN_LIGHT; f.hi = TAN_FULL; }
+  // Göksu aynı gün tekrar gelirse başkası için sipariş verir
+  if (FRIENDS[id].again && S.friendsDay && S.friendsDay.day === S.day && ((S.friendsDay.n || {})[id] || 0) > 0) { f.hi = FRIENDS[id].again; f.solo = null; }
   return f;
 }
 // aynı kişi üst üste gelmesin: son üç müşteriden biri çıkarsa yeniden seçilir
@@ -1826,20 +1828,24 @@ const FRIENDS = {
       p => `Merhabalar, kolay gelsin! Seramik atölyesinden geliyorum, ellerim hâlâ çamurlu. ${cap(p)} alabilir miyim? Et olmasın lütfen.`,
       p => `Selam! Bugün canım ${p} çekti. Vejetaryenim, et koymazsanız çok sevinirim.`],
     happy: ['Ellerinize sağlık! Renkleri öyle güzel ki atölyede bir tabağa resmini yapasım geldi.', 'Çok teşekkür ederim, nefis olmuş!',
-      'Tam istediğim gibi, sağ olun! Göksu da buna bayılır.', 'Bu tabak bir sanat eseri gibi, teşekkürler!'],
+      'Tam istediğim gibi, sağ olun! Göksu\'ya da anlatacağım.', 'Bu tabak bir sanat eseri gibi, teşekkürler!'],
     meh: [i => `Teşekkür ederim, çok tatlısınız. Ama… ${i}`, i => `Güzel olmuş aslında, yalnız… ${i}`],
     solo: ['Göksu bugün gelemedi, ona da selam söyleyeyim.', 'Bugün tek başımayım, Göksu işte kaldı.'],
     olay: t => `Bunun içinde ${t} var… Ben vejetaryenim, söylemiştim. Açıkçası çok üzüldüm.` },
   goksu: { name: 'Göksu', pair: 'idil', hair: 'wavyshort', hairColor: '#3b2618', skin: '#f2cba8', skinDark: '#dcae86', shirt: '#1d1d22', collar: '#34343c', earring: 'hoop', mustache: false, glasses: false,
-    hi: [p => `Selam usta, yine ben! ${cap(p)} alabilir miyim?`,
-      p => `Selam usta! Bugün canım ${p} çekti, var mı?`,
+    hi: [p => `Selam usta! Toplantıdan yeni çıktım, biraz soluklanayım dedim. ${cap(p)} alabilir miyim?`,
       p => `Merhabalar! Geçen sefer çok beğendim, bugün de ${p} rica edeceğim.`,
-      p => `Selam selam! İşten çıktım, kafam dağınık. ${cap(p)} iyi gelir.`,
-      p => `Ooo usta, nasılsın? Acele yok, ${p} yapıver.`,
-      p => `Selam! Yolum buradan geçiyordu, uğramadan olmaz. ${cap(p)} lütfen.`,
-      p => `Usta, ben geldim! Bugün ${p} olsun.`],
+      p => `Selam! Yolum buradan geçiyordu, bir merhaba diyeyim dedim. ${cap(p)} lütfen.`,
+      p => `Ooo usta, nasılsın? Asıl sohbete geldim ama ${p} da yaparsan süper olur.`,
+      p => `Selam usta! Akşam konsere gidiyoruz, öncesinde sana uğradım. ${cap(p)} olsun.`,
+      p => `Merhaba! Bugün çok yoğundu, senin dükkanın havası iyi geliyor. ${cap(p)} rica edeyim.`],
+    // aynı gün yeniden uğradığında başkası için alır
+    again: [p => `Tekrar selam usta! Ofistekiler senden bahsettiğimi duyunca onlar da istedi: ${p} paketler misin?`,
+      p => `Yine merhaba! Bu sefer İdil için alıyorum, atölyeden çıkamıyor. ${cap(p)} lütfen.`,
+      p => `Selam! Akşam annemlere gideceğim, eli boş gitmeyeyim: ${p} hazırlar mısın?`,
+      p => `Tekrar ben usta! Alt kattaki komşu teyze rica etti, ona ${p} götüreceğim.`],
     happy: ['Harika, eline sağlık!', 'Süper olmuş, teşekkürler!', 'Ooo, bu çok iyi olmuş. İdil\'e de anlatacağım!',
-      'Bunu yerken her şeyi unuttum, eline sağlık.', 'Tam kıvamında. Ben buranın müdavimi oluyorum galiba!'],
+      'Sunumu bile çok güzel, ellerine sağlık.', 'Dükkan da her geçen gün güzelleşiyor bu arada!'],
     meh: [i => `Fena değil usta, yalnız… ${i}`, i => `Teşekkürler, ama söylemeden edemeyeceğim… ${i}`, i => `Güzel olmuş aslında. Sadece… ${i}`],
     solo: ['İdil bugün atölyede, ben tek geldim.', 'İdil sonra gelirim dedi, ben dayanamadım.'] },
   egemen: { name: 'Egemen', fav: ['sarma', 'manti'], hair: 'short', hairColor: '#141210', skin: '#eac09a', skinDark: '#d09f75', shirt: '#7d8a4e', tee: true, trim: '#22305a', print: 'eye', mustache: false, necklace: 'cord', glasses: 'clear',
@@ -2230,7 +2236,7 @@ function drawShop(ctx, t) {
 
 // yazar kasa. A: esnaf kasası (fiş rulosu, müşteri ekranı), B: nostaljik pirinç kasa
 function drawRegister(ctx, x, y, money, t, st) {
-  ctx.save(); ctx.translate(x, y);
+  ctx.save(); ctx.translate(x, y); ctx.scale(.88, .88);
   ctx.fillStyle = 'rgba(0,0,0,.2)'; ellipse(ctx, 0, 2, 76, 8); ctx.fill();
   const txt = money + '₺';
   if (st === 'B') {
@@ -4634,10 +4640,16 @@ const GREET = [
   (p, h) => `Hayırlı işler ${h}. ${cap(p)} rica ediyorum.`,
   (p, h) => `Selam ${h}! ${cap(p)} olsun, zahmet olmazsa.`,
   (p, h) => `İyi günler ${h}. Kokusu sokağa kadar geliyor! ${cap(p)} alayım.`,
-  (p, h) => `${cap(h)}, öğle arasındayım, ${p} yetişir mi?`,
+  (p, h) => S.time >= 12 * 60 && S.time < 14.5 * 60 ? `${cap(h)}, öğle arasındayım, ${p} yetişir mi?` : `${cap(h)}, acelem var biraz, ${p} yetişir mi?`,
   (p, h) => `Hayırlı olsun ${h}, dükkan çok güzel olmuş. ${cap(p)} rica edeceğim.`,
   (p, h) => `Komşu tavsiye etti ${h}. ${cap(p)} deneyeyim bakalım.`,
-  (p, h) => `Merhabalar! Bugün canım ${p} çekti ${h}.`,
+  (p, h) => `Merhabalar ${h}! Bugün canım ${p} çekti.`,
+  (p, h) => S.time < 12 * 60 ? `Günaydın ${h}! Güne güzel başlayalım: ${p} alabilir miyim?` : S.time >= 17 * 60 ? `İyi akşamlar ${h}! İşten çıktım, ${p} iyi gider.` : `Tünaydın ${h}! ${cap(p)} yapar mısın?`,
+  (p, h) => `Selam ${h}, geçen hafta da gelmiştim, çok beğendim. Bugün ${p} deneyeceğim.`,
+  (p, h) => `Arkadaşlar burayı çok övdü ${h}. ${cap(p)} rica edeyim, bakalım haklılar mı!`,
+  (p, h) => `Pazardan dönüyorum ${h}, ellerim kollarım dolu. ${cap(p)} alayım, oturup dinleneyim.`,
+  (p, h) => `Kolay gelsin ${h}! Vapur kaçtı, bari ${p} yiyeyim.`,
+  (p, h) => `Selamün aleyküm ${h}. ${cap(p)} olsun, bereketli olsun.`,
 ];
 // müşteriler ustaya nasıl seslenir: abla, abi, usta; yaşlılar gençlere evladım der
 function hitap(c) {
@@ -4861,9 +4873,10 @@ function evalFlat(o, d) {
   return finish(o, (top * .5 + bs * .3 + sl * .2) * (ok ? 1 : .25) - extra, issues, ok, d);
 }
 const HAPPY = ['Ellerine sağlık usta, harika olmuş!', 'Mis gibi! Tam istediğim gibi.', 'Oh be, nefis! Yine gelirim.', 'Bu ne güzellik! Afiyetle yerim.',
-  'Annemin yaptığı gibi olmuş, ellerine sağlık!', 'Valla bu mahallenin en iyisi burası.', 'Tadı damağımda kalacak, teşekkürler!', 'Kokusuyla bile doyurdun usta!'];
-const OK = ['Fena değil.', 'İdare eder.', 'Güzel ama tam değil.', 'Yenir, ama daha iyisini yaparsın.', 'Eh işte, bir dahakine.'];
-const BAD = ['Bu ne böyle?!', 'Usta, olmamış bu.', 'Hiç beğenmedim.', 'Bunu ben mi sipariş ettim?!', 'Kusura bakma ama olmamış.'];
+  'Annemin yaptığı gibi olmuş, ellerine sağlık!', 'Valla bu mahallenin en iyisi burası.', 'Tadı damağımda kalacak, teşekkürler!', 'Kokusuyla bile doyurdun usta!',
+  'Bereketli olsun, eline koluna sağlık!', 'Bunu herkese anlatacağım, bak görürsün dükkan dolacak.', 'İşte esnaf lokantası böyle olur!', 'Çocukluğum aklıma geldi, sağ ol usta.'];
+const OK = ['Fena değil.', 'İdare eder.', 'Güzel ama tam değil.', 'Yenir, ama daha iyisini yaparsın.', 'Eh işte, bir dahakine.', 'Emeğine sağlık ama bir şey eksik gibi.', 'Bugün biraz aceleye gelmiş galiba.'];
+const BAD = ['Bu ne böyle?!', 'Usta, olmamış bu.', 'Hiç beğenmedim.', 'Bunu ben mi sipariş ettim?!', 'Kusura bakma ama olmamış.', 'Usta, bugün senin günün değil herhalde.', 'Yazık oldu, çok umutluydum.'];
 
 // ---------- sabah hazırlığı, market, depo ----------
 const batchesOf = k => S.batches.filter(b => b.dish === k && b.left > 0);
@@ -5295,7 +5308,7 @@ function teaGlassPath(ctx) {
 }
 // çay tabağı, kesme şekerler ve kaşıkla birlikte; tabanı (cx, by)
 function drawTeaGlass(ctx, cx, by, s = 1, t = 0, steam = true) {
-  const tst = window.__teaStyle || '0';
+  const tst = window.__teaStyle || 'D';
   if (tst === 'D' || tst === 'E') { drawTeaGlass3(ctx, cx, by, s, t, steam, tst); return; }
   if (tst !== '0') { drawTeaGlass2(ctx, cx, by, s, t, steam, tst); return; }
   ctx.save(); ctx.translate(cx, by); ctx.scale(s, s); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
