@@ -487,6 +487,17 @@ button:focus-visible{outline:3px solid var(--cini);outline-offset:2px}
   .news b{font-size:17px}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.intro-scr{position:fixed;inset:0;z-index:24;background:#140d08;display:flex;align-items:center;justify-content:center}
+.intro-scr canvas{display:block;width:min(100vw,calc(100vh * 16 / 9));aspect-ratio:16/9;height:auto}
+.intro-cap{position:absolute;left:50%;bottom:max(12px,var(--sab));transform:translateX(-50%);width:min(760px,calc(100% - 24px));display:flex;align-items:center;gap:14px;background:rgba(255,250,240,.95);border:3px solid #3a2216;border-radius:18px;padding:8px 10px 8px 16px;box-shadow:0 6px 0 rgba(58,34,22,.35)}
+.intro-cap p{margin:0;flex:1;font-weight:800;font-size:clamp(13px,1.9vw,17px);line-height:1.3;color:#3a2216}
+.intro-cap p.pop{animation:introIn .5s ease both}
+@keyframes introIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.intro-cap .btn{flex:none}
+.intro-dots{position:absolute;top:-16px;left:18px;display:flex;gap:6px}
+.intro-dots i{width:9px;height:9px;border-radius:50%;background:rgba(255,250,240,.45)}
+.intro-dots i.on{background:#ffd66e}
+.intro-skip{position:absolute;top:max(12px,var(--sat));right:max(12px,var(--sar));background:rgba(20,12,6,.55);color:#fffaf0;border:2px solid rgba(255,250,240,.6);border-radius:999px;padding:6px 16px;font:800 14px Nunito,sans-serif;cursor:pointer}
 </style>
 
 <div class="game">
@@ -628,6 +639,11 @@ button:focus-visible{outline:3px solid var(--cini);outline-offset:2px}
   </section>
 </div>
 
+<div class="intro-scr" id="introScr" hidden>
+  <canvas id="introC" aria-label="Açılış sahnesi"></canvas>
+  <button class="intro-skip" id="introSkip" type="button">Geç ›</button>
+  <div class="intro-cap"><div class="intro-dots" id="introDots"></div><p id="introTxt"></p><button class="btn go" id="introNext" type="button">Devam</button></div>
+</div>
 <div class="title-screen" id="titleScr" hidden>
   <div class="awning" aria-hidden="true"></div>
   <div class="floaty" aria-hidden="true"><span style="left:6%;animation-delay:-2s">🥙</span><span style="left:22%;animation-delay:-9s">🍲</span><span style="left:41%;animation-delay:-5s">🫖</span><span style="left:63%;animation-delay:-12s">🥟</span><span style="left:80%;animation-delay:-1s">🍮</span><span style="left:92%;animation-delay:-7s">🧅</span></div>
@@ -2791,31 +2807,74 @@ function drawWindowView(ctx, t) {
     const wx = 292 + ((i * 37 + t * (6 + (i % 3) * 2)) % 156) - 8, wy = 184 + (i % 5) * 10;
     ctx.beginPath(); ctx.moveTo(wx, wy); ctx.quadraticCurveTo(wx + 4, wy - 3, wx + 8, wy); ctx.stroke();
   }
-  // Boğaz köprüsü: kuleler, ana halat, askılar ve tabliye; akşam renkli ışıklar
-  const T1 = 316, T2 = 408, TOP = 100, DECK = 150;
-  const cab = s => (1 - s) * (1 - s) * TOP + 2 * s * (1 - s) * 192 + s * s * TOP;
-  ctx.strokeStyle = N > .5 ? 'rgba(150,160,190,.5)' : 'rgba(232,236,238,.9)'; ctx.lineWidth = .8;
-  for (let s = .04; s < 1; s += .06) { const hx = T1 + (T2 - T1) * s; ctx.beginPath(); ctx.moveTo(hx, cab(s)); ctx.lineTo(hx, DECK); ctx.stroke(); }
-  for (let k = 1; k < 4; k++) { const f = k / 4; ctx.beginPath(); ctx.moveTo(T1 - 26 * f, TOP + 38 * f); ctx.lineTo(T1 - 26 * f, DECK); ctx.stroke(); ctx.beginPath(); ctx.moveTo(T2 + 26 * f, TOP + 38 * f); ctx.lineTo(T2 + 26 * f, DECK); ctx.stroke(); }
-  ctx.strokeStyle = nt('#eef1f2'); ctx.lineWidth = 1.8;
-  ctx.beginPath(); ctx.moveTo(286, TOP + 46); ctx.lineTo(T1, TOP); ctx.quadraticCurveTo((T1 + T2) / 2, 192, T2, TOP); ctx.lineTo(438, TOP + 46); ctx.stroke();
-  ctx.fillStyle = nt('#eceff0'); ctx.fillRect(292, DECK, 140, 4); ctx.fillStyle = nt('#8a969c'); ctx.fillRect(292, DECK + 4, 140, 2);
-  if (N > .2) for (let i = 0; i <= 20; i++) {
-    const s = i / 20, hx = T1 + (T2 - T1) * s;
-    ctx.fillStyle = `hsla(${(t * 45 + i * 14) % 360},90%,66%,${N})`; circle(ctx, hx, cab(s), 1.2); ctx.fill();
-    ctx.fillStyle = `rgba(255,220,140,${N * .9})`; circle(ctx, 292 + i * 7, DECK + 1, .8); ctx.fill();
-  }
-  for (let i = 0; i < 4; i++) {
-    const cx = 292 + ((i * 41 + t * (i % 2 ? 18 : -14)) % 150 + 150) % 150 - 5;
-    ctx.fillStyle = N > .5 ? (i % 2 ? '#ff5a4a' : '#fff2b0') : ['#d6442a', '#f2c14e', '#1d4fa0', '#fff'][i]; ctx.fillRect(cx, DECK - 1.5, 4, 1.8);
-  }
-  for (const tx of [T1, T2]) {
-    ctx.fillStyle = nt('#d9dee1'); ctx.fillRect(tx - 3, TOP - 4, 6, 180 - TOP);
-    ctx.fillStyle = nt('#a7b2b8'); ctx.fillRect(tx + 1, TOP - 4, 2, 180 - TOP);
-    ctx.fillStyle = nt('#c3cbd0'); for (const by of [TOP + 6, TOP + 26, DECK + 8]) ctx.fillRect(tx - 4, by, 8, 2.5);
-    ctx.fillStyle = nt('#e8ecee'); ctx.fillRect(tx - 4, TOP - 6, 8, 3);
-    if (N > .2) { ctx.fillStyle = `rgba(255,60,50,${N * (.6 + .4 * Math.sin(t * 3))})`; circle(ctx, tx, TOP - 7, 1.4); ctx.fill(); }
-    ctx.fillStyle = 'rgba(30,70,100,.25)'; ellipse(ctx, tx, 181, 7, 2); ctx.fill();
+  // açılış sahnesinde Kadıköy'ün gerçek manzarası, oyunda Boğaz köprüsü
+  if ((window.__view || (introState ? 'kule' : 'kopru')) === 'kopru') {
+    // Boğaz köprüsü: kuleler, ana halat, askılar ve tabliye; akşam renkli ışıklar
+    const T1 = 316, T2 = 408, TOP = 100, DECK = 150;
+    const cab = s => (1 - s) * (1 - s) * TOP + 2 * s * (1 - s) * 192 + s * s * TOP;
+    ctx.strokeStyle = N > .5 ? 'rgba(150,160,190,.5)' : 'rgba(232,236,238,.9)'; ctx.lineWidth = .8;
+    for (let s = .04; s < 1; s += .06) { const hx = T1 + (T2 - T1) * s; ctx.beginPath(); ctx.moveTo(hx, cab(s)); ctx.lineTo(hx, DECK); ctx.stroke(); }
+    for (let k = 1; k < 4; k++) { const f = k / 4; ctx.beginPath(); ctx.moveTo(T1 - 26 * f, TOP + 38 * f); ctx.lineTo(T1 - 26 * f, DECK); ctx.stroke(); ctx.beginPath(); ctx.moveTo(T2 + 26 * f, TOP + 38 * f); ctx.lineTo(T2 + 26 * f, DECK); ctx.stroke(); }
+    ctx.strokeStyle = nt('#eef1f2'); ctx.lineWidth = 1.8;
+    ctx.beginPath(); ctx.moveTo(286, TOP + 46); ctx.lineTo(T1, TOP); ctx.quadraticCurveTo((T1 + T2) / 2, 192, T2, TOP); ctx.lineTo(438, TOP + 46); ctx.stroke();
+    ctx.fillStyle = nt('#eceff0'); ctx.fillRect(292, DECK, 140, 4); ctx.fillStyle = nt('#8a969c'); ctx.fillRect(292, DECK + 4, 140, 2);
+    if (N > .2) for (let i = 0; i <= 20; i++) {
+      const s = i / 20, hx = T1 + (T2 - T1) * s;
+      ctx.fillStyle = `hsla(${(t * 45 + i * 14) % 360},90%,66%,${N})`; circle(ctx, hx, cab(s), 1.2); ctx.fill();
+      ctx.fillStyle = `rgba(255,220,140,${N * .9})`; circle(ctx, 292 + i * 7, DECK + 1, .8); ctx.fill();
+    }
+    for (let i = 0; i < 4; i++) {
+      const cx = 292 + ((i * 41 + t * (i % 2 ? 18 : -14)) % 150 + 150) % 150 - 5;
+      ctx.fillStyle = N > .5 ? (i % 2 ? '#ff5a4a' : '#fff2b0') : ['#d6442a', '#f2c14e', '#1d4fa0', '#fff'][i]; ctx.fillRect(cx, DECK - 1.5, 4, 1.8);
+    }
+    for (const tx of [T1, T2]) {
+      ctx.fillStyle = nt('#d9dee1'); ctx.fillRect(tx - 3, TOP - 4, 6, 180 - TOP);
+      ctx.fillStyle = nt('#a7b2b8'); ctx.fillRect(tx + 1, TOP - 4, 2, 180 - TOP);
+      ctx.fillStyle = nt('#c3cbd0'); for (const by of [TOP + 6, TOP + 26, DECK + 8]) ctx.fillRect(tx - 4, by, 8, 2.5);
+      ctx.fillStyle = nt('#e8ecee'); ctx.fillRect(tx - 4, TOP - 6, 8, 3);
+      if (N > .2) { ctx.fillStyle = `rgba(255,60,50,${N * (.6 + .4 * Math.sin(t * 3))})`; circle(ctx, tx, TOP - 7, 1.4); ctx.fill(); }
+      ctx.fillStyle = 'rgba(30,70,100,.25)'; ellipse(ctx, tx, 181, 7, 2); ctx.fill();
+    }
+  } else {
+    // Kadıköy'den görünen manzara: karşıda tarihi yarımadanın kubbe ve minareleri, sağda denizin ortasında Kız Kulesi
+    const sil = mixHex(W.hill0, nt('#5f7282'), .6), lit = N > .2;
+    const mosque = (x, b, s, mins) => {
+      ctx.fillStyle = sil;
+      ctx.fillRect(x - 16 * s, b - 6 * s, 32 * s, 6 * s);
+      for (const dx of [-10, 10]) { ctx.beginPath(); ctx.arc(x + dx * s, b - 6 * s, 5 * s, Math.PI, 0); ctx.fill(); }
+      ctx.fillRect(x - 9 * s, b - 10 * s, 18 * s, 4 * s);
+      ctx.beginPath(); ctx.arc(x, b - 10 * s, 9 * s, Math.PI, 0); ctx.fill();
+      ctx.fillRect(x - .4 * s, b - 22 * s, .8 * s, 3.5 * s);
+      for (const dx of mins) {
+        const mx = x + dx * s, h = 32 * s;
+        ctx.fillStyle = sil; ctx.fillRect(mx - .9 * s, b - h, 1.8 * s, h);
+        ctx.beginPath(); ctx.moveTo(mx - 1.2 * s, b - h); ctx.lineTo(mx, b - h - 6 * s); ctx.lineTo(mx + 1.2 * s, b - h); ctx.closePath(); ctx.fill();
+        ctx.fillRect(mx - 1.6 * s, b - h * .68, 3.2 * s, .9 * s);
+        if (lit) { ctx.fillStyle = `rgba(255,224,150,${N})`; ctx.fillRect(mx - 1.6 * s, b - h * .68, 3.2 * s, .9 * s); }
+      }
+    };
+    mosque(330, 156, 1.15, [-21, -18, 18, 21]);
+    mosque(384, 152, .95, [-20, 20]);
+    // Kız Kulesi: kayalık adacık, beyaz yapı, kurşun külahlı kule ve fener
+    const kx = 410, ky = 198;
+    ctx.fillStyle = 'rgba(20,50,70,.22)'; ellipse(ctx, kx, ky + 3, 16, 2.4); ctx.fill();
+    ctx.fillStyle = nt('#8c8f86'); ctx.beginPath(); ctx.moveTo(kx - 15, ky + 2); ctx.quadraticCurveTo(kx - 10, ky - 4, kx, ky - 4); ctx.quadraticCurveTo(kx + 11, ky - 4, kx + 15, ky + 2); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = nt('#f4efe4'); ctx.fillRect(kx - 11, ky - 11, 22, 8);
+    ctx.fillStyle = nt('#d9d0bf'); ctx.fillRect(kx - 11, ky - 4.5, 22, 1.5);
+    ctx.fillStyle = nt('#6f7d86'); ctx.beginPath(); ctx.moveTo(kx - 12, ky - 11); ctx.lineTo(kx + 12, ky - 11); ctx.lineTo(kx + 9, ky - 14); ctx.lineTo(kx - 9, ky - 14); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = nt('#f4efe4'); ctx.fillRect(kx + 1, ky - 30, 7, 19);
+    ctx.fillStyle = nt('#d9d0bf'); ctx.fillRect(kx + 6, ky - 30, 2, 19);
+    ctx.fillStyle = nt('#e9e2d2'); ctx.fillRect(kx, ky - 32, 9, 2.5);
+    ctx.fillStyle = nt('#f4efe4'); ctx.fillRect(kx + 2.2, ky - 36, 4.6, 4);
+    ctx.fillStyle = nt('#6f7d86'); ctx.beginPath(); ctx.moveTo(kx + 1.6, ky - 36); ctx.lineTo(kx + 4.5, ky - 45); ctx.lineTo(kx + 7.4, ky - 36); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = nt('#5d7d95'); for (const wy of [ky - 26, ky - 19]) ctx.fillRect(kx + 3.4, wy, 2.2, 3);
+    for (let i = 0; i < 4; i++) ctx.fillRect(kx - 9 + i * 5, ky - 9, 2.2, 3);
+    if (lit) {
+      ctx.fillStyle = `rgba(255,224,150,${N})`; for (let i = 0; i < 4; i++) ctx.fillRect(kx - 9 + i * 5, ky - 9, 2.2, 3); ctx.fillRect(kx + 3.4, ky - 26, 2.2, 3);
+      const g = ctx.createRadialGradient(kx + 4.5, ky - 34, 1, kx + 4.5, ky - 34, 10); g.addColorStop(0, `rgba(255,230,160,${N * (.7 + .3 * Math.sin(t * 2))})`); g.addColorStop(1, 'rgba(255,230,160,0)');
+      ctx.fillStyle = g; circle(ctx, kx + 4.5, ky - 34, 10); ctx.fill();
+      ctx.fillStyle = `rgba(255,214,110,${N * .3})`; ctx.fillRect(kx - 2, ky + 4, 12, 18);
+    }
   }
   // vapur
   const fx = 292 + ((t * 7) % 196) - 28, fy = 204;
@@ -6623,6 +6682,300 @@ document.addEventListener('gesturestart', e => e.preventDefault());
 try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
 document.addEventListener('keydown', () => Music.start(), { passive: true });
 
+// ---------- açılış sahnesi: yeni oyunda nereye geldiğimizi ve ne yapacağımızı anlatır ----------
+const easeIO = k => k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+const clamp01 = k => Math.max(0, Math.min(1, k));
+function introSky(ctx, h, top, bot) { const g = ctx.createLinearGradient(0, 0, 0, h); g.addColorStop(0, top); g.addColorStop(1, bot); ctx.fillStyle = g; ctx.fillRect(0, 0, 800, h); }
+function introCloud(ctx, x, y, s) {
+  ctx.fillStyle = 'rgba(255,255,255,.85)';
+  for (const [dx, dy, r] of [[0, 0, 16], [18, -8, 20], [40, -2, 17], [58, 4, 12], [26, 6, 15]]) { circle(ctx, x + dx * s, y + dy * s, r * s); ctx.fill(); }
+}
+// karşı kıyıda tarihi yarımada: kubbeler ve minareler, sabah pusunda
+function introSkyline(ctx, base) {
+  ctx.fillStyle = '#a9bccb';
+  ctx.beginPath(); ctx.moveTo(230, base); ctx.quadraticCurveTo(330, base - 34, 450, base - 26); ctx.quadraticCurveTo(600, base - 40, 800, base - 22); ctx.lineTo(800, base); ctx.closePath(); ctx.fill();
+  const mosque = (x, s, mins) => {
+    const b = base - 22 * s;
+    ctx.fillStyle = '#93a9ba';
+    ctx.fillRect(x - 42 * s, b - 4 * s, 84 * s, 26 * s);
+    for (const dx of [-26, 26]) { ctx.beginPath(); ctx.arc(x + dx * s, b - 4 * s, 13 * s, Math.PI, 0); ctx.fill(); }
+    ctx.fillRect(x - 24 * s, b - 14 * s, 48 * s, 10 * s);
+    ctx.beginPath(); ctx.arc(x, b - 14 * s, 22 * s, Math.PI, 0); ctx.fill();
+    ctx.fillRect(x - .8 * s, b - 42 * s, 1.6 * s, 7 * s);
+    for (const dx of mins) {
+      const mx = x + dx * s, h = 76 * s;
+      ctx.fillRect(mx - 2 * s, b + 22 * s - h, 4 * s, h);
+      ctx.fillRect(mx - 3.2 * s, b + 22 * s - h * .72, 6.4 * s, 2 * s);
+      ctx.fillRect(mx - 3.2 * s, b + 22 * s - h * .5, 6.4 * s, 2 * s);
+      ctx.beginPath(); ctx.moveTo(mx - 2.6 * s, b + 22 * s - h); ctx.lineTo(mx, b + 22 * s - h - 14 * s); ctx.lineTo(mx + 2.6 * s, b + 22 * s - h); ctx.closePath(); ctx.fill();
+    }
+  };
+  mosque(420, 1, [-56, -48, 48, 56]);
+  mosque(640, .85, [-54, 54]);
+  ctx.fillStyle = '#93a9ba'; for (const [x, w, h] of [[300, 24, 14], [340, 30, 20], [520, 34, 16], [740, 40, 18], [770, 30, 12]]) ctx.fillRect(x, base - h, w, h);
+}
+// Kadıköy iskelesi: krem cepheli, kemerli pencereli, saat kuleli eski bina
+function introPierBuilding(ctx) {
+  ctx.fillStyle = 'rgba(0,0,0,.12)'; ctx.fillRect(14, 196, 220, 140);
+  ctx.fillStyle = '#f1e6cf'; ctx.fillRect(8, 190, 220, 138);
+  ctx.fillStyle = '#e2d3b4'; ctx.fillRect(8, 300, 220, 28);
+  ctx.fillStyle = '#5d6c79'; ctx.beginPath(); ctx.moveTo(0, 192); ctx.lineTo(28, 160); ctx.lineTo(208, 160); ctx.lineTo(236, 192); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#c9b48d'; ctx.fillRect(2, 188, 232, 6);
+  // kule ve saat
+  ctx.fillStyle = '#f1e6cf'; ctx.fillRect(98, 118, 40, 46);
+  ctx.fillStyle = '#5d6c79'; ctx.beginPath(); ctx.moveTo(92, 120); ctx.lineTo(118, 86); ctx.lineTo(144, 120); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#c9b48d'; ctx.fillRect(94, 118, 48, 4);
+  ctx.fillStyle = '#fffaf0'; circle(ctx, 118, 141, 12); ctx.fill(); ctx.strokeStyle = '#3a2216'; ctx.lineWidth = 1.6; ctx.stroke();
+  ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(118, 141); ctx.lineTo(118, 133); ctx.moveTo(118, 141); ctx.lineTo(124, 143); ctx.stroke();
+  ctx.fillStyle = '#3a2216'; ctx.fillRect(117.5, 80, 1, 7);
+  // kemerli pencereler
+  for (let i = 0; i < 6; i++) {
+    const x = 22 + i * 34;
+    ctx.fillStyle = '#c9b48d'; ctx.beginPath(); ctx.moveTo(x - 2, 290); ctx.lineTo(x - 2, 222); ctx.arc(x + 11, 222, 13, Math.PI, 0); ctx.lineTo(x + 24, 290); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#4f8d9c'; ctx.beginPath(); ctx.moveTo(x, 288); ctx.lineTo(x, 222); ctx.arc(x + 11, 222, 11, Math.PI, 0); ctx.lineTo(x + 22, 288); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.fillRect(x + 3, 214, 4, 70);
+    ctx.strokeStyle = '#f1e6cf'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(x + 11, 212); ctx.lineTo(x + 11, 288); ctx.moveTo(x, 252); ctx.lineTo(x + 22, 252); ctx.stroke();
+  }
+  // tabela
+  ctx.fillStyle = '#16807f'; roundRect(ctx, 58, 196, 120, 18, 4); ctx.fill();
+  ctx.fillStyle = '#fffaf0'; ctx.font = '900 13px Nunito, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('KADIKÖY', 118, 206);
+  // iskele ayakları ve platform
+  ctx.fillStyle = '#6b4a2e'; for (let x = 16; x < 330; x += 26) ctx.fillRect(x, 334, 6, 34);
+  ctx.fillStyle = '#8a6a48'; ctx.fillRect(0, 326, 330, 10);
+  ctx.fillStyle = '#5a3e26'; ctx.fillRect(0, 334, 330, 3);
+}
+// büyük şehir hatları vapuru: sola doğru gelir
+function introFerry(ctx, x, y, s, t) {
+  ctx.save(); ctx.translate(x, y + Math.sin(t * 1.6) * 1.2); ctx.scale(s, s);
+  ctx.fillStyle = 'rgba(255,255,255,.75)'; for (let i = 1; i < 7; i++) { ellipse(ctx, 26 + i * 8, 6 + i * .3, 6 - i * .6, 1.3); ctx.fill(); }
+  ctx.fillStyle = 'rgba(15,45,70,.28)'; ellipse(ctx, 2, 8, 32, 2.6); ctx.fill();
+  ctx.fillStyle = '#23303c'; ctx.beginPath(); ctx.moveTo(-30, -3); ctx.lineTo(28, -3); ctx.lineTo(26, 7); ctx.lineTo(-23, 7); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#c0392b'; ctx.fillRect(-24, 5, 49, 1.4);
+  ctx.fillStyle = '#fbfaf5'; ctx.fillRect(-24, -11, 48, 8); ctx.fillRect(-16, -18, 32, 7);
+  ctx.fillStyle = '#d9d4c7'; ctx.fillRect(-24, -4, 48, 1); ctx.fillRect(-16, -11.5, 32, 1);
+  ctx.fillStyle = '#4f7a96'; for (let i = 0; i < 9; i++) ctx.fillRect(-21 + i * 5.1, -9, 2.8, 3); for (let i = 0; i < 6; i++) ctx.fillRect(-13 + i * 5, -16, 2.6, 2.6);
+  ctx.fillStyle = '#e3b23c'; ctx.fillRect(0, -26, 6, 8); ctx.fillStyle = '#1a1a1a'; ctx.fillRect(0, -27, 6, 2.2);
+  ctx.strokeStyle = '#23303c'; ctx.lineWidth = .5; ctx.beginPath(); ctx.moveTo(-14, -18); ctx.lineTo(-14, -28); ctx.lineTo(12, -18); ctx.stroke();
+  for (let i = 0; i < 3; i++) { const p = ((t * .7 + i / 3) % 1); ctx.fillStyle = `rgba(235,235,235,${.55 * (1 - p)})`; circle(ctx, 3 + p * 10, -30 - p * 14, 2.2 + p * 3.5); ctx.fill(); }
+  ctx.restore();
+}
+function introSea(ctx, top, t) {
+  const sea = ctx.createLinearGradient(0, top, 0, 450); sea.addColorStop(0, '#78afcc'); sea.addColorStop(1, '#2d6c93'); ctx.fillStyle = sea; ctx.fillRect(0, top, 800, 450 - top);
+  ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = 2; ctx.lineCap = 'round';
+  for (let i = 0; i < 26; i++) { const y = top + 10 + (i * 37) % (440 - top), x = (i * 131 + t * (8 + i % 4 * 3)) % 860 - 30, w = 10 + (y - top) * .08; ctx.beginPath(); ctx.moveTo(x, y); ctx.quadraticCurveTo(x + w / 2, y - 3, x + w, y); ctx.stroke(); }
+}
+function introPier(ctx, k, t) {
+  introSky(ctx, 260, '#86c3ea', '#ffe3b6');
+  const sg = ctx.createRadialGradient(560, 150, 8, 560, 150, 110); sg.addColorStop(0, 'rgba(255,244,200,.95)'); sg.addColorStop(.3, 'rgba(255,224,160,.45)'); sg.addColorStop(1, 'rgba(255,224,160,0)');
+  ctx.fillStyle = sg; circle(ctx, 560, 150, 110); ctx.fill(); ctx.fillStyle = '#fff7d9'; circle(ctx, 560, 150, 24); ctx.fill();
+  introCloud(ctx, (180 + t * 6) % 920 - 60, 62, 1.1); introCloud(ctx, (560 + t * 4) % 920 - 60, 40, .8); introCloud(ctx, (820 + t * 5) % 920 - 60, 96, .7);
+  introSkyline(ctx, 252);
+  introSea(ctx, 250, t);
+  ctx.fillStyle = 'rgba(255,240,190,.45)'; for (let i = 0; i < 9; i++) { ctx.fillRect(540 - i * 4 + Math.sin(t * 2 + i) * 6, 256 + i * 9, 40 + i * 8, 2); }
+  introPierBuilding(ctx);
+  ctx.fillStyle = '#2f3a44'; ctx.fillRect(298, 252, 4, 74); ctx.fillRect(293, 322, 14, 5);
+  ctx.beginPath(); ctx.moveTo(291, 252); ctx.lineTo(309, 252); ctx.lineTo(305, 236); ctx.lineTo(295, 236); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#ffe9a8'; ctx.fillRect(296, 239, 8, 12);
+  introFerry(ctx, 860 - easeIO(clamp01(k * 1.15)) * 380, 318, 4.2, t);
+  // ön planda taş rıhtım, babalar ve fener
+  ctx.fillStyle = '#9b8f80'; ctx.fillRect(0, 408, 800, 42); ctx.fillStyle = '#b4a897'; ctx.fillRect(0, 404, 800, 8);
+  ctx.strokeStyle = 'rgba(70,60,50,.35)'; ctx.lineWidth = 1.5; for (let x = 0; x < 800; x += 58) { ctx.beginPath(); ctx.moveTo(x, 412); ctx.lineTo(x, 450); ctx.stroke(); }
+  for (const x of [420, 700]) { ctx.fillStyle = '#2f3a44'; roundRect(ctx, x - 9, 388, 18, 20, 6); ctx.fill(); ctx.fillRect(x - 12, 386, 24, 5); }
+  for (let i = 0; i < 4; i++) {
+    const sp = 34 + i * 9, gx = ((i * 230 + t * sp) % 1000) - 100, gy = 70 + i * 34 + Math.sin(t * 1.2 + i * 2) * 10;
+    drawGull(ctx, gx, gy, 2.6 + i * .6, Math.sin(t * (6 + i) + i), 1);
+  }
+}
+// apartman cephesi: pencereler, panjurlar, küçük balkonlar
+function introFacade(ctx, x, w, top, col, shut, t) {
+  ctx.fillStyle = col; ctx.fillRect(x, top, w, 262 - top);
+  ctx.fillStyle = 'rgba(0,0,0,.08)'; ctx.fillRect(x, top, 4, 262 - top);
+  ctx.fillStyle = mixHex(col, '#ffffff', .35); ctx.fillRect(x - 3, top - 6, w + 6, 8);
+  const cols = Math.max(2, Math.round(w / 64)), cw = w / cols;
+  for (let y = top + 22; y < 230; y += 62) for (let i = 0; i < cols; i++) {
+    const wx = x + i * cw + cw / 2 - 14;
+    ctx.fillStyle = mixHex(col, '#ffffff', .45); ctx.fillRect(wx - 3, y - 3, 34, 46);
+    ctx.fillStyle = '#3d5a6a'; ctx.fillRect(wx, y, 28, 40);
+    ctx.fillStyle = 'rgba(255,255,255,.25)'; ctx.fillRect(wx + 3, y + 3, 5, 34);
+    ctx.fillStyle = shut; ctx.fillRect(wx - 10, y, 9, 40); ctx.fillRect(wx + 29, y, 9, 40);
+    ctx.fillStyle = 'rgba(0,0,0,.15)'; for (let j = 5; j < 40; j += 6) { ctx.fillRect(wx - 10, y + j, 9, 1.4); ctx.fillRect(wx + 29, y + j, 9, 1.4); }
+    if ((i + y) % 3 === 0) {
+      ctx.strokeStyle = '#2f3a44'; ctx.lineWidth = 1.5; ctx.strokeRect(wx - 6, y + 30, 40, 12);
+      for (let j = 0; j < 40; j += 5) { ctx.beginPath(); ctx.moveTo(wx - 6 + j, y + 30); ctx.lineTo(wx - 6 + j, y + 42); ctx.stroke(); }
+      for (let j = 0; j < 3; j++) { ctx.fillStyle = '#b5532c'; ctx.fillRect(wx - 2 + j * 12, y + 22, 8, 8); ctx.fillStyle = '#3c8a3e'; circle(ctx, wx + 2 + j * 12, y + 20, 5); ctx.fill(); ctx.fillStyle = '#e23b4e'; circle(ctx, wx + 1 + j * 12, y + 18, 2.2); ctx.fill(); }
+    }
+  }
+}
+function introAwning(ctx, x, w, y, c1, h = 26) {
+  const n = Math.max(3, Math.round(w / 24));
+  for (let i = 0; i < n; i++) { ctx.fillStyle = i % 2 ? '#fdf7ee' : c1; ctx.fillRect(x + i * w / n, y, w / n + .5, h); ctx.beginPath(); ctx.arc(x + (i + .5) * w / n, y + h, w / n / 2, 0, Math.PI); ctx.fill(); }
+}
+function introShopFront(ctx, x, w, label, c1, inside) {
+  ctx.fillStyle = '#3a2a20'; ctx.fillRect(x, 262, w, 100);
+  ctx.fillStyle = '#2b4a3a'; roundRect(ctx, x + 10, 266, w - 20, 22, 4); ctx.fill();
+  ctx.fillStyle = '#f7e6b5'; ctx.font = '900 14px Nunito, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(label, x + w / 2, 277.5);
+  introAwning(ctx, x + 4, w - 8, 290, c1, 16);
+  ctx.fillStyle = '#ffe8b8'; ctx.fillRect(x + 10, 316, w - 20, 44);
+  inside(ctx, x + 10, 316, w - 20);
+  ctx.strokeStyle = '#3a2a20'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(x + w / 2, 316); ctx.lineTo(x + w / 2, 360); ctx.stroke();
+}
+// ahşap kasalı kırmızı-krem nostaljik Moda tramvayı
+function introTram(ctx, x, y) {
+  ctx.save(); ctx.translate(x, y);
+  ctx.strokeStyle = '#2f3a44'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(60, -112); ctx.lineTo(90, -136); ctx.lineTo(120, -112); ctx.stroke();
+  ctx.fillStyle = 'rgba(0,0,0,.2)'; ellipse(ctx, 90, 4, 100, 5); ctx.fill();
+  ctx.fillStyle = '#2f3a44'; for (const wx of [36, 144]) { circle(ctx, wx, -4, 10); ctx.fill(); }
+  ctx.fillStyle = '#c8322b'; roundRect(ctx, 0, -60, 180, 54, 6); ctx.fill();
+  ctx.fillStyle = '#f4ead2'; roundRect(ctx, 0, -110, 180, 54, 8); ctx.fill();
+  ctx.fillStyle = '#8f231d'; ctx.fillRect(0, -62, 180, 5); ctx.fillRect(0, -112, 180, 4);
+  ctx.fillStyle = '#a32a24'; roundRect(ctx, -4, -118, 188, 10, 5); ctx.fill();
+  ctx.fillStyle = '#5b8aa3'; for (let i = 0; i < 6; i++) { roundRect(ctx, 12 + i * 27, -102, 20, 34, 4); ctx.fill(); }
+  ctx.fillStyle = 'rgba(255,255,255,.3)'; for (let i = 0; i < 6; i++) ctx.fillRect(15 + i * 27, -99, 4, 28);
+  ctx.fillStyle = '#1b1b1b'; roundRect(ctx, 62, -132, 56, 14, 3); ctx.fill();
+  ctx.fillStyle = '#ffd66e'; ctx.font = '900 10px Nunito, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('MODA', 90, -125);
+  ctx.fillStyle = '#fdf7ee'; ctx.font = '900 11px Nunito, sans-serif'; ctx.fillText('T3', 90, -33);
+  ctx.fillStyle = '#ffe9a8'; circle(ctx, 172, -22, 4); ctx.fill();
+  ctx.restore();
+}
+function introStreet(ctx, k, t) {
+  introSky(ctx, 450, '#8cc8ec', '#d9eef8');
+  ctx.save(); ctx.translate(0, -66);
+    introFacade(ctx, 0, 196, 40, '#e8a99e', '#2f7d6d', t);
+  introFacade(ctx, 196, 214, 14, '#f2d48f', '#16807f', t);
+  introFacade(ctx, 410, 200, 56, '#9fd0c3', '#b5532c', t);
+  introFacade(ctx, 610, 190, 28, '#ece0c8', '#5a6fa0', t);
+  // komşular: sahaf, plakçı, kahveci
+  introShopFront(ctx, 8, 180, 'SAHAF', '#2f7d6d', (c, x, y, w) => { const cs = ['#b5532c', '#2f5d8a', '#e3b23c', '#3c8a3e', '#7a3b5a']; for (let i = 0; i < w - 8; i += 7) { c.fillStyle = cs[(i / 7) % 5]; c.fillRect(x + 4 + i, y + 14 + (i % 3) * 2, 5, 28 - (i % 3) * 2); } c.fillStyle = '#6b4a2e'; c.fillRect(x, y + 41, w, 3); });
+  introShopFront(ctx, 418, 186, 'PLAK & KASET', '#b5532c', (c, x, y, w) => { for (let i = 0; i < 4; i++) { const cx = x + 22 + i * 44; c.fillStyle = '#1b1b1b'; circle(c, cx, y + 22, 15); c.fill(); c.fillStyle = ['#e23b4e', '#e3b23c', '#16807f', '#7a3b5a'][i]; circle(c, cx, y + 22, 5); c.fill(); } });
+  introShopFront(ctx, 616, 178, 'KAHVE', '#5a6fa0', (c, x, y, w) => { c.fillStyle = '#6b4a2e'; c.fillRect(x, y + 30, w, 4); for (let i = 0; i < 5; i++) { c.fillStyle = '#fdf7ee'; c.fillRect(x + 12 + i * 32, y + 18, 10, 12); c.fillStyle = '#8a5a2b'; c.fillRect(x + 13 + i * 32, y + 19, 8, 3); } });
+  // bizim dükkân: kepenk kapalı, tabela boş
+  const sx = 214, sw = 178;
+  ctx.fillStyle = '#3a2a20'; ctx.fillRect(sx - 6, 258, sw + 12, 104);
+  ctx.fillStyle = '#6b4a2e'; roundRect(ctx, sx, 262, sw, 24, 4); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,.18)'; ctx.font = '800 12px Nunito, sans-serif'; ctx.textAlign = 'center'; ctx.fillText('· · ·', sx + sw / 2, 275);
+  introShutter(ctx, sx + 4, 290, sw - 8, 70, 0);
+  ctx.save(); ctx.translate(sx + sw / 2 + 30, 320); ctx.rotate(-.05);
+  ctx.fillStyle = '#fffaf0'; ctx.fillRect(-34, -16, 68, 30); ctx.fillStyle = '#c8322b'; ctx.font = '900 9px Nunito, sans-serif'; ctx.fillText('YAKINDA', 0, -6); ctx.fillText('AÇILIYOR!', 0, 6);
+  ctx.fillStyle = 'rgba(200,190,150,.8)'; ctx.fillRect(-6, -19, 12, 5); ctx.restore();
+  // kaldırım, yol ve tramvay rayları
+  ctx.fillStyle = '#c9c2b6'; ctx.fillRect(0, 362, 800, 22); ctx.strokeStyle = 'rgba(0,0,0,.12)'; ctx.lineWidth = 1; for (let x = 0; x < 800; x += 40) { ctx.beginPath(); ctx.moveTo(x, 362); ctx.lineTo(x, 384); ctx.stroke(); }
+  ctx.fillStyle = '#9a9085'; ctx.fillRect(0, 384, 800, 4);
+  ctx.fillStyle = '#8a8178'; ctx.fillRect(0, 388, 800, 140);
+  ctx.fillStyle = 'rgba(0,0,0,.12)'; for (let y = 392; y < 520; y += 9) for (let x = (y % 2) * 8; x < 800; x += 16) { roundRect(ctx, x, y, 14, 7, 3); ctx.fill(); }
+  ctx.fillStyle = '#5c5650'; ctx.fillRect(0, 410, 800, 3); ctx.fillRect(0, 424, 800, 3);
+  ctx.strokeStyle = '#2f3a44'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(0, 294); ctx.lineTo(800, 294); ctx.stroke();
+  drawCat(ctx, sx + 40, 372, 1.15, t, 'sit');
+  const tk = clamp01(k / .62); if (tk > 0 && tk < 1) introTram(ctx, -220 + easeIO(tk) * 1240, 418);
+  ctx.restore();
+  for (let i = 0; i < 2; i++) drawGull(ctx, ((i * 400 + t * 40) % 1000) - 100, 40 + i * 30, 2.4, Math.sin(t * 7 + i), 1);
+}
+// oluklu kepenk; up 0..1 yukarı sarılma oranı
+function introShutter(ctx, x, y, w, h, up) {
+  const hh = h * (1 - up);
+  ctx.fillStyle = '#7d8790'; ctx.fillRect(x, y, w, hh);
+  for (let j = 0; j < hh; j += 6) { ctx.fillStyle = 'rgba(255,255,255,.18)'; ctx.fillRect(x, y + j, w, 2); ctx.fillStyle = 'rgba(0,0,0,.14)'; ctx.fillRect(x, y + j + 4, w, 1.5); }
+  if (hh > 6) { ctx.fillStyle = '#5c656d'; ctx.fillRect(x, y + hh - 5, w, 5); ctx.fillStyle = '#c4ccd2'; ctx.fillRect(x + w / 2 - 10, y + hh - 4, 20, 3); }
+  ctx.fillStyle = '#5c656d'; ctx.fillRect(x - 3, y - 6, w + 6, 8);
+}
+function introOpen(ctx, k, t) {
+  const up = easeIO(clamp01((k - .1) / .45)), lit = clamp01((k - .5) / .3);
+  ctx.fillStyle = '#f2d48f'; ctx.fillRect(0, 0, 800, 450);
+  ctx.fillStyle = 'rgba(0,0,0,.05)'; for (let y = 0; y < 400; y += 22) ctx.fillRect(0, y, 800, 2);
+  // içerisi: dükkânın kendisi, kapı boşluğundan görünür
+  const ox = 150, oy = 112, ow = 500, oh = 250;
+  ctx.save(); ctx.beginPath(); ctx.rect(ox, oy, ow, oh); ctx.clip();
+  ctx.translate(ox, oy - 8); ctx.scale(ow / 800, ow / 800); introWithCust(null, 0, false, () => drawShop(ctx, t)); ctx.restore();
+  ctx.fillStyle = `rgba(20,12,6,${.65 * (1 - lit)})`; ctx.fillRect(ox, oy, ow, oh);
+  introShutter(ctx, ox, oy, ow, oh, up);
+  // kapı çerçevesi
+  ctx.strokeStyle = '#3a2a20'; ctx.lineWidth = 12; ctx.strokeRect(ox - 6, oy - 6, ow + 12, oh + 12);
+  // tabela: ampuller sırayla yanar
+  ctx.fillStyle = 'rgba(0,0,0,.18)'; roundRect(ctx, 126, 18, 556, 70, 10); ctx.fill();
+  ctx.fillStyle = '#1f4535'; roundRect(ctx, 120, 12, 560, 70, 10); ctx.fill();
+  ctx.strokeStyle = '#c99a3a'; ctx.lineWidth = 3; roundRect(ctx, 128, 20, 544, 54, 6); ctx.stroke();
+  const n = 26;
+  for (let i = 0; i < n; i++) {
+    const on = lit * n > i, p = i / n, bx = p < .5 ? 132 + p * 2 * 536 : 132 + (1 - (p - .5) * 2) * 536, by = p < .5 ? 16 : 78;
+    if (on) { const g = ctx.createRadialGradient(bx, by, 1, bx, by, 9); g.addColorStop(0, 'rgba(255,230,150,.9)'); g.addColorStop(1, 'rgba(255,230,150,0)'); ctx.fillStyle = g; circle(ctx, bx, by, 9); ctx.fill(); }
+    ctx.fillStyle = on ? '#fff3c4' : '#8f8a76'; circle(ctx, bx, by, 3); ctx.fill();
+  }
+  ctx.save(); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  const nm = shopName(); let fs = 34; ctx.font = `900 ${fs}px Nunito, sans-serif`; while (ctx.measureText(nm).width > 510 && fs > 18) { fs -= 2; ctx.font = `900 ${fs}px Nunito, sans-serif`; }
+  if (lit > 0) { ctx.shadowColor = `rgba(255,214,110,${lit})`; ctx.shadowBlur = 16 * lit; }
+  ctx.fillStyle = mixHex('#8f8a76', '#ffd66e', lit); ctx.fillText(nm, 400, 48); ctx.restore();
+  // tente açılır
+  const aw = clamp01((k - .62) / .25);
+  if (aw > 0) { ctx.save(); ctx.translate(0, 88); ctx.scale(1, aw); introAwning(ctx, 136, 528, 0, '#d6442a', 22); ctx.restore(); }
+  // yanlarda sokak lambaları ve saksılar
+  for (const x of [80, 720]) {
+    ctx.fillStyle = '#2f3a44'; ctx.fillRect(x - 3, 140, 6, 40); ctx.fillRect(x - 14, 136, 28, 6);
+    const g = ctx.createRadialGradient(x, 196, 2, x, 196, 40); g.addColorStop(0, `rgba(255,220,140,${.25 + .5 * lit})`); g.addColorStop(1, 'rgba(255,220,140,0)'); ctx.fillStyle = g; circle(ctx, x, 196, 40); ctx.fill();
+    ctx.fillStyle = mixHex('#c9c2b6', '#ffe9a8', lit); roundRect(ctx, x - 12, 180, 24, 30, 6); ctx.fill(); ctx.strokeStyle = '#2f3a44'; ctx.lineWidth = 2; ctx.stroke();
+    ctx.fillStyle = '#b5532c'; ctx.beginPath(); ctx.moveTo(x - 26, 358); ctx.lineTo(x + 26, 358); ctx.lineTo(x + 20, 404); ctx.lineTo(x - 20, 404); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#3c8a3e'; for (let i = -2; i <= 2; i++) { circle(ctx, x + i * 9, 350 - Math.abs(i) * -2, 12); ctx.fill(); }
+    ctx.fillStyle = '#e23b4e'; for (let i = -2; i <= 2; i++) { circle(ctx, x + i * 9 + 3, 344, 3.4); ctx.fill(); }
+  }
+  ctx.fillStyle = '#c9c2b6'; ctx.fillRect(0, 404, 800, 46); ctx.fillStyle = '#b4ab9e'; ctx.fillRect(0, 404, 800, 4);
+  // Sarman kepenk açılınca içeri süzülür
+  // Sarman kepenk açılınca zıplayıp içeri, tezgahın üstüne geçer ve orada kalır
+  const ck = easeIO(clamp01((k - .62) / .22)), tx = ox + CAT_X * ow / 800, ty = oy - 8 + 294 * ow / 800;
+  drawCat(ctx, 520 + (tx - 520) * ck, 412 + (ty - 412) * ck - Math.sin(ck * Math.PI) * 70, 1.4 + (.95 * ow / 800 - 1.4) * ck, t, 'sit');
+}
+// ilk müşteri: Kadıköylü Su içeri girip tezgaha gelir
+function introWithCust(c, x, walking, fn) {
+  const sv = [cust, custX, walk]; cust = c; custX = x; walk = walking ? {} : null;
+  try { fn(); } finally { [cust, custX, walk] = sv; }
+}
+let introGuest = null;
+function introInside(ctx, k, t) {
+  introGuest = introGuest || Object.assign({ skin: SKINS[1][0], skinDark: SKINS[1][1], mustache: false, glasses: false, seed: 3 }, KADIKOY[2], { kadikoy: true });
+  const wk = clamp01((k - .1) / .45); introGuest.mood = wk >= 1 ? 'happy' : 'idle';
+  const z = 1.1 - .1 * easeIO(clamp01(k / .6));
+  ctx.save(); ctx.translate(400, 225); ctx.scale(z, z); ctx.translate(-400, -225);
+  introWithCust(introGuest, 980 - easeIO(wk) * 650, wk > 0 && wk < 1, () => drawShop(ctx, t));
+  if (!catInside()) drawCat(ctx, CAT_X, 294, .95, t, 'sit');
+  ctx.restore();
+}
+const INTRO = [
+  { d: 5.5, draw: introPier, sfx: () => sfx.horn(), txt: () => 'Kadıköy, güzel bir sabah. Vapurdan iniyorsun, martılar seni karşılıyor.' },
+  { d: 5.5, draw: introStreet, sfx: () => sfx.gull(), txt: () => 'Çarşının ortasında küçük bir dükkân var. Uzun zamandır kapalıydı, artık senin!' },
+  { d: 5, draw: introOpen, sfx: () => { noise(1.4, 'bandpass', 900, .05, 3); setTimeout(sfx.bell, 2600); }, txt: () => `Kepengi kaldır, tabelayı yak: ${shopName()} açılıyor!` },
+  { d: 7, draw: introInside, sfx: () => {}, txt: () => 'Müşteriyi dinle, istediğini pişir, sıcak sıcak servis et. Mutlu müşteri ün getirir, ün kasayı doldurur. Hadi, afiyet olsun!' },
+];
+let introState = null;
+function drawIntroFrame(ctx, st, now) {
+  const sc = INTRO[st.i], lt = (now - st.t0) / 1000, k = clamp01(lt / sc.d);
+  sc.draw(ctx, k, now / 1000);
+  if (lt < .45) { ctx.fillStyle = `rgba(16,10,6,${1 - lt / .45})`; ctx.fillRect(0, 0, 800, 450); }
+}
+function introGo(i) {
+  const st = introState; if (!st) return;
+  if (i >= INTRO.length) { introEnd(); return; }
+  st.i = i; st.t0 = performance.now();
+  $('#introTxt').textContent = INTRO[i].txt();
+  $('#introTxt').classList.remove('pop'); void $('#introTxt').offsetWidth; $('#introTxt').classList.add('pop');
+  $('#introDots').innerHTML = INTRO.map((_, j) => `<i class="${j === i ? 'on' : ''}"></i>`).join('');
+  $('#introNext').textContent = i === INTRO.length - 1 ? 'Dükkânı aç' : 'Devam';
+  try { INTRO[i].sfx(); } catch (e) {}
+}
+function introEnd() {
+  const st = introState; if (!st) return;
+  introState = null; $('#introScr').hidden = true; st.done();
+}
+function playIntro(done) {
+  introState = { i: 0, t0: 0, done };
+  $('#introScr').hidden = false; introGo(0);
+  const loop = now => {
+    if (!introState) return;
+    const st = introState, sc = INTRO[st.i];
+    drawIntroFrame(fit($('#introC'), 800, 450), st, now);
+    if ((now - st.t0) / 1000 > sc.d + 1.6 && st.i < INTRO.length - 1) introGo(st.i + 1);
+    requestAnimationFrame(loop);
+  };
+  requestAnimationFrame(loop);
+}
+$('#introNext').onclick = () => { if (introState) introGo(introState.i + 1); };
+$('#introSkip').onclick = () => introEnd();
 // ---------- loop ----------
 let lastT = performance.now(), lastHud = 0, lastAmb = 0, lastAutoSave = 0;
 function frame(now) {
@@ -6660,7 +7013,7 @@ function frameBody(now) {
 // ---------- başlangıç ekranı, kayıt, öğretici ----------
 let begun = false, tutStep = -1, tutCovT = 0, tutCovV = 0;
 const rotOn = () => getComputedStyle($('#rotateHint')).display !== 'none';
-const paused = () => bgOff || rotOn() || !$('#titleScr').hidden || !$('#setScr').hidden || !$('#rewardScr').hidden || !$('#storeScr').hidden || !$('#badgeScr').hidden || !$('#adScr').hidden || !$('#profScr').hidden || !$('#marketScr').hidden;
+const paused = () => bgOff || rotOn() || !$('#introScr').hidden || !$('#titleScr').hidden || !$('#setScr').hidden || !$('#rewardScr').hidden || !$('#storeScr').hidden || !$('#badgeScr').hidden || !$('#adScr').hidden || !$('#profScr').hidden || !$('#marketScr').hidden;
 const toastQ = [];
 function toast(msg) { toastQ.push(msg); if (toastQ.length === 1) showToast(); }
 function showToast() {
@@ -6684,6 +7037,8 @@ function begin() {
   $('#titleScr').hidden = true;
   if (begun) return;
   if (!S.player) { openProfile(true); return; }
+  // yeni oyunda önce açılış sahnesi: nereye geldik, ne yapacağız
+  if (!S.ev.intro && S.day === 1 && !S.dayServed) { playIntro(() => { S.ev.intro = true; save(); begin(); }); return; }
   begun = true; hadSave = true;
   ensureGoal(); checkBadges(); syncReminder();
   if (S.phase !== 'open') { showDayBanner(); openMorning(); }
