@@ -1714,16 +1714,35 @@ function coverage(d) {
 
 // ---------- customers ----------
 const SKINS = [['#f6d2b4', '#e2b48f'], ['#eac09a', '#d09f75'], ['#d9a57c', '#bb8259'], ['#b07a52', '#8f5f3c']];
+// Kadıköylü bohemler: her biri sabit bir tip, numarasıyla seçilir
+const KADIKOY = [
+  { name: 'Mercan', hair: 'bob', hairColor: '#e07aa0', glasses: 'black', necklace: 'beads', shirt: '#7a5a8a', tee: true, trim: '#2b2b30' },
+  { name: 'Bora', hair: 'beret', hairColor: '#d64a2e', beard: 'stubble', strap: '#2b2b30', shirt: '#c9a03c' },
+  { name: 'Su', hair: 'bun', hairColor: '#8a5cc0', earring: 'hoop', necklace: 'beads', shirt: '#3e4a5c', tee: true, trim: '#f4efe2' },
+  { name: 'Arda', hair: 'messy', hairColor: '#2b1d14', beard: 'stubble', jacket: '#7a5a3a', shirt: '#e8dcc4', tee: true, trim: '#7a5a3a' },
+  { name: 'Deniz', hair: 'bob', hairColor: '#3aa6a0', glasses: 'clear', strap: '#c0392b', shirt: '#6b7a3a' },
+  { name: 'Rüzgar', hair: 'long', hairColor: '#5b3a1e', beard: 'stubble', necklace: 'cord', jacket: '#2b2b30', shirt: '#f4efe2', stripes: '#2b2b30', tee: true },
+  { name: 'Ilgaz', hair: 'shoulder', hairColor: '#d64a2e', glasses: 'black', jacket: '#3d5a80', shirt: '#6b7a3a' },
+  { name: 'Kaan', hair: 'wavyshort', hairColor: '#1f1a17', earring: 'hoop', shirt: '#f4efe2', stripes: '#3e4a5c', tee: true, strap: '#e8dcc4' },
+  { name: 'Lale', hair: 'beret', hairColor: '#e07aa0', earring: 'stud', jacket: '#3d5a80', shirt: '#e8dcc4', tee: true },
+  { name: 'Efe', hair: 'messy', hairColor: '#e8c860', earring: 'stud', shirt: '#2b2b30', tee: true, trim: '#c0392b' },
+  { name: 'Ada', hair: 'bun', hairColor: '#5b3a1e', glasses: 'black', strap: '#c0392b', shirt: '#e8dcc4', tee: true, trim: '#2b2b30' },
+  { name: 'Can', hair: 'long', hairColor: '#1f1a17', mustache: true, glasses: 'black', jacket: '#7a2e2e', shirt: '#2b2b30', tee: true },
+];
+// Egemen hangi numaraları seçerse sadece onlar gelir (1'den başlar)
+const KADIKOY_ON = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 const TYPES = [
   { names: ['Ahmet Amca', 'Hüseyin Amca', 'Rıza Amca', 'Kemal Bey', 'Osman Amca'], hair: ['bald', 'cap'], mustache: 1, colors: ['#d8d2c8', '#9a948a'], glasses: .5, shirt: ['#eef1f4', '#efe8d6', '#e2ebf2', '#f3ede0'], dayi: ['#2c4a7a', '#6b4a2f', '#3d5f8a', '#5a5a5a', '#7a3a3a'] },
   { names: ['Ayşe Teyze', 'Fatma Teyze', 'Hatice Hanım', 'Emine Teyze', 'Nermin Hanım'], hair: ['scarf', 'bun', 'bob', 'shoulder', 'scarf', 'bun'], colors: ['#cfcac4', '#9a948a', '#6b4a2f', '#8b5a2b', '#3b2618'], scarf: ['#c2395a', '#3c7a8f', '#7d4fa0', '#d98a1f'], glasses: .4, shirt: ['#7a3b5a', '#2f5d6e', '#8a6a3a'] },
   { names: ['Ceren', 'Elif', 'Selin', 'Defne', 'Melis'], hair: ['long', 'bun'], colors: ['#3b2618', '#7a4a22', '#c98b3c', '#1f1a17'], glasses: .25, shirt: ['#e07a5f', '#3d8b8b', '#f2b134', '#8f6bb3'] },
+  // Kadıköylü bohemler: boyalı saç, kalın çerçeve gözlük, bez çanta, küpe, kolye
+  { names: KADIKOY.map(k => k.name), kadikoy: true, hair: ['messy'], colors: ['#2b1d14'], glasses: 0, shirt: ['#3e4a5c'] },
   { names: ['Mehmet', 'Onur', 'Emre', 'Burak', 'Kerem'], hair: ['short'], colors: ['#2b1d14', '#5b3a1e', '#1a1a1a'], mustache: .25, glasses: .3, shirt: ['#2f7d4f', '#c7462e', '#36558f', '#e3a23b'] },
 ];
 // amcalar vegan ya da vejetaryen gelmez; eski kayıtlarda öyle kalmış müdavimler de düzelir
 const noDiet = name => TYPES[0].names.includes(name);
 for (const r of S.regulars) if (r.look && noDiet(r.look.name)) delete r.look.diet;
-const LOOK_KEYS = ['name', 'hair', 'hairColor', 'skin', 'skinDark', 'shirt', 'scarf', 'mustache', 'glasses', 'diet', 'stripes', 'glassArt', 'tee', 'trim', 'jacket', 'strap', 'print', 'beard', 'earring', 'necklace', 'collar', 'bowtie', 'vstripes', 'pocket'];
+const LOOK_KEYS = ['name', 'hair', 'hairColor', 'skin', 'skinDark', 'shirt', 'scarf', 'mustache', 'glasses', 'diet', 'stripes', 'glassArt', 'tee', 'trim', 'jacket', 'strap', 'print', 'beard', 'earring', 'necklace', 'collar', 'bowtie', 'vstripes', 'pocket', 'kadikoy'];
 const lookOf = c => Object.fromEntries(LOOK_KEYS.map(k => [k, c[k]]));
 function makeFriend(id) {
   const f = Object.assign({}, FRIENDS[id], { fid: id, mood: 'idle', seed: Math.random() * 100 });
@@ -1743,6 +1762,7 @@ function makeCustomer() {
   return c;
 }
 const OFTEN = ['goksu', 'egemen'];
+const KADIKOY_HI = ['Moda sahilinden yürüye yürüye geldim. ', 'Bahariye\'de konser bitti, karnım zil çalıyor. ', 'Plakçıları gezdim, şimdi bir şeyler yiyeyim. ', 'Yeldeğirmeni\'ndeki atölyeden çıktım, acıktım. ', 'Boğa\'nın orada buluştuk, ilk durak burası. ', 'Vapurla karşıdan geçtim, kokusu iskeleye kadar geliyor. ', 'Sahafta kitap bakıyordum, burnuma bu koku geldi. ', 'Kadıköy\'de böyle esnaf lokantası kalmadı, iyi ki varsın. '];
 function makeCustomerOnce() {
   if (!S.friendsDay || S.friendsDay.day !== S.day) S.friendsDay = { day: S.day, ids: [] };
   // Göksu ve Egemen dükkanın en sık gelen müşterileri: günde üç kereye kadar uğrarlar
@@ -1765,7 +1785,7 @@ function makeCustomerOnce() {
   if (S.day >= 2 && S.ev.gicikDay !== S.day && Math.random() < .1) { return Object.assign({}, pick(GICIK), { mood: 'idle', seed: Math.random() * 100 }); }
   if (S.regulars.length && Math.random() < .35) { const r = pick(S.regulars); return Object.assign({}, r.look, { mood: 'idle', seed: Math.random() * 100, regular: r }); }
   const c = makeStranger();
-  if (S.day >= 2 && !noDiet(c.name) && Math.random() < .12) c.diet = Math.random() < .5 ? 'vegan' : 'vejetaryen';
+  if (S.day >= 2 && !noDiet(c.name) && Math.random() < (c.kadikoy ? .35 : .12)) c.diet = Math.random() < .5 ? 'vegan' : 'vejetaryen';
   return c;
 }
 const KAMIL = { name: 'Kebapçı Kâmil', hair: 'chef', hairColor: '#2b1d14', skin: '#eac09a', skinDark: '#d09f75', shirt: '#8f2a1f', scarf: null, mustache: true, glasses: false };
@@ -1849,7 +1869,7 @@ const DIET_SELF = { vegan: 'veganım', vejetaryen: 'vejetaryenim' };
 const DIET_OLAY = [(t, d) => `NE?! Bunun içinde ${t} var! ${cap(d)} olduğumu söyledim! Rezalet! Paramı geri ver, bir daha adım atmam!`, (t, d) => `Usta, sen ciddi misin?! ${cap(t)}! Ben ${DIET_SELF[d]} dedim! Herkes duysun, bu lokantada ${d} müşteriye ${t} yediriyorlar!`];
 function makeStranger() {
   const T = pick(TYPES), sk = pick(SKINS), free = T.names.filter(n => !S.regulars.some(r => r.look.name === n));
-  return {
+  const c = {
     name: pick(free.length ? free : T.names), hair: pick(T.hair), hairColor: pick(T.colors), skin: sk[0], skinDark: sk[1],
     shirt: pick(T.shirt), scarf: T.scarf ? pick(T.scarf) : null,
     mustache: Math.random() < (T.mustache || 0), glasses: Math.random() < T.glasses,
@@ -1857,6 +1877,11 @@ function makeStranger() {
     vstripes: T.dayi ? pick(T.dayi) : undefined, pocket: !!T.dayi,
     mood: 'idle', seed: Math.random() * 100,
   };
+  if (T.kadikoy) {
+    const on = KADIKOY.filter((k, i) => KADIKOY_ON.includes(i + 1)), fr = on.filter(k => !S.regulars.some(r => r.look.name === k.name));
+    Object.assign(c, { mustache: false, glasses: false }, pick(fr.length ? fr : on), { kadikoy: true });
+  }
+  return c;
 }
 
 function drawCustomer(ctx, c, x, t, walking) {
@@ -2172,11 +2197,7 @@ function drawShop(ctx, t) {
   if (hasDecor('kilim')) drawKilim(ctx);
   if (isBayram()) drawCandyBowl(ctx, 226, 300);
   // register
-  ctx.fillStyle = '#5a6670'; roundRect(ctx, 40, 260, 140, 42, 10); ctx.fill();
-  ctx.fillStyle = '#3e4850'; roundRect(ctx, 52, 244, 72, 24, 6); ctx.fill();
-  ctx.fillStyle = '#b8e6a8'; ctx.fillRect(57, 248, 62, 15);
-  ctx.fillStyle = '#2a3238'; ctx.font = '800 12px "Nunito", sans-serif'; ctx.textAlign = 'right'; ctx.fillText(S.money + '₺', 116, 260);
-  ctx.fillStyle = '#e8e2d6'; for (let i = 0; i < 4; i++) for (let j = 0; j < 2; j++) { roundRect(ctx, 56 + i * 28, 272 + j * 14, 20, 9, 3); ctx.fill(); }
+  drawRegister(ctx, 110, 302, S.money, t, window.__regStyle || 'A');
   // çay
   drawTeaGlass(ctx, 716, 292, .72, t, true);
   if (catInside()) { const up = cust && !walk; drawCat(ctx, CAT_X - (up ? 0 : 4), 294, up ? .95 : 1.1, t, up ? 'sit' : 'sleep', true); }
@@ -2207,6 +2228,83 @@ function drawShop(ctx, t) {
   }
 }
 
+// yazar kasa. A: esnaf kasası (fiş rulosu, müşteri ekranı), B: nostaljik pirinç kasa
+function drawRegister(ctx, x, y, money, t, st) {
+  ctx.save(); ctx.translate(x, y);
+  ctx.fillStyle = 'rgba(0,0,0,.2)'; ellipse(ctx, 0, 2, 76, 8); ctx.fill();
+  const txt = money + '₺';
+  if (st === 'B') {
+    // ahşap taban ve çekmece
+    ctx.fillStyle = '#7a4a24'; roundRect(ctx, -72, -22, 144, 22, 4); ctx.fill();
+    ctx.fillStyle = '#93602f'; roundRect(ctx, -66, -18, 132, 14, 3); ctx.fill();
+    ctx.fillStyle = '#d9b45a'; ctx.font = '800 7px "Nunito", sans-serif'; ctx.textAlign = 'center'; ctx.fillText('AFİYET OLSUN', 0, -8.5);
+    // pirinç gövde
+    const g = ctx.createLinearGradient(-64, 0, 64, 0);
+    g.addColorStop(0, '#9a6e1e'); g.addColorStop(.3, '#f0cf6a'); g.addColorStop(.55, '#c99a32'); g.addColorStop(1, '#8a5f18');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.moveTo(-64, -22); ctx.lineTo(-56, -58); ctx.lineTo(56, -58); ctx.lineTo(64, -22); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = '#6e4a12'; ctx.lineWidth = 1.5; ctx.stroke();
+    // süslemeler
+    ctx.strokeStyle = 'rgba(110,74,18,.55)'; ctx.lineWidth = 1.2;
+    for (const s of [-1, 1]) { ctx.beginPath(); ctx.arc(s * 50, -40, 6, 0, Math.PI * 1.6); ctx.stroke(); ctx.beginPath(); ctx.arc(s * 50, -40, 2.5, 0, Math.PI * 2); ctx.stroke(); }
+    // tuş sıraları
+    for (let j = 0; j < 3; j++) for (let i = 0; i < 6; i++) {
+      const bx = -34 + i * 13.6 + j * 1.5, by = -50 + j * 9.5;
+      ctx.fillStyle = '#3a2a1a'; circle(ctx, bx, by + 1, 4.3); ctx.fill();
+      ctx.fillStyle = '#f7f1e2'; circle(ctx, bx, by, 3.8); ctx.fill();
+      ctx.fillStyle = '#3a2a1a'; ctx.font = '700 4.5px "Nunito", sans-serif'; ctx.textAlign = 'center'; ctx.fillText((j * 6 + i) % 10, bx, by + 1.6);
+    }
+    // üst kemerli pencere ve rakam levhaları
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.moveTo(-46, -58); ctx.lineTo(-46, -76); ctx.quadraticCurveTo(0, -98, 46, -76); ctx.lineTo(46, -58); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = '#6e4a12'; ctx.lineWidth = 1.5; ctx.stroke();
+    ctx.fillStyle = '#1e1a14'; roundRect(ctx, -38, -80, 76, 18, 3); ctx.fill();
+    ctx.fillStyle = '#fbf3dc'; ctx.font = '800 13px "Nunito", sans-serif'; ctx.textAlign = 'center'; ctx.fillText(txt, 0, -66.5);
+    // kol
+    ctx.strokeStyle = '#8a5f18'; ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(64, -36); ctx.quadraticCurveTo(80, -40, 78, -56); ctx.stroke();
+    ctx.fillStyle = '#5a3a1a'; circle(ctx, 78, -58, 5); ctx.fill();
+    ctx.restore(); return;
+  }
+  // A: krem gövde, eğik tuş takımı
+  ctx.fillStyle = '#d9d3c6'; roundRect(ctx, -70, -22, 140, 22, 5); ctx.fill();
+  ctx.fillStyle = '#c4bdae'; roundRect(ctx, -64, -17, 128, 12, 3); ctx.fill();
+  ctx.fillStyle = '#7d766a'; roundRect(ctx, -6, -13, 12, 4, 2); ctx.fill(); circle(ctx, 52, -11, 2.4); ctx.fill();
+  ctx.fillStyle = '#ece7dc'; ctx.beginPath(); ctx.moveTo(-66, -22); ctx.lineTo(-58, -50); ctx.lineTo(30, -50); ctx.lineTo(40, -22); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = 'rgba(0,0,0,.15)'; ctx.lineWidth = 1; ctx.stroke();
+  ctx.fillStyle = '#4a4f55'; ctx.beginPath(); ctx.moveTo(-58, -25); ctx.lineTo(-52, -47); ctx.lineTo(25, -47); ctx.lineTo(32, -25); ctx.closePath(); ctx.fill();
+  // tuş takımı: eğik panelde düzenli ızgara; solda rakamlar, sağda işlev tuşları, en sağ altta büyük TOPLAM
+  const kp = (u, v) => { const yy = -45 + v * 18, l = -51 + v * 6.5 * 1.0, r = 24 + v * 6.5; return [l + (r - l) * u, yy]; };
+  const key = (u0, v0, u1, v1, col, sh) => {
+    const [ax, ay] = kp(u0, v0), [bx, by2] = kp(u1, v0), [cx2, cy] = kp(u1, v1), [dx, dy] = kp(u0, v1);
+    ctx.fillStyle = sh; ctx.beginPath(); ctx.moveTo(ax, ay + 1); ctx.lineTo(bx, by2 + 1); ctx.lineTo(cx2, cy + 1); ctx.lineTo(dx, dy + 1); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by2); ctx.lineTo(cx2, cy); ctx.lineTo(dx, dy); ctx.closePath(); ctx.fill();
+  };
+  const cols = 6, rows = 4, gu = .02, gv = .06;
+  for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) {
+    if (i === 5 && j >= 2) continue;
+    const u0 = i / cols + gu, u1 = (i + 1) / cols - gu, v0 = j / rows + gv, v1 = (j + 1) / rows - gv;
+    const fn = i >= 4, col = fn ? (i === 4 ? '#f2b134' : '#d6442a') : '#f4f1ea';
+    key(u0, v0, u1, v1, col, 'rgba(0,0,0,.45)');
+  }
+  key(5 / cols + gu, 2 / rows + gv, 1 - gu, 1 - gv, '#3f9a4d', 'rgba(0,0,0,.45)');
+  // fiş yazıcı ve kağıt
+  ctx.fillStyle = '#ece7dc'; roundRect(ctx, 36, -46, 32, 24, 5); ctx.fill(); ctx.strokeStyle = 'rgba(0,0,0,.15)'; ctx.stroke();
+  ctx.fillStyle = '#3a3f45'; ctx.fillRect(40, -44, 24, 3);
+  ctx.fillStyle = '#fffdf6'; ctx.beginPath(); ctx.moveTo(42, -43); ctx.lineTo(62, -43); ctx.lineTo(63, -60); ctx.quadraticCurveTo(66, -66, 60, -68); ctx.lineTo(44, -66); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = 'rgba(0,0,0,.18)'; ctx.stroke();
+  ctx.strokeStyle = 'rgba(80,80,80,.5)'; ctx.lineWidth = 1; for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.moveTo(46, -62 + i * 5); ctx.lineTo(58 - (i % 2) * 4, -62 + i * 5); ctx.stroke(); }
+  // müşteri ekranı
+  ctx.fillStyle = '#7d766a'; ctx.fillRect(-26, -66, 5, 18);
+  ctx.save(); ctx.translate(-23, -70); ctx.rotate(-.06);
+  ctx.fillStyle = '#2f3438'; roundRect(ctx, -34, -14, 68, 22, 5); ctx.fill();
+  const lg = ctx.createLinearGradient(0, -10, 0, 4); lg.addColorStop(0, '#0c2a1a'); lg.addColorStop(1, '#123d26');
+  ctx.fillStyle = lg; roundRect(ctx, -30, -10, 60, 14, 2); ctx.fill();
+  ctx.fillStyle = '#5dff9a'; ctx.shadowColor = '#5dff9a'; ctx.shadowBlur = 4;
+  let fs = 12; ctx.font = `800 ${fs}px "Nunito", sans-serif`; while (ctx.measureText(txt).width > 54 && fs > 7) { fs--; ctx.font = `800 ${fs}px "Nunito", sans-serif`; }
+  ctx.textAlign = 'right'; ctx.fillText(txt, 27, 1.5);
+  ctx.restore();
+  ctx.restore();
+}
 function drawBoxStack(ctx, x, y, k) {
   ctx.fillStyle = 'rgba(0,0,0,.18)'; ellipse(ctx, x, y + 3, 80, 10); ctx.fill();
   for (let i = 0; i < k; i++) {
@@ -2224,20 +2322,63 @@ function drawBoxStack(ctx, x, y, k) {
   }
   if (k) { ctx.fillStyle = '#3a2216'; ctx.font = '800 15px "Baloo 2", sans-serif'; ctx.textAlign = 'left'; ctx.fillText(`${k} kutu`, x + 76, y - 6); }
 }
-function drawDeskPhone(ctx, x, y, t, ringing) {
-  ctx.save(); ctx.translate(x, y);
-  if (ringing) ctx.rotate(Math.sin(t * 40) * .05 * (Math.sin(t * 5) > 0 ? 1 : 0));
-  ctx.fillStyle = 'rgba(0,0,0,.18)'; ellipse(ctx, 0, 4, 40, 7); ctx.fill();
-  ctx.fillStyle = '#b8302a'; ctx.beginPath(); ctx.moveTo(-34, 2); ctx.lineTo(34, 2); ctx.lineTo(26, -26); ctx.lineTo(-26, -26); ctx.closePath(); ctx.fill();
-  ctx.fillStyle = '#efe6d2'; circle(ctx, 0, -12, 11); ctx.fill();
-  ctx.fillStyle = '#b8302a'; for (let i = 0; i < 10; i++) { const a = i / 10 * Math.PI * 2 - 1; circle(ctx, Math.cos(a) * 7, -12 + Math.sin(a) * 7, 1.6); ctx.fill(); }
-  ctx.fillStyle = '#8f1f1a'; circle(ctx, 0, -12, 2.4); ctx.fill();
-  const lift = ringing ? Math.abs(Math.sin(t * 40)) * 2 * (Math.sin(t * 5) > 0 ? 1 : 0) : 0;
-  ctx.fillStyle = '#d23a32'; roundRect(ctx, -36, -36 - lift, 72, 10, 5); ctx.fill();
-  ellipse(ctx, -32, -30 - lift, 9, 7); ctx.fill(); ellipse(ctx, 32, -30 - lift, 9, 7); ctx.fill();
-  ctx.fillStyle = 'rgba(255,255,255,.25)'; roundRect(ctx, -26, -35 - lift, 52, 3, 2); ctx.fill();
+// masa telefonu. A: kırmızı çevirmeli, B: krem tuşlu
+function drawDeskPhone(ctx, x, y, t, ringing, st = window.__phoneStyle || 'B') {
+  const on = ringing && Math.sin(t * 5) > 0, sh = on ? Math.sin(t * 40) : 0, lift = on ? Math.abs(sh) * 2.5 : 0;
+  ctx.save(); ctx.translate(x, y); ctx.rotate(sh * .04);
+  ctx.fillStyle = 'rgba(0,0,0,.2)'; ellipse(ctx, 0, 3, 42, 7); ctx.fill();
+  // kıvrık kordon
+  ctx.strokeStyle = st === 'B' ? '#bdb29a' : '#8f1f1a'; ctx.lineWidth = 2;
+  const cs = st === 'B' ? -1 : 1;
+  ctx.lineWidth = 1.4; ctx.beginPath(); for (let i = 0; i <= 60; i++) { const u = i / 60, px = st === 'B' ? -37 - Math.sin(u * Math.PI) * 9 : 34 + u * 10, py = st === 'B' ? -3 - u * 19 : -4 - Math.sin(u * Math.PI) * 14; const a = i * 1.1; i ? ctx.lineTo(px + Math.cos(a) * 1.8, py + Math.sin(a) * 1.4) : ctx.moveTo(px, py); } ctx.stroke();
+  if (st === 'B') {
+    // krem tuşlu masa telefonu: solda ahize yuvası, sağda eğik tuş takımı
+    const g = ctx.createLinearGradient(0, -30, 0, 2); g.addColorStop(0, '#f4eedd'); g.addColorStop(1, '#d4cab2');
+    ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(-40, 2); ctx.lineTo(40, 2); ctx.quadraticCurveTo(39, -14, 34, -22); ctx.lineTo(-34, -22); ctx.quadraticCurveTo(-39, -14, -40, 2); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = 'rgba(90,80,60,.35)'; ctx.lineWidth = 1; ctx.stroke();
+    ctx.fillStyle = '#bfb49b'; ctx.fillRect(-40, 0, 80, 2.5);
+    // tuş paneli
+    ctx.fillStyle = '#e6dcc5'; ctx.beginPath(); ctx.moveTo(4, -1); ctx.lineTo(36, -1); ctx.lineTo(32, -19); ctx.lineTo(7, -19); ctx.closePath(); ctx.fill();
+    for (let j = 0; j < 4; j++) for (let i = 0; i < 3; i++) {
+      const w = 6.4 + j * .25, x0 = 9.2 - j * .7 + i * (w + 1.6), y0 = -17.4 + j * 4.2;
+      ctx.fillStyle = 'rgba(0,0,0,.25)'; roundRect(ctx, x0, y0 + .7, w, 3.1, 1); ctx.fill();
+      ctx.fillStyle = j === 3 && i !== 1 ? '#c9d7e2' : '#fffdf7'; roundRect(ctx, x0, y0, w, 3.1, 1); ctx.fill();
+    }
+    // ekran ve ışık
+    ctx.fillStyle = '#4f6b5a'; roundRect(ctx, -2, -19, 8, 4, 1); ctx.fill();
+    ctx.fillStyle = on ? '#ff5a46' : '#9c8f74'; circle(ctx, 2, -8, 1.8); ctx.fill();
+    // ahize yuvası
+    ctx.fillStyle = '#d9cfb8'; roundRect(ctx, -36, -24, 34, 9, 4); ctx.fill();
+    // ahize
+    ctx.save(); ctx.translate(-19, -26 - lift);
+    const hg = ctx.createLinearGradient(0, -6, 0, 6); hg.addColorStop(0, '#fbf6ea'); hg.addColorStop(1, '#d9cfb8');
+    const hs = () => { ctx.beginPath(); ctx.moveTo(-24, 5); ctx.lineTo(-24, -1); ctx.quadraticCurveTo(-23, -5, -16, -5); ctx.quadraticCurveTo(0, -8, 16, -5); ctx.quadraticCurveTo(23, -5, 24, -1); ctx.lineTo(24, 5); ctx.quadraticCurveTo(24, 7, 21, 7); ctx.lineTo(13, 7); ctx.quadraticCurveTo(11, 7, 11, 4); ctx.quadraticCurveTo(0, 1, -11, 4); ctx.quadraticCurveTo(-11, 7, -13, 7); ctx.lineTo(-21, 7); ctx.quadraticCurveTo(-24, 7, -24, 5); ctx.closePath(); };
+    ctx.fillStyle = 'rgba(0,0,0,.15)'; ctx.save(); ctx.translate(1, 1.5); hs(); ctx.fill(); ctx.restore();
+    ctx.fillStyle = hg; hs(); ctx.fill();
+    ctx.strokeStyle = 'rgba(110,96,70,.7)'; ctx.lineWidth = 1; hs(); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,.7)'; ellipse(ctx, -2, -5, 12, 1.1); ctx.fill();
+    ctx.restore();
+  } else {
+    const g = ctx.createLinearGradient(-36, -30, 30, 4); g.addColorStop(0, '#e2483e'); g.addColorStop(1, '#9a2420');
+    ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(-36, 2); ctx.lineTo(36, 2); ctx.quadraticCurveTo(34, -18, 24, -27); ctx.lineTo(-24, -27); ctx.quadraticCurveTo(-34, -18, -36, 2); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,.18)'; ctx.beginPath(); ctx.moveTo(-28, -10); ctx.quadraticCurveTo(-26, -22, -18, -25); ctx.lineTo(-14, -25); ctx.quadraticCurveTo(-22, -20, -24, -8); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#7a1a16'; ctx.fillRect(-36, 0, 72, 3);
+    // çevirmeli kadran
+    ctx.fillStyle = '#f6efe0'; ellipse(ctx, 0, -11, 15, 12); ctx.fill();
+    ctx.strokeStyle = '#b5a98f'; ctx.lineWidth = 1; ctx.stroke();
+    ctx.fillStyle = '#c33b31'; ellipse(ctx, 0, -11, 5.5, 4.5); ctx.fill();
+    for (let i = 0; i < 10; i++) { const a = -Math.PI * .35 + i / 10 * Math.PI * 1.6; ctx.fillStyle = '#fffaf0'; circle(ctx, Math.cos(a) * 10.2, -11 + Math.sin(a) * 8.2, 2.3); ctx.fill(); ctx.strokeStyle = '#a99d84'; ctx.lineWidth = .8; ctx.stroke(); }
+    ctx.strokeStyle = '#c9ccd1'; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(12, -4); ctx.lineTo(15, -1); ctx.stroke();
+    // ahize
+    ctx.save(); ctx.translate(0, -30 - lift);
+    ctx.fillStyle = '#c9302a'; ctx.beginPath(); ctx.moveTo(-26, 0); ctx.quadraticCurveTo(0, -9, 26, 0); ctx.lineTo(26, 4); ctx.quadraticCurveTo(0, -4, -26, 4); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#d93a32'; ellipse(ctx, -30, 3, 9, 6.5, -.2); ctx.fill(); ellipse(ctx, 30, 3, 9, 6.5, .2); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,.3)'; ellipse(ctx, -31, 1, 5, 2, -.2); ctx.fill(); ellipse(ctx, 29, 1, 5, 2, .2); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,.22)'; ctx.beginPath(); ctx.moveTo(-20, -2); ctx.quadraticCurveTo(0, -8, 20, -2); ctx.lineTo(20, -1); ctx.quadraticCurveTo(0, -6, -20, -1); ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
   ctx.restore();
-  if (ringing && Math.sin(t * 5) > 0) {
+  if (on) {
     ctx.strokeStyle = '#d6442a'; ctx.lineWidth = 3; ctx.lineCap = 'round';
     for (const s of [-1, 1]) for (const r of [14, 24]) { ctx.beginPath(); ctx.arc(x + s * 34, y - 34, r, s < 0 ? Math.PI * .95 : -Math.PI * .45, s < 0 ? Math.PI * 1.45 : Math.PI * .05); ctx.stroke(); }
   }
@@ -4493,7 +4634,7 @@ const GREET = [
 ];
 // müşteriler ustaya nasıl seslenir: abla, abi, usta; yaşlılar gençlere evladım der
 function hitap(c) {
-  const P = S.player || {}, old = c && (c.hair === 'bald' || c.hair === 'cap' || c.hair === 'scarf');
+  const P = S.player || {}, old = c && (c.hair === 'bald' || c.hair === 'cap' || c.hair === 'scarf' || TYPES[0].names.includes(c.name) || TYPES[1].names.includes(c.name));
   // yaşlılar genç ustaya abi/abla demez; gençler yaşlı ustaya amca/teyze der
   if (old && P.age && P.age < 45) return Math.random() < .6 ? 'evladım' : 'usta';
   const g = P.age >= 55 && !old ? (P.g === 'k' ? 'teyze' : P.g === 'e' ? 'amca' : 'usta') : P.g === 'k' ? 'abla' : P.g === 'e' ? 'abi' : 'usta';
@@ -4989,6 +5130,80 @@ function drawTeapot(x, full) {
   }
 }
 // ince belli çay bardağı: altta tombul gövde, ince bel, yukarı açılan lale ağız
+// ince belli çay bardağı: alt göbek, ince bel, yukarı açılan gövde, hafif dışa dönük ağız
+function teaGlass2Path(ctx) {
+  ctx.beginPath(); ctx.moveTo(-9, 0);
+  ctx.bezierCurveTo(-13.5, -1, -14.5, -9, -12.5, -15);
+  ctx.bezierCurveTo(-11, -19.5, -8.2, -21.5, -8, -25);
+  ctx.bezierCurveTo(-8.3, -34, -11.2, -45, -12.8, -55);
+  ctx.quadraticCurveTo(-13.1, -57, -13.9, -58);
+  ctx.lineTo(13.9, -58); ctx.quadraticCurveTo(13.1, -57, 12.8, -55);
+  ctx.bezierCurveTo(11.2, -45, 8.3, -34, 8, -25);
+  ctx.bezierCurveTo(8.2, -21.5, 11, -19.5, 12.5, -15);
+  ctx.bezierCurveTo(14.5, -9, 13.5, -1, 9, 0); ctx.closePath();
+}
+function drawTeaGlass2(ctx, cx, by, s, t, steam, st) {
+  ctx.save(); ctx.translate(cx, by); ctx.scale(s, s); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  const ink = '#3a2a22';
+  // tabak
+  ctx.fillStyle = 'rgba(0,0,0,.18)'; ellipse(ctx, 1.5, 6, 33, 6.5); ctx.fill();
+  ctx.fillStyle = st === 'C' ? '#e9e2d2' : '#dcd7cd'; ellipse(ctx, 0, 3.8, 32, 7.2); ctx.fill();
+  ctx.fillStyle = '#fffdf8'; ellipse(ctx, 0, 2.4, 32, 7.2); ctx.fill();
+  ctx.strokeStyle = st === 'B' ? ink : '#9a9488'; ctx.lineWidth = st === 'B' ? 1.6 : 1.1; ctx.stroke();
+  if (st === 'B') { ctx.strokeStyle = '#d23a2e'; ctx.lineWidth = 3; ellipse(ctx, 0, 2.4, 27.5, 6); ctx.stroke(); ctx.strokeStyle = '#fffdf8'; ctx.lineWidth = .8; ellipse(ctx, 0, 2.4, 27.5, 6); ctx.stroke(); }
+  else if (st === 'C') {
+    ctx.strokeStyle = '#c9a03c'; ctx.lineWidth = 1.6; ellipse(ctx, 0, 2.4, 30, 6.6); ctx.stroke();
+    ctx.fillStyle = '#2f5fa0'; for (let i = 0; i < 14; i++) { const a = i / 14 * Math.PI * 2; ellipse(ctx, Math.cos(a) * 25, 2.4 + Math.sin(a) * 5.4, 1.8, 1, a); ctx.fill(); }
+    ctx.strokeStyle = '#c9a03c'; ctx.lineWidth = .9; ellipse(ctx, 0, 2.4, 20, 4.4); ctx.stroke();
+  } else { ctx.strokeStyle = '#d4ad4a'; ctx.lineWidth = 1.2; ellipse(ctx, 0, 2.4, 29.5, 6.5); ctx.stroke(); }
+  ctx.fillStyle = 'rgba(0,0,0,.05)'; ellipse(ctx, 0, 1.8, 15, 3.4); ctx.fill();
+  if (st === 'B') for (const [sx, sy] of [[-22, 1], [-17, 4]]) {
+    ctx.fillStyle = '#fff'; ctx.strokeStyle = ink; ctx.lineWidth = 1; roundRect(ctx, sx - 3, sy - 3.5, 6, 6, 1); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#e6e8ea'; ctx.fillRect(sx + 1.5, sy - 3, 1.2, 5);
+  }
+  // kaşık
+  ctx.strokeStyle = '#7d878e'; ctx.lineWidth = 2.4; ctx.beginPath(); ctx.moveTo(16, 3.5); ctx.lineTo(31, -1.5); ctx.stroke();
+  ctx.strokeStyle = '#e4e8eb'; ctx.lineWidth = 1.1; ctx.beginPath(); ctx.moveTo(16, 3.5); ctx.lineTo(31, -1.5); ctx.stroke();
+  ctx.fillStyle = '#d6dbdf'; ellipse(ctx, 13.5, 4.4, 4.4, 2.3, -.35); ctx.fill(); ctx.strokeStyle = '#7d878e'; ctx.lineWidth = .9; ctx.stroke();
+  // cam
+  ctx.save(); teaGlass2Path(ctx); ctx.clip();
+  ctx.fillStyle = 'rgba(236,246,250,.5)'; ctx.fillRect(-18, -60, 36, 61);
+  const lv = -50;
+  ctx.save(); ctx.beginPath(); ctx.rect(-18, lv, 36, -lv - 4.5); ctx.clip();
+  const g = ctx.createLinearGradient(-15, 0, 15, 0);
+  g.addColorStop(0, '#6a1406'); g.addColorStop(.2, '#a32a0c'); g.addColorStop(.45, '#d2491c'); g.addColorStop(.6, '#c94019'); g.addColorStop(.85, '#9a2a0c'); g.addColorStop(1, '#5e1104');
+  ctx.fillStyle = g; ctx.fillRect(-18, lv, 36, 52);
+  const g3 = ctx.createRadialGradient(2, -12, 1, 2, -12, 9); g3.addColorStop(0, 'rgba(255,190,100,.75)'); g3.addColorStop(1, 'rgba(255,140,60,0)');
+  ctx.fillStyle = g3; ctx.fillRect(-18, -26, 36, 24);
+  ctx.fillStyle = 'rgba(40,6,0,.25)'; ctx.fillRect(-18, -25.5, 36, 2.2);
+  ctx.restore();
+  ctx.fillStyle = 'rgba(200,90,50,.25)'; ctx.fillRect(-12, -4.5, 24, 5);
+  ctx.fillStyle = '#b13a12'; ellipse(ctx, 0, lv, 12.3, 2); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,200,150,.75)'; ctx.lineWidth = .9; ctx.beginPath(); ctx.ellipse(0, lv, 12.3, 2, 0, Math.PI, Math.PI * 2); ctx.stroke();
+  // parlamalar
+  ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(-10.6, -52); ctx.bezierCurveTo(-9.2, -44, -7.6, -36, -6.6, -29); ctx.stroke();
+  ctx.lineWidth = 1.8; ctx.beginPath(); ctx.moveTo(-8.6, -17); ctx.bezierCurveTo(-11.4, -13, -11.4, -6, -8.2, -3); ctx.stroke();
+  ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(10.6, -52); ctx.bezierCurveTo(9.4, -44, 8, -37, 7, -30); ctx.stroke();
+  ctx.restore();
+  // dış çizgi
+  ctx.strokeStyle = st === 'B' ? ink : 'rgba(62,82,94,.85)'; ctx.lineWidth = st === 'B' ? 1.8 : 1.2; teaGlass2Path(ctx); ctx.stroke();
+  ctx.lineWidth = .9; ctx.beginPath(); ctx.ellipse(0, -.3, 9, 1.6, 0, 0, Math.PI); ctx.stroke();
+  // ağız
+  ctx.fillStyle = 'rgba(236,246,250,.55)'; ellipse(ctx, 0, -58, 13.9, 2.4); ctx.fill(); ctx.stroke();
+  if (st === 'C') {
+    ctx.strokeStyle = '#d4ad4a'; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(0, -57.4, 13.7, 2.4, 0, 0, Math.PI); ctx.stroke();
+    ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(-8.1, -25); ctx.quadraticCurveTo(0, -23.4, 8.1, -25); ctx.stroke();
+  }
+  ctx.strokeStyle = 'rgba(255,255,255,.9)'; ctx.lineWidth = .9; ctx.beginPath(); ctx.ellipse(0, -57.3, 12.8, 1.8, 0, .15, Math.PI - .15); ctx.stroke();
+  if (steam) for (let i = 0; i < 2; i++) {
+    const o = Math.sin(t * 2 + i * 1.7) * 3, sx = -5 + i * 10;
+    for (const [col, lw] of [['rgba(110,90,80,.12)', 4], ['rgba(255,255,255,.8)', 1.8]]) {
+      ctx.strokeStyle = col; ctx.lineWidth = lw; ctx.beginPath(); ctx.moveTo(sx, -64); ctx.quadraticCurveTo(sx + 4 + o, -71, sx, -77); ctx.quadraticCurveTo(sx - 4 - o, -82, sx + 1, -86); ctx.stroke();
+    }
+  }
+  ctx.restore();
+}
 function teaGlassPath(ctx) {
   ctx.beginPath(); ctx.moveTo(-10, 0);
   ctx.bezierCurveTo(-15, -1.5, -16.6, -12, -12.4, -19.5);
@@ -5002,6 +5217,8 @@ function teaGlassPath(ctx) {
 }
 // çay tabağı, kesme şekerler ve kaşıkla birlikte; tabanı (cx, by)
 function drawTeaGlass(ctx, cx, by, s = 1, t = 0, steam = true) {
+  const tst = window.__teaStyle || '0';
+  if (tst !== '0') { drawTeaGlass2(ctx, cx, by, s, t, steam, tst); return; }
   ctx.save(); ctx.translate(cx, by); ctx.scale(s, s); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
   // tabak
   ctx.fillStyle = 'rgba(0,0,0,.16)'; ellipse(ctx, 1.5, 6.5, 30, 6.5); ctx.fill();
@@ -5469,6 +5686,7 @@ function nextCustomer() {
     let line = cust.hi ? said(cust.hi, orderPhrase(order)) + orderExtras(order) + (cust.solo && !cust.partner && !cust.duo && Math.random() < .5 ? ' ' + said(cust.solo) : '') : intro + (order.riddle || (intro ? `${cap(orderPhrase(order))} alabilir miyim?` : pick(GREET)(orderPhrase(order), hitap(cust)))) + orderExtras(order);
     if (cust.critic) line = `İyi günler. Gurme Fikret, Lezzet Gazetesi. ${cap(orderPhrase(order))} rica edeyim.${orderExtras(order)} Not alacağım, haberiniz olsun.`;
     if (cust.gicik) line = pick(['Of, neyse… ', 'Hıh. ', 'Çabuk ol bakalım! ']) + line;
+    if (cust.kadikoy && !cust.regular && !order.riddle && Math.random() < .6) line = pick(KADIKOY_HI) + line;
     if (catInside() && !cust.critic && !cust.gicik && Math.random() < .18) line += ' ' + pick(CAT_HI);
     if (isBayram() && !cust.critic && !cust.gicik && cust.special !== 'rival2' && Math.random() < .45) line = pick(['İyi bayramlar usta! ', 'Bayramın mübarek olsun! ', 'Hayırlı bayramlar! ']) + line;
     if (cust.diet && !cust.hi) line += ' ' + pick(DIET_HI[cust.diet]);
