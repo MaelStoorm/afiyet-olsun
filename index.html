@@ -73,7 +73,9 @@ button:focus-visible{outline:3px solid var(--cini);outline-offset:2px}
 .chip.mute.off b{opacity:.35;text-decoration:line-through}
 .pat-bar{display:inline-block;width:72px;height:12px;border-radius:99px;background:#ead7bd;border:2px solid var(--ink);overflow:hidden}
 .pat-bar i{display:block;height:100%;width:100%;background:var(--good);transition:width .2s linear}
-.chip.pat b{font-size:15px;line-height:1}
+.chip.pat b{font-size:15px;line-height:1;display:flex;align-items:center}
+.chip.pat b svg{width:22px;height:22px;display:block;filter:drop-shadow(0 1px 1px rgba(0,0,0,.25))}
+.chip.pat.eta i.pat-bar{display:none}
 .chip.pat.low{animation:shake .4s 2}
 .decor-prev{width:100%;max-width:560px;aspect-ratio:16/9;display:block;border-radius:14px;border:3px solid var(--wood-dark);margin:0 auto 10px}
 .upg.using{border-color:var(--cini);background:var(--cini-soft)}
@@ -498,7 +500,7 @@ button:focus-visible{outline:3px solid var(--cini);outline-offset:2px}
       <div class="chip"><span>Saat</span><b id="hClock">11:00</b></div>
       <div class="chip money"><span>Kasa</span><b id="hMoney">0₺</b></div>
       <div class="chip"><span>Ün</span><b id="hRep">50</b></div>
-      <div class="chip pat off" id="patChip" title="Müşterinin sabrı"><span>Sabır</span><i class="pat-bar"><i id="patFill"></i></i><b id="patFace">😊</b></div>
+      <div class="chip pat off" id="patChip" title="Müşterinin sabrı"><span>Sabır</span><i class="pat-bar"><i id="patFill"></i></i><b id="patFace"></b></div>
       <button class="chip mute" id="menuBtn" type="button" aria-label="Menü" title="Menü"><b>☰</b></button>
       <button class="chip mute" id="muteBtn" type="button" aria-label="Sesi kapat" title="Ses"><b id="hMute">🔊</b></button>
       <button class="chip mute" id="musicBtn" type="button" aria-label="Müziği kapat" title="Müzik"><b id="hMusic">🎵</b></button>
@@ -1292,6 +1294,7 @@ function shipHorn(len, f0) {
   } catch (e) {}
 }
 const sfx = {
+  ring: () => { for (let i = 0; i < 2; i++) for (let k = 0; k < 6; k++) setTimeout(() => { tone(1240, .05, 'square', .018); tone(1580, .05, 'square', .014); }, i * 420 + k * 50); },
   plop: () => tone(rnd(380, 540), .07, 'triangle', .05),
   chop: () => { noise(.035, 'bandpass', rnd(2200, 3200), .14, 2); tone(rnd(180, 230), .05, 'triangle', .04); },
   pour: () => { noise(.35, 'lowpass', rnd(700, 1000), .07, 1); noise(.25, 'bandpass', 1800, .02, 3, .05); },
@@ -1563,20 +1566,49 @@ function drawPiece(ctx, type, x, y, rot, seed, b = 0) {
     case 'balik': {
       // ızgara uskumru fileto: hep ekmeğin boyunca yatar
       ctx.rotate(-rot + (rot > Math.PI ? Math.PI : 0) + (r() - .5) * .3);
-      const L = 62, W = 22, body = () => { ctx.beginPath(); ctx.moveTo(-L, 1); ctx.bezierCurveTo(-L + 12, -W, L - 22, -W - 2, L, -3); ctx.quadraticCurveTo(L + 5, 0, L, 3); ctx.bezierCurveTo(L - 22, W, -L + 12, W - 1, -L, 1); ctx.closePath(); };
+      // doğal görünüm: yumuşak renk geçişi, düzensiz kaplan çizgileri, kömür izleri, yağ parlaması
+      const L = 62, W = 21, cb = clamp(b * 1.2, 0, 1);
+      const body = () => {
+        ctx.beginPath(); ctx.moveTo(-L + 4, -W * .8);
+        ctx.bezierCurveTo(-L + 22, -W - 2, L - 30, -W * .85, L - 4, -4);
+        ctx.quadraticCurveTo(L + 3, 0, L - 4, 4);
+        ctx.bezierCurveTo(L - 30, W * .88, -L + 22, W + 2, -L + 4, W * .8);
+        ctx.quadraticCurveTo(-L - 3, 0, -L + 4, -W * .8); ctx.closePath();
+      };
       ctx.fillStyle = 'rgba(60,30,10,.22)'; ctx.save(); ctx.translate(2, 4); body(); ctx.fill(); ctx.restore();
-      body(); ctx.fillStyle = rgb(mix([232, 182, 120], [150, 82, 36], clamp(b * 1.2, 0, 1))); ctx.fill();
-      ctx.save(); ctx.scale(.95, .8); body(); ctx.clip();
+      // kenarda kızarmış et
+      body(); ctx.fillStyle = rgb(mix([222, 172, 110], [146, 84, 38], cb)); ctx.fill();
+      ctx.save(); ctx.scale(.94, .82); body(); ctx.clip();
       const g = ctx.createLinearGradient(0, -W, 0, W);
-      g.addColorStop(0, '#26343e'); g.addColorStop(.42, '#4f6a7c'); g.addColorStop(.62, '#aebcc4'); g.addColorStop(1, '#e6dccb');
+      g.addColorStop(0, rgb(mix([58, 80, 88], [66, 54, 42], cb * .5)));
+      g.addColorStop(.45, rgb(mix([112, 128, 128], [122, 100, 72], cb * .5)));
+      g.addColorStop(.7, rgb(mix([186, 184, 168], [184, 150, 104], cb * .5)));
+      g.addColorStop(1, rgb(mix([214, 204, 182], [198, 160, 110], cb * .5)));
       ctx.fillStyle = g; ctx.fillRect(-L - 4, -W - 4, 2 * L + 10, 2 * W + 8);
-      ctx.strokeStyle = 'rgba(16,24,30,.85)'; ctx.lineWidth = 2.4; ctx.lineCap = 'round';
-      for (let i = 0; i < 11; i++) { const sx = -L + 14 + i * 10.5 + r() * 3; ctx.beginPath(); ctx.moveTo(sx, -W); ctx.quadraticCurveTo(sx + 5, -W * .55, sx + 1, -W * .12); ctx.stroke(); }
-      ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(-L + 10, W * .38); ctx.quadraticCurveTo(0, W * .5, L - 14, W * .3); ctx.stroke();
-      ctx.strokeStyle = `rgba(30,14,4,${.35 + clamp(b, 0, 1) * .35})`; ctx.lineWidth = 5;
-      for (const gx of [-38, -12, 14, 40]) { ctx.beginPath(); ctx.moveTo(gx + 8, -W - 2); ctx.lineTo(gx - 8, W + 2); ctx.stroke(); }
+      // uskumrunun dalgalı koyu çizgileri: sırtta, hafif eğik, uçları yumuşak
+      ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+      for (let i = 0; i < 10; i++) {
+        const sx = -L + 16 + i * 11 + r() * 3, ph = r() * 6, len = .45 + r() * .2;
+        ctx.beginPath();
+        for (let k = 0; k <= 8; k++) { const yy = -W + k / 8 * W * 2 * len, xx = sx + k * 1.1 + Math.sin(ph + k * .75) * 1.6; k ? ctx.lineTo(xx, yy) : ctx.moveTo(xx, yy); }
+        ctx.strokeStyle = 'rgba(22,28,30,.16)'; ctx.lineWidth = 6.5; ctx.stroke();
+        ctx.strokeStyle = 'rgba(22,28,30,.5)'; ctx.lineWidth = 2.6; ctx.stroke();
+      }
+      for (let i = 0; i < 9; i++) {
+        const cx = -L + 10 + r() * (2 * L - 20), cy = (r() - .5) * W * 1.4, rr2 = 4 + r() * 7;
+        const sg = ctx.createRadialGradient(cx, cy, 0, cx, cy, rr2);
+        sg.addColorStop(0, `rgba(48,24,6,${.18 + cb * .25})`); sg.addColorStop(1, 'rgba(48,24,6,0)');
+        ctx.fillStyle = sg; ctx.fillRect(cx - rr2, cy - rr2, rr2 * 2, rr2 * 2);
+      }
+      for (const gx of [-36, -12, 12, 36]) {
+        const ox = (r() - .5) * 4;
+        ctx.strokeStyle = `rgba(70,36,10,${.18 + cb * .2})`; ctx.lineWidth = 7; ctx.beginPath(); ctx.moveTo(gx + ox + 7, -W - 2); ctx.lineTo(gx + ox - 7, W + 2); ctx.stroke();
+        ctx.strokeStyle = `rgba(36,16,4,${.3 + cb * .3})`; ctx.lineWidth = 2.6; ctx.beginPath(); ctx.moveTo(gx + ox + 7, -W - 2); ctx.lineTo(gx + ox - 7, W + 2); ctx.stroke();
+      }
+      ctx.fillStyle = 'rgba(255,250,235,.16)';
+      for (let i = 0; i < 3; i++) { ellipse(ctx, -L + 24 + r() * (2 * L - 50), -W * .3 + r() * W * .4, 9 + r() * 8, 2.4, -.08); ctx.fill(); }
       ctx.restore();
-      body(); ctx.strokeStyle = 'rgba(90,50,20,.55)'; ctx.lineWidth = 1.4; ctx.stroke();
+      body(); ctx.strokeStyle = 'rgba(110,62,24,.4)'; ctx.lineWidth = 1.2; ctx.stroke();
       break;
     }
     case 'marul': {
@@ -1683,15 +1715,15 @@ function coverage(d) {
 // ---------- customers ----------
 const SKINS = [['#f6d2b4', '#e2b48f'], ['#eac09a', '#d09f75'], ['#d9a57c', '#bb8259'], ['#b07a52', '#8f5f3c']];
 const TYPES = [
-  { names: ['Ahmet Amca', 'Hüseyin Amca', 'Rıza Amca', 'Kemal Bey', 'Osman Amca'], hair: ['bald', 'cap'], mustache: 1, colors: ['#d8d2c8', '#9a948a'], glasses: .5, shirt: ['#5b7fa6', '#7b6a4f', '#4f6b52'] },
-  { names: ['Ayşe Teyze', 'Fatma Teyze', 'Hatice Hanım', 'Emine Teyze', 'Nermin Hanım'], hair: ['scarf'], colors: ['#8b5a2b'], scarf: ['#c2395a', '#3c7a8f', '#7d4fa0', '#d98a1f'], glasses: .4, shirt: ['#7a3b5a', '#2f5d6e', '#8a6a3a'] },
+  { names: ['Ahmet Amca', 'Hüseyin Amca', 'Rıza Amca', 'Kemal Bey', 'Osman Amca'], hair: ['bald', 'cap'], mustache: 1, colors: ['#d8d2c8', '#9a948a'], glasses: .5, shirt: ['#eef1f4', '#efe8d6', '#e2ebf2', '#f3ede0'], dayi: ['#2c4a7a', '#6b4a2f', '#3d5f8a', '#5a5a5a', '#7a3a3a'] },
+  { names: ['Ayşe Teyze', 'Fatma Teyze', 'Hatice Hanım', 'Emine Teyze', 'Nermin Hanım'], hair: ['scarf', 'bun', 'bob', 'shoulder', 'scarf', 'bun'], colors: ['#cfcac4', '#9a948a', '#6b4a2f', '#8b5a2b', '#3b2618'], scarf: ['#c2395a', '#3c7a8f', '#7d4fa0', '#d98a1f'], glasses: .4, shirt: ['#7a3b5a', '#2f5d6e', '#8a6a3a'] },
   { names: ['Ceren', 'Elif', 'Selin', 'Defne', 'Melis'], hair: ['long', 'bun'], colors: ['#3b2618', '#7a4a22', '#c98b3c', '#1f1a17'], glasses: .25, shirt: ['#e07a5f', '#3d8b8b', '#f2b134', '#8f6bb3'] },
   { names: ['Mehmet', 'Onur', 'Emre', 'Burak', 'Kerem'], hair: ['short'], colors: ['#2b1d14', '#5b3a1e', '#1a1a1a'], mustache: .25, glasses: .3, shirt: ['#2f7d4f', '#c7462e', '#36558f', '#e3a23b'] },
 ];
 // amcalar vegan ya da vejetaryen gelmez; eski kayıtlarda öyle kalmış müdavimler de düzelir
 const noDiet = name => TYPES[0].names.includes(name);
 for (const r of S.regulars) if (r.look && noDiet(r.look.name)) delete r.look.diet;
-const LOOK_KEYS = ['name', 'hair', 'hairColor', 'skin', 'skinDark', 'shirt', 'scarf', 'mustache', 'glasses', 'diet', 'stripes', 'glassArt', 'tee', 'trim', 'jacket', 'strap', 'print', 'beard', 'earring', 'necklace', 'collar', 'bowtie'];
+const LOOK_KEYS = ['name', 'hair', 'hairColor', 'skin', 'skinDark', 'shirt', 'scarf', 'mustache', 'glasses', 'diet', 'stripes', 'glassArt', 'tee', 'trim', 'jacket', 'strap', 'print', 'beard', 'earring', 'necklace', 'collar', 'bowtie', 'vstripes', 'pocket'];
 const lookOf = c => Object.fromEntries(LOOK_KEYS.map(k => [k, c[k]]));
 function makeFriend(id) {
   const f = Object.assign({}, FRIENDS[id], { fid: id, mood: 'idle', seed: Math.random() * 100 });
@@ -1821,6 +1853,8 @@ function makeStranger() {
     name: pick(free.length ? free : T.names), hair: pick(T.hair), hairColor: pick(T.colors), skin: sk[0], skinDark: sk[1],
     shirt: pick(T.shirt), scarf: T.scarf ? pick(T.scarf) : null,
     mustache: Math.random() < (T.mustache || 0), glasses: Math.random() < T.glasses,
+    // amcalar: dikey çizgili gömlek, cebinde kalem, tam bir Türk dayısı
+    vstripes: T.dayi ? pick(T.dayi) : undefined, pocket: !!T.dayi,
     mood: 'idle', seed: Math.random() * 100,
   };
 }
@@ -1864,9 +1898,11 @@ function drawCustomer(ctx, c, x, t, walking) {
   } else if (c.hair === 'bald' || c.hair === 'cap') {
     ellipse(ctx, -fr + 4, hy - 4, 9, 16); ctx.fill(); ellipse(ctx, fr - 4, hy - 4, 9, 16); ctx.fill();
     if (c.hair === 'cap') {
-      ctx.fillStyle = c.capColor || '#5b4a3a'; ctx.beginPath(); ctx.arc(0, hy - 14, fr + 2, Math.PI, Math.PI * 2); ctx.closePath(); ctx.fill();
-      ellipse(ctx, 20, hy - 14, 52, 10); ctx.fill();
-      ctx.strokeStyle = 'rgba(0,0,0,.2)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-30, hy - 40); ctx.lineTo(30, hy - 40); ctx.stroke();
+      // şapka kaşların üstünde dursun: siper alnın yukarısında
+      ctx.fillStyle = c.capColor || '#5b4a3a'; ctx.beginPath(); ctx.ellipse(0, hy - 26, fr + 2, fr - 8, 0, Math.PI, Math.PI * 2); ctx.closePath(); ctx.fill();
+      ellipse(ctx, 22, hy - 26, 50, 7); ctx.fill();
+      ctx.fillStyle = 'rgba(0,0,0,.18)'; ellipse(ctx, 22, hy - 23, 46, 3); ctx.fill();
+      ctx.strokeStyle = 'rgba(0,0,0,.2)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-30, hy - 50); ctx.lineTo(30, hy - 50); ctx.stroke();
     }
   }
   // face
@@ -1885,8 +1921,9 @@ function drawCustomer(ctx, c, x, t, walking) {
   ctx.strokeStyle = scarfed ? '#5a3a22' : (c.hair === 'bald' || c.hair === 'cap' ? '#8c8478' : c.hairColor);
   ctx.lineWidth = 4; ctx.lineCap = 'round';
   const tilt = m === 'angry' ? 5 : m === 'happy' ? -3 : 0;
-  ctx.beginPath(); ctx.moveTo(-27, eyeY - 14 - tilt); ctx.lineTo(-10, eyeY - 14 + tilt); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(27, eyeY - 14 - tilt); ctx.lineTo(10, eyeY - 14 + tilt); ctx.stroke();
+  const bY = eyeY - (c.hair === 'cap' ? 12 : 14);
+  ctx.beginPath(); ctx.moveTo(-27, bY - tilt); ctx.lineTo(-10, bY + tilt); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(27, bY - tilt); ctx.lineTo(10, bY + tilt); ctx.stroke();
   // nose
   ctx.strokeStyle = c.skinDark; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, hy + 10, 6, Math.PI * .2, Math.PI * .8); ctx.stroke();
   // mouth
@@ -1942,6 +1979,24 @@ function drawTorso(ctx, c, y) {
   ctx.fillStyle = c.shirt; ctx.fill(body);
   ctx.save(); ctx.clip(body);
   if (c.stripes) { ctx.fillStyle = c.stripes; for (let sy = y - 84; sy < y + 60; sy += 20) ctx.fillRect(-90, sy, 180, 8); }
+  if (c.vstripes) {
+    ctx.fillStyle = c.vstripes;
+    for (let sx = -88; sx < 90; sx += 15) { ctx.globalAlpha = .8; ctx.fillRect(sx, y - 96, 3, 160); ctx.globalAlpha = .3; ctx.fillRect(sx + 7, y - 96, 1.2, 160); }
+    ctx.globalAlpha = 1;
+    // düğme patı ve düğmeler
+    ctx.fillStyle = 'rgba(0,0,0,.08)'; ctx.fillRect(-6, y - 80, 12, 140);
+    ctx.strokeStyle = 'rgba(0,0,0,.18)'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(-6, y - 80); ctx.lineTo(-6, y + 60); ctx.moveTo(6, y - 80); ctx.lineTo(6, y + 60); ctx.stroke();
+    for (let by = y - 58; by < y + 50; by += 26) { ctx.fillStyle = '#f7f4ec'; circle(ctx, 0, by, 3.4); ctx.fill(); ctx.strokeStyle = 'rgba(0,0,0,.3)'; ctx.lineWidth = 1; ctx.stroke(); }
+  }
+  if (c.pocket) {
+    // göğüs cebi, cepte tükenmez kalem
+    ctx.fillStyle = '#1f3f8f'; roundRect(ctx, -50, y - 74, 6, 24, 3); ctx.fill(); ctx.fillStyle = '#d8dde3'; ctx.fillRect(-49.4, y - 74, 2, 16);
+    ctx.fillStyle = '#c0392b'; roundRect(ctx, -40, y - 70, 6, 20, 3); ctx.fill();
+    ctx.fillStyle = c.shirt; ctx.beginPath(); ctx.moveTo(-62, y - 58); ctx.lineTo(-24, y - 58); ctx.lineTo(-24, y - 24); ctx.lineTo(-43, y - 18); ctx.lineTo(-62, y - 24); ctx.closePath(); ctx.fill();
+    if (c.vstripes) { ctx.save(); ctx.clip(); ctx.fillStyle = c.vstripes; ctx.globalAlpha = .8; for (let sx = -59; sx < -24; sx += 15) ctx.fillRect(sx, y - 58, 3, 42); ctx.restore(); }
+    ctx.strokeStyle = 'rgba(0,0,0,.3)'; ctx.lineWidth = 1.8; ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-62, y - 51); ctx.lineTo(-24, y - 51); ctx.stroke();
+  }
   if (c.glassArt) {
     const r = mulberry(21), cols = ['#d6303a', '#2a62c0', '#f2b134', '#16a39f', '#9b4ab0', '#ee8a3a', '#5fae3e'], P = [];
     for (let i = 0; i < 7; i++) { P.push([]); for (let j = 0; j < 8; j++) P[i].push([-100 + j * 30 + (j % 7 ? (r() - .5) * 14 : 0), y - 100 + i * 28 + (i % 6 ? (r() - .5) * 12 : 0)]); }
@@ -1975,8 +2030,9 @@ function drawTorso(ctx, c, y) {
   if (c.strap) { ctx.strokeStyle = c.strap; ctx.lineWidth = 12; ctx.beginPath(); ctx.moveTo(-58, y - 96); ctx.lineTo(72, y + 56); ctx.stroke(); ctx.strokeStyle = 'rgba(0,0,0,.2)'; ctx.lineWidth = 2; ctx.stroke(); }
   ctx.restore();
   if (!c.tee) {
-    ctx.fillStyle = c.collar || 'rgba(255,255,255,.85)';
+    ctx.fillStyle = c.collar || (c.vstripes ? c.shirt : 'rgba(255,255,255,.85)');
     ctx.beginPath(); ctx.moveTo(-22, y - 92); ctx.lineTo(0, y - 66); ctx.lineTo(22, y - 92); ctx.lineTo(10, y - 94); ctx.lineTo(0, y - 80); ctx.lineTo(-10, y - 94); ctx.closePath(); ctx.fill();
+    if (c.vstripes) { ctx.strokeStyle = c.vstripes; ctx.lineWidth = 1.6; ctx.stroke(); }
   }
 }
 function drawNeckwear(ctx, c, y) {
@@ -2102,7 +2158,7 @@ function drawShop(ctx, t) {
   // customer
   if (cust && cust.partner) { ctx.save(); ctx.translate(custX - 190, 8); ctx.scale(.8, .8); drawCustomer(ctx, cust.partner, 0, t + 1.3, !!walk); ctx.restore(); }
   if (cust && cust.kid) { ctx.save(); ctx.translate(custX, 352); ctx.scale(.7, .7); ctx.translate(-custX, -352); drawCustomer(ctx, cust, custX, t, !!walk); ctx.restore(); }
-  else if (cust) drawCustomer(ctx, cust, custX, t, !!walk);
+  else if (cust && !cust.phoneCall) drawCustomer(ctx, cust, custX, t, !!walk);
   // counter
   ctx.fillStyle = '#a86a37'; ctx.fillRect(0, 304, 800, 146);
   ctx.fillStyle = '#c4864d'; ctx.fillRect(0, 292, 800, 18);
@@ -2124,8 +2180,14 @@ function drawShop(ctx, t) {
   // çay
   drawTeaGlass(ctx, 716, 292, .72, t, true);
   if (catInside()) { const up = cust && !walk; drawCat(ctx, CAT_X - (up ? 0 : 4), 294, up ? .95 : 1.1, t, up ? 'sit' : 'sleep', true); }
+  // telefon: paket siparişler buradan gelir
+  if (S.day >= 4 || (cust && cust.phoneCall)) drawDeskPhone(ctx, isBayram() ? 300 : 222, 296, t, cust && cust.phoneCall && phase === 'order' && !cust.taken);
+  // paket kutuları tezgahta üst üste
+  const jb = order && order.job;
+  if (jb && jb.done > 0 && !jb.given) drawBoxStack(ctx, 520, 300, jb.done);
+  if (plate && plate.boxes) drawBoxStack(ctx, 520, 300, plate.boxes);
   // served plate
-  if (plate) {
+  else if (plate) {
     ctx.fillStyle = 'rgba(0,0,0,.18)'; ellipse(ctx, 520, 304, 98, 20); ctx.fill();
     ctx.fillStyle = '#fbfaf5'; ellipse(ctx, 520, 298, 96, 22); ctx.fill();
     ctx.strokeStyle = '#16807f'; ctx.lineWidth = 3; ellipse(ctx, 520, 298, 84, 17); ctx.stroke();
@@ -2145,6 +2207,41 @@ function drawShop(ctx, t) {
   }
 }
 
+function drawBoxStack(ctx, x, y, k) {
+  ctx.fillStyle = 'rgba(0,0,0,.18)'; ellipse(ctx, x, y + 3, 80, 10); ctx.fill();
+  for (let i = 0; i < k; i++) {
+    const by = y - i * 17, ox = ((i * 37) % 7) - 3;
+    ctx.save(); ctx.translate(x + ox, by);
+    ctx.fillStyle = '#e2b97c'; ctx.beginPath(); ctx.moveTo(-70, -16); ctx.lineTo(70, -16); ctx.lineTo(60, -31); ctx.lineTo(-60, -31); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = 'rgba(120,76,30,.35)'; ctx.lineWidth = 1; ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,.18)'; ctx.beginPath(); ctx.moveTo(-60, -31); ctx.lineTo(60, -31); ctx.lineTo(64, -25); ctx.lineTo(-64, -25); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#c99a5e'; ctx.fillRect(-70, -16, 140, 16);
+    ctx.fillStyle = 'rgba(0,0,0,.12)'; ctx.fillRect(-70, -16, 140, 3);
+    ctx.strokeStyle = 'rgba(90,55,20,.4)'; ctx.strokeRect(-70, -16, 140, 16);
+    ctx.fillStyle = '#c0392b'; roundRect(ctx, -30, -13, 60, 10, 4); ctx.fill();
+    ctx.fillStyle = '#fff4e2'; ctx.font = '800 7.5px "Nunito", sans-serif'; ctx.textAlign = 'center'; ctx.fillText('AFİYET OLSUN', 0, -5.4);
+    ctx.restore();
+  }
+  if (k) { ctx.fillStyle = '#3a2216'; ctx.font = '800 15px "Baloo 2", sans-serif'; ctx.textAlign = 'left'; ctx.fillText(`${k} kutu`, x + 76, y - 6); }
+}
+function drawDeskPhone(ctx, x, y, t, ringing) {
+  ctx.save(); ctx.translate(x, y);
+  if (ringing) ctx.rotate(Math.sin(t * 40) * .05 * (Math.sin(t * 5) > 0 ? 1 : 0));
+  ctx.fillStyle = 'rgba(0,0,0,.18)'; ellipse(ctx, 0, 4, 40, 7); ctx.fill();
+  ctx.fillStyle = '#b8302a'; ctx.beginPath(); ctx.moveTo(-34, 2); ctx.lineTo(34, 2); ctx.lineTo(26, -26); ctx.lineTo(-26, -26); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#efe6d2'; circle(ctx, 0, -12, 11); ctx.fill();
+  ctx.fillStyle = '#b8302a'; for (let i = 0; i < 10; i++) { const a = i / 10 * Math.PI * 2 - 1; circle(ctx, Math.cos(a) * 7, -12 + Math.sin(a) * 7, 1.6); ctx.fill(); }
+  ctx.fillStyle = '#8f1f1a'; circle(ctx, 0, -12, 2.4); ctx.fill();
+  const lift = ringing ? Math.abs(Math.sin(t * 40)) * 2 * (Math.sin(t * 5) > 0 ? 1 : 0) : 0;
+  ctx.fillStyle = '#d23a32'; roundRect(ctx, -36, -36 - lift, 72, 10, 5); ctx.fill();
+  ellipse(ctx, -32, -30 - lift, 9, 7); ctx.fill(); ellipse(ctx, 32, -30 - lift, 9, 7); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,.25)'; roundRect(ctx, -26, -35 - lift, 52, 3, 2); ctx.fill();
+  ctx.restore();
+  if (ringing && Math.sin(t * 5) > 0) {
+    ctx.strokeStyle = '#d6442a'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+    for (const s of [-1, 1]) for (const r of [14, 24]) { ctx.beginPath(); ctx.arc(x + s * 34, y - 34, r, s < 0 ? Math.PI * .95 : -Math.PI * .45, s < 0 ? Math.PI * 1.45 : Math.PI * .05); ctx.stroke(); }
+  }
+}
 function drawGarden(ctx) {
   ctx.fillStyle = '#c9b48f'; ctx.fillRect(292, 214, 140, 18); ctx.fillStyle = '#b39d78'; for (let x = 292; x < 432; x += 14) ctx.fillRect(x, 214, 1.5, 18);
   for (const [x, s] of [[324, .9], [402, .85]]) {
@@ -4416,20 +4513,19 @@ function ticketHTML() {
       <span class="tag">${o.count ? o.count + ' yaprak sar' : o.slices ? o.slices + ' dilim kes' : kindOf(o.dish) === 'tray' ? 'Bir tepsi' : 'Bir tencere'}</span>`;
   }
   let body;
-  if (o.phone) body = `<p class="recipe-note">📞 Mahalle siparişi: ${o.phone}. Yeşil kutuya dokun, ${o.count} ${PREP[o.dish].unit} birden paketlenir.</p>`;
-  else if (o.fromBatch) body = `<p class="recipe-note">Bu yemeği sabah hazırladın. Mutfaktaki yeşil kutudan bir ${PREP[o.dish].unit} ver.</p>`;
+  if (o.fromBatch) body = `<p class="recipe-note">Bu yemeği sabah hazırladın. Mutfaktaki yeşil kutudan bir ${PREP[o.dish].unit} ver.</p>`;
   else if (o.riddle && !o.asked) body = `<p class="quote">“${o.riddle}”</p>`;
   else if (D.variants && SET.diff === 'hard') body = '<p class="recipe-note gen-note">Malzemeleri tarifine göre koy. Hatırlamıyorsan tarif defterine bak.</p>';
   else if (D.variants) body = `<p class="recipe-note recipe-list">${cap(reqList((variantOf(o) || D.variants[0]).req, o.dish))}</p>`;
   else if (o.half) body = `<ul>${o.items.map((i, n) => `<li><span class="half">${n + 1}. yarı</span><span>${ING[i.type].name}</span><em class="${i.bol ? 'bol' : ''}">${qtyText(i)}</em></li>`).join('')}</ul>`;
   else if (!o.items.length) body = '<ul><li><span>Malzemesiz, sade</span></li></ul>';
   else body = `<ul>${o.items.map(i => `<li><span>${ING[i.type].label || ING[i.type].name}</span><em class="${i.bol ? 'bol' : ''}">${qtyText(i)}</em></li>`).join('')}</ul>`;
-  const tag = o.fromBatch ? (o.phone ? `Paket · ${o.count} ` : '1 ') + PREP[o.dish].unit : D.kind === 'sarma' || D.kind === 'cookie' || D.kind === 'manti' ? `${o.count} tane` : D.unit ? D.unit : D.kind === 'jam' ? '1 kavanoz' : D.kind === 'bowl' ? '1 porsiyon' : (o.slices === 1 ? 'Kesilmesin' : slicesText(o.slices)) + (o.wellDone ? ' · iyi pişmiş' : '');
+  const tag = o.job ? `📦 Paket · ${o.job.done + 1}. / ${o.job.n} · ${o.slices === 1 ? 'kesilmesin' : slicesText(o.slices)}` : o.fromBatch ? '1 ' + PREP[o.dish].unit : D.kind === 'sarma' || D.kind === 'cookie' || D.kind === 'manti' ? `${o.count} tane` : D.unit ? D.unit : D.kind === 'jam' ? '1 kavanoz' : D.kind === 'bowl' ? '1 porsiyon' : (o.slices === 1 ? 'Kesilmesin' : slicesText(o.slices)) + (o.wellDone ? ' · iyi pişmiş' : '');
   const title = o.riddle && !o.asked ? D.name : dishTitle(o);
   const drink = (o.drink ? `<span class="tag" style="margin-left:10px">+ İçecek: ${o.drinkRiddle && !o.asked ? '?' : DRINKS[o.drink].name}</span>` : '')
     + (o.bread ? `<span class="tag" style="margin-left:10px">+ Ekmek: ${o.breadRiddle && !o.asked ? '?' : BREADS[o.bread].name}</span>` : '')
     + (o.pastry ? `<span class="tag" style="margin-left:10px">+ Yanına: ${o.pastryRiddle && !o.asked ? '?' : PASTRY[o.pastry].name}</span>` : '');
-  return `<div class="ticket-head"><span>Sipariş</span><span>${cust.name}</span></div>
+  return `<div class="ticket-head"><span>${o.job ? '📞 Paket sipariş' : 'Sipariş'}</span><span>${o.job ? `🛵 ${clockText(o.job.eta)}` : cust.name}</span></div>
     <div class="ticket-dish">${title}</div>${o.diet ? `<span class="diet">${DIET_TAG[o.diet]}</span>` : ''}${o.changed ? '<span class="chg">Değişti!</span>' : ''}${body}<span class="tag">${tag}</span>${drink}`;
 }
 const dietMark = req => req.some(t => MEAT.includes(t)) ? '' : req.some(t => ANIMAL.includes(t)) ? ' 🧀' : ' 🌱';
@@ -4488,7 +4584,7 @@ function finish(o, total, issues, ok, d) {
   // en ağır şikayet yıldızın üst sınırını belirler: eksik ana malzeme 2, eksik tarif malzemesi 3, istenmeyen şey 4 yıldız
   const worst = issues.reduce((m, i) => i.w > .12 ? Math.max(m, i.w) : m, 0);
   if (ok) total = Math.min(total, worst >= .95 ? .48 : worst >= .75 ? .66 : worst >= .4 ? .8 : worst > .12 ? .89 : 1);
-  const qty = o.phone && d && d.prep ? Math.max(1, Math.min(o.count, d.prep.left)) : 1, price = DISH[o.dish].price * qty, refund = !ok || total < .3;
+  const price = DISH[o.dish].price, refund = !ok || total < .3;
   const pay = refund ? 0 : round5(price * clamp(total, 0, 1)) + dprice;
   const tip = !refund && total >= .85 ? round5(price * .25 * (has('masa') ? 1.6 : 1) * (DIFF[SET.diff] || DIFF.normal).tip * (1 + .25 * perk('bahsis')) * (cust && cust.gicik && total >= .92 ? 2 : 1) * (isBayram() ? 1.25 : 1)) : 0;
   total = clamp(total, 0, 1);
@@ -4504,7 +4600,6 @@ function evalServe(o, d) {
     issues.push({ w: .6, t: `Ben ${V.label || 'klasik'} istemiştim, bu ${BV.label || 'klasik'} olmuş.` }); total *= .6;
   }
   if (b.issue && b.q < .9) issues.push({ w: 1 - b.q, t: b.issue });
-  if (ok && o.phone && b.left < o.count) { issues.push({ w: .5, t: `${o.count} ${PREP[o.dish].unit} istemişlerdi, ${b.left} ${PREP[o.dish].unit} çıkabildi.` }); total *= b.left / o.count; }
   return finish(o, total, issues, ok, d);
 }
 function evalRecipe(o, d) {
@@ -5215,6 +5310,18 @@ function patienceSeconds() {
 }
 function updatePatience(dt) {
   const chip = $('#patChip');
+  const j = order && order.job && !order.job.given && ['order', 'box'].includes(phase) ? order.job : null;
+  chip.classList.toggle('eta', !!j);
+  chip.firstChild.textContent = j ? '🛵 Kurye' : 'Sabır';
+  if (j) {
+    chip.classList.remove('off'); setFace('eta');
+    const left = Math.round(j.eta - S.time);
+    $('#patFace').textContent = left > 0 ? `${clockText(j.eta)} · ${left} dk` : 'Bekliyor!';
+    $('#patFace').style.color = left > 20 ? '' : 'var(--tomato)';
+    if (left <= 0 && !j.warned) { j.warned = true; sfx.grumble(); toast('🛵 Kurye Murat geldi, kapıda paketleri bekliyor!'); if (phase === 'box') renderPanel(); }
+    return;
+  }
+  $('#patFace').style.color = '';
   const on = cust && cust.pat != null && phase === 'order';
   chip.classList.toggle('off', !on);
   if (!on) return;
@@ -5228,7 +5335,28 @@ function updatePatience(dt) {
   const p = cust.pat, fill = $('#patFill');
   fill.style.width = (p * 100) + '%';
   fill.style.background = p > .5 ? 'var(--good)' : p > .25 ? 'var(--gold)' : 'var(--tomato)';
-  $('#patFace').textContent = p > .5 ? '😊' : p > .25 ? '😐' : '😠';
+  setFace(p > .5 ? 'happy' : p > .25 ? 'meh' : 'angry');
+}
+// iPhone tarzı parlak yüz ifadeleri (kendi çizimimiz)
+const FACE_SVG = (() => {
+  const base = (a, b, c) => `<defs><radialGradient id="pf-${a}" cx="50%" cy="38%" r="62%"><stop offset="0" stop-color="${b}"/><stop offset="1" stop-color="${c}"/></radialGradient>
+    <linearGradient id="pfh-${a}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".75"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>
+    <circle cx="32" cy="32" r="30" fill="url(#pf-${a})"/><ellipse cx="32" cy="17" rx="19" ry="11" fill="url(#pfh-${a})"/>`;
+  const eye = (x, y) => `<ellipse cx="${x}" cy="${y}" rx="4.2" ry="6.4" fill="#5b3a1a"/><ellipse cx="${x + 1.2}" cy="${y - 2.4}" rx="1.4" ry="1.8" fill="#fff" opacity=".8"/>`;
+  return {
+    happy: base('h', '#ffe46b', '#f6a21a') + `<ellipse cx="15" cy="38" rx="6" ry="3.6" fill="#ff7a6b" opacity=".45"/><ellipse cx="49" cy="38" rx="6" ry="3.6" fill="#ff7a6b" opacity=".45"/>
+      <path d="M15 28q6-7 12 0M37 28q6-7 12 0" stroke="#5b3a1a" stroke-width="3.6" fill="none" stroke-linecap="round"/>
+      <path d="M18 39q14 15 28 0" stroke="#5b3a1a" stroke-width="3.4" fill="none" stroke-linecap="round"/>`,
+    meh: base('m', '#ffe46b', '#f6a21a') + eye(22, 27) + eye(42, 27) + `<path d="M21 44h22" stroke="#5b3a1a" stroke-width="3.6" stroke-linecap="round"/>`,
+    angry: base('a', '#ffb347', '#e8541c') + `<path d="M13 19l13 6M51 19l-13 6" stroke="#5b2a10" stroke-width="3.8" stroke-linecap="round"/>` + eye(21, 30) + eye(43, 30)
+      + `<path d="M20 48q12-10 24 0" stroke="#5b2a10" stroke-width="3.6" fill="none" stroke-linecap="round"/>`,
+  };
+})();
+let faceNow = '';
+function setFace(k) {
+  if (k === faceNow) return;
+  faceNow = k;
+  $('#patFace').innerHTML = k === 'eta' ? '' : `<svg viewBox="0 0 64 64" aria-hidden="true">${FACE_SVG[k]}</svg>`;
 }
 const customerGap = () => Math.max(2, Math.round(4 + (100 - S.rep) / 6 - Math.min(4, S.regulars.length * .5) - (S.boost.crowd === S.day ? 3 : 0) + (weatherOf(S.day) === 'kar' ? 2 : 0)));
 let talk = null;
@@ -5238,12 +5366,64 @@ function enterCustomer(onArrive) {
   show('shop'); hud(); renderPanel();
   walkTo(330, 1000, onArrive);
 }
+// telefonla paket sipariş: hepsi aynı, tek tek hazırlanıp kutuya konur, kurye saatinde gelip alır
+const PHONE_DISH = { lahmacun: [3, 5], pide: [2, 3], gozleme: [2, 3] }, PHONE_MIN = 45;
 function phoneOrder() {
-  if (S.day < 4 || S.dayServed < 2 || (S.phone && S.phone.day === S.day && S.phone.n >= 2) || Math.random() >= .12) return null;
-  const bs = S.batches.filter(b => b.left >= 3);
-  if (!bs.length) return null;
-  const b = pick(bs);
-  return { b, n: Math.min(b.left, 2 + Math.floor(Math.random() * 3)), place: pick(PHONE_PLACES) };
+  if (S.day < 4 || S.dayServed < 2 || (S.phone && S.phone.day === S.day && S.phone.n >= 2) || Math.random() >= .14) return null;
+  const ds = Object.keys(PHONE_DISH).filter(k => canOrder(k));
+  if (!ds.length) return null;
+  const dish = pick(ds), [lo, hi] = PHONE_DISH[dish];
+  let n = lo + Math.floor(Math.random() * (hi - lo + 1));
+  while (n > 2 && S.time + n * PHONE_MIN + 20 > closeTime()) n--;
+  if (S.time + n * PHONE_MIN + 20 > closeTime()) return null;
+  return { dish, n, place: pick(PHONE_PLACES) };
+}
+const jobUnit = j => j.dish === 'lahmacun' ? 'lahmacun' : j.dish === 'pide' ? 'pide' : 'gözleme';
+function phoneCall(ph) {
+  const o = makeOrder(ph.dish); delete o.riddle; delete o.diet; o.slices = ph.dish === 'lahmacun' ? 1 : DISH[ph.dish].slices;
+  o.job = { dish: ph.dish, n: ph.n, done: 0, res: [], place: ph.place, start: S.time, eta: Math.min(closeTime(), Math.ceil((S.time + ph.n * PHONE_MIN + 20) / 5) * 5) };
+  S.phone = { day: S.day, n: (S.phone && S.phone.day === S.day ? S.phone.n : 0) + 1 };
+  cust = { name: ph.place, phoneCall: true, mood: 'idle', seed: 6 }; order = o;
+  result = null; plate = null; custX = 330; bubble.hidden = true;
+  phase = 'order'; show('shop'); hud(); sfx.ring();
+  setTimeout(() => {
+    if (cust && cust.phoneCall && !cust.taken) say(`📞 ${ph.place}`, `Alo usta, ${ph.place} burası! ${ph.n} tane ${orderPhrase(o).replace(/ ?bir /, ' ').trim()} istiyoruz, paket olsun.${orderExtras(o)} Kuryeniz saat ${clockText(o.job.eta)} gibi gelip alsın.`);
+  }, 700);
+  renderPanel();
+}
+// her hazırlanan yemek tezgahta kutuya girer, kutular üst üste dizilir
+function boxUp() {
+  const j = order.job;
+  j.res.push(result); j.done++; result = null; plate = null;
+  sfx.plop(); setTimeout(() => sfx.plop(), 120);
+  show('shop'); hud(); bubble.hidden = true;
+  if (j.done >= j.n) { j.doneAt = S.time; kuryeArrive(); return; }
+  phase = 'box'; renderPanel();
+}
+function kuryeArrive() {
+  const j = order.job;
+  j.late = Math.max(0, Math.round(j.doneAt - j.eta));
+  cust = Object.assign({}, KURYE, { mood: j.late > 10 ? 'meh' : 'idle', seed: 5 });
+  enterCustomer(() => {
+    phase = 'handoff'; sfx.bell();
+    say(cust.name, j.late > 0 ? `Usta ${j.late} dakikadır kapıdayım, ${j.place} iki kere aradı! Paketler hazır mı?` : pick([`Selam usta! ${j.place} siparişini almaya geldim. Kutular hazır mı?`, `Motor kapıda usta, ${j.n} kutu ${j.place} için. Sıcakken götüreyim!`]));
+    renderPanel();
+  });
+}
+function handOff() {
+  const j = order.job, R = j.res;
+  let total = R.reduce((a, r) => a + r.total, 0) / R.length;
+  const seen = new Set(), issues = [];
+  for (const r of R) for (const i of r.issues) if (!seen.has(i.t)) { seen.add(i.t); issues.push(i); }
+  issues.sort((a, c) => c.w - a.w);
+  let pay = R.reduce((a, r) => a + r.pay, 0), tip = R.reduce((a, r) => a + r.tip, 0);
+  if (j.late > 0) {
+    const pen = Math.min(.35, j.late / 120);
+    total = clamp(total - pen, 0, 1); pay = round5(pay * (1 - pen)); tip = 0;
+    issues.unshift({ w: .5, t: `Kurye ${j.late} dakika bekledi, ${lower(j.place)} soğuk yemek yiyecek.` });
+  } else tip += round5(DISH[j.dish].price * .1 * j.n);
+  j.given = true; plate = { boxes: j.n };
+  serveNow({ total, refund: R.every(r => r.refund), stars: Math.max(1, Math.round(total * 5)), issues: issues.slice(0, 3), pay, tip, cost: R.reduce((a, r) => a + (r.cost || 0), 0), drinkOk: false });
 }
 function nextCustomer() {
   if (S.dayServed > 0) S.time = Math.min(closeTime(), S.time + customerGap());
@@ -5257,31 +5437,25 @@ function nextCustomer() {
     return;
   }
   const critic = !ev && criticDay(S.day) && S.dayServed >= 2 && !(S.critic && S.critic.day === S.day);
-  const ph = !ev && !critic ? phoneOrder() : null;
-  cust = ev === 'rival2' ? Object.assign({}, KAMIL, { mood: 'meh', seed: 1, special: 'rival2' }) : critic ? Object.assign({}, FIKRET, { mood: 'idle', seed: 2 }) : ph ? Object.assign({}, KURYE, { mood: 'idle', seed: 5 }) : makeCustomer();
+  const ph = !ev && !critic && S.tut ? phoneOrder() : null;
+  if (ph) { phoneCall(ph); return; }
+  cust = ev === 'rival2' ? Object.assign({}, KAMIL, { mood: 'meh', seed: 1, special: 'rival2' }) : critic ? Object.assign({}, FIKRET, { mood: 'idle', seed: 2 }) : makeCustomer();
   S.recent = [...(S.recent || []), cust.name, ...(cust.partner ? [cust.partner.name] : [])].slice(-3);
   if (!S.tut && !ev && !cust.diet && !cust.gicik && !cust.critic) {
     order = { dish: 'lahmacun', items: [{ type: 'kiyma', bol: false }, { type: 'maydanoz', bol: false }], slices: 2, tutorial: true };
     tutStep = 0;
   } else {
-  if (ph) {
-    order = { dish: ph.b.dish, variant: ph.b.variant, items: [], fromBatch: true, count: ph.n, phone: ph.place };
-    const unit = PREP[ph.b.dish].unit, nm = lower(DISH[ph.b.dish].name);
-    cust.hi = [() => `Usta selam! ${ph.place} telefonla sipariş verdi: ${ph.n} ${unit} ${nm}. Paketle, ben motorla götüreyim!`];
-    S.phone = { day: S.day, n: (S.phone && S.phone.day === S.day ? S.phone.n : 0) + 1 };
-  } else {
   const fav = cust.fav && (cust.full || Math.random() < .6) ? cust.fav.filter(k => canOrder(k, cust.diet)) : [];
   if (cust.full && !fav.length) { cust.full = false; cust.hi = FRIENDS.tan.hi; }
   order = makeOrder(fav.length ? pick(fav) : cust.regular && Math.random() < .5 && dishOpen(cust.regular.fav) ? cust.regular.fav : null, cust.diet);
-  }
   if (cust.fid || cust.critic) delete order.riddle;
   if (cust.easy) order.easy = true;
-  if (!order.tutorial && !order.phone && DISH[order.dish].soup && Math.random() < .85) { order.bread = Math.random() < .55 ? 'beyaz' : 'tahilli'; order.breadRiddle = S.day >= 3 && Math.random() < .35; }
-  if (!order.tutorial && !order.phone && S.day >= 2 && cust.special !== 'rival2' && Math.random() < .3) {
+  if (!order.tutorial && DISH[order.dish].soup && Math.random() < .85) { order.bread = Math.random() < .55 ? 'beyaz' : 'tahilli'; order.breadRiddle = S.day >= 3 && Math.random() < .35; }
+  if (!order.tutorial && S.day >= 2 && cust.special !== 'rival2' && Math.random() < .3) {
     const fits = (DRINK_FIT[order.dish] || Object.keys(DRINKS)).filter(k => !(cust.diet === 'vegan' && k === 'ayran'));
     if (fits.length) { order.drink = fits.includes('cay') && (weatherOf(S.day) !== 'acik' || order.dish === 'gozleme') && Math.random() < .6 ? 'cay' : pick(fits); order.drinkRiddle = S.day >= 3 && Math.random() < .5; }
   }
-  if (!order.tutorial && !order.phone && (order.drink === 'cay' || ['menemen', 'tofumenemen', 'borek'].includes(order.dish)) && Math.random() < .45) {
+  if (!order.tutorial && (order.drink === 'cay' || ['menemen', 'tofumenemen', 'borek'].includes(order.dish)) && Math.random() < .45) {
     const av = Object.keys(PASTRY).filter(k => pastryLeft(k) > 0 && !(cust.diet === 'vegan' && k === 'pogaca'));
     if (av.length) { order.pastry = pick(av); order.pastryRiddle = S.day >= 3 && Math.random() < .35; }
   }
@@ -5326,6 +5500,27 @@ function renderPanel() {
       phase = 'leave'; bubble.hidden = true; panel.innerHTML = '<p>Güle güle!</p>';
       walkTo(-200, 900, () => { if (S.time >= closeTime()) endDay(); else nextCustomer(); });
     };
+    return;
+  }
+  if (phase === 'order' && cust.phoneCall) {
+    const j = order.job;
+    panel.innerHTML = `<p>📞 <strong>${j.place}</strong> telefonla paket sipariş verdi: <b>${j.n} ${jobUnit(j)}</b>. Kurye Murat saat <b>${clockText(j.eta)}</b> gibi gelip alacak. Her birini hazırla, tezgahta kutuya koy.</p>
+      <button class="btn primary" id="takeBtn" type="button">Hazırlamaya başla</button>`;
+    $('#takeBtn').onclick = toKitchen;
+    return;
+  }
+  if (phase === 'box') {
+    const j = order.job, left = Math.round(j.eta - S.time);
+    panel.innerHTML = `<p>📦 Kutuya kondu: <b>${j.done}/${j.n}</b> ${jobUnit(j)} tezgahta.<br>🛵 Kurye ${left > 0 ? `${clockText(j.eta)} gibi geliyor (${left} dk kaldı).` : 'geldi bile, kapıda bekliyor!'}</p>
+      <button class="btn primary" id="boxNext" type="button">Sıradakini hazırla (${j.done + 1}/${j.n})</button>`;
+    $('#boxNext').onclick = () => { phase = 'order'; toKitchen(); };
+    return;
+  }
+  if (phase === 'handoff') {
+    const j = order.job;
+    panel.innerHTML = `<p>${j.n} kutu ${j.place} için hazır.${j.late > 0 ? ` Kurye ${j.late} dakika bekledi.` : ' Tam vaktinde!'}</p>
+      <button class="btn go" id="giveBtn" type="button">📦 Kutuları ver</button>`;
+    $('#giveBtn').onclick = handOff;
     return;
   }
   if (phase === 'order') {
@@ -5641,12 +5836,13 @@ function openSide(kind) {
   }
   $('#drinkScr').hidden = false; row.firstChild.focus();
 }
-function serveNow() {
-  if (phase !== 'order' || !K || !K.dough) return;
-  result = evaluate(order.easy && K.dough !== order.dish ? adaptOrder(K) : order, K);
+function serveNow(pre) {
+  if (!pre && (phase !== 'order' || !K || !K.dough)) return;
+  result = pre || evaluate(order.easy && K.dough !== order.dish ? adaptOrder(K) : order, K);
+  if (order.job && !pre) { boxUp(); return; }
   if (K.drink === 'cay') S.cay = Math.max(0, S.cay - 1);
-  if (K.prep) { K.prep.left -= order.phone ? Math.max(1, Math.min(order.count, K.prep.left)) : 1; S.batches = S.batches.filter(b => b.left > 0); }
-  plate = K;
+  if (K.prep) { K.prep.left--; S.batches = S.batches.filter(b => b.left > 0); }
+  plate = pre ? plate : K;
   const reg = cust.regular, bad = cust.diet ? usedTypes(K).filter(t => dietBad(cust.diet, t)) : [];
   let extraLine = '', olay = '';
   result.notes = [];
@@ -5700,6 +5896,7 @@ function serveNow() {
   const issue = result.issues[0] ? ' ' + result.issues[0].t : '';
   let line = cust.mood === 'happy' ? pick(HAPPY) : (cust.mood === 'meh' ? pick(OK) : pick(BAD)) + issue;
   if (cust.fid || cust.kurye) line = cust.mood === 'happy' ? said(cust.happy) : said(cust.meh, result.issues[0] ? result.issues[0].t : 'Biraz eksik olmuş.');
+  if (cust.kurye && order.job && order.job.late > 0) line = `Sonunda! ${order.job.late} dakika bekledim usta, ${lower(order.job.place)} soğuk yiyecek. Hadi götürüyorum.`;
   if (cust.gicik) line = cust.mood === 'happy' ? 'Hıh… Peki, kabul ediyorum, güzel olmuş.' : (cust.mood === 'meh' ? 'Bu mu yani? Neyse…' : 'Rezalet!') + issue;
   if (cust.critic) line = result.stars >= 5 ? 'Mükemmel. Bunu gazetede yazacağım.' : result.stars >= 3 ? 'Hmm. Fena değil, not ettim.' + issue : 'Hayal kırıklığı. Okurlarımı uyarmam gerekecek.' + issue;
   if (result.refund && !cust.polite && !olay) line += ' Paramı geri ver!';
