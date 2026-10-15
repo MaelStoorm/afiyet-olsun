@@ -2202,7 +2202,7 @@ function drawShop(ctx, t) {
   drawTeaGlass(ctx, 716, 292, .72, t, true);
   if (catInside()) { const up = cust && !walk; drawCat(ctx, CAT_X - (up ? 0 : 4), 294, up ? .95 : 1.1, t, up ? 'sit' : 'sleep', true); }
   // telefon: paket siparişler buradan gelir
-  if (S.day >= 4 || (cust && cust.phoneCall)) drawDeskPhone(ctx, isBayram() ? 300 : 222, 296, t, cust && cust.phoneCall && phase === 'order' && !cust.taken);
+  if (S.day >= 4 || (cust && cust.phoneCall)) drawDeskPhone(ctx, isBayram() ? 300 : 222, 296, t, cust && cust.phoneCall && phase === 'order' && !cust.taken ? (cust.answered ? 'talk' : 'ring') : false);
   // paket kutuları tezgahta üst üste
   const jb = order && order.job;
   if (jb && jb.done > 0 && !jb.given) drawBoxStack(ctx, 520, 300, jb.done);
@@ -2324,13 +2324,20 @@ function drawBoxStack(ctx, x, y, k) {
 }
 // masa telefonu. A: kırmızı çevirmeli, B: krem tuşlu
 function drawDeskPhone(ctx, x, y, t, ringing, st = window.__phoneStyle || 'B') {
-  const on = ringing && Math.sin(t * 5) > 0, sh = on ? Math.sin(t * 40) : 0, lift = on ? Math.abs(sh) * 2.5 : 0;
-  ctx.save(); ctx.translate(x, y); ctx.rotate(sh * .04);
+  // çalarken ahize yuvasında zıplar ve sallanır; açılınca kalkar (kulağa götürülmüş gibi havada durur)
+  const talk = ringing === 'talk', on = ringing === 'ring' || (ringing === true && Math.sin(t * 5) > 0);
+  const sh = on ? Math.sin(t * 40) : 0, hop = on ? Math.abs(Math.sin(t * 26)) * 7 : 0;
+  const hy = talk ? -44 + Math.sin(t * 2) * 1.5 : -hop, hrot = talk ? -.32 : on ? Math.sin(t * 34) * .14 : 0, lift = -hy;
+  const hx0 = st === 'B' ? -19 : 0, hy0 = st === 'B' ? -26 : -30;
+  ctx.save(); ctx.translate(x, y); ctx.rotate(sh * .05);
   ctx.fillStyle = 'rgba(0,0,0,.2)'; ellipse(ctx, 0, 3, 42, 7); ctx.fill();
   // kıvrık kordon
   ctx.strokeStyle = st === 'B' ? '#bdb29a' : '#8f1f1a'; ctx.lineWidth = 2;
   const cs = st === 'B' ? -1 : 1;
-  ctx.lineWidth = 1.4; ctx.beginPath(); for (let i = 0; i <= 60; i++) { const u = i / 60, px = st === 'B' ? -37 - Math.sin(u * Math.PI) * 9 : 34 + u * 10, py = st === 'B' ? -3 - u * 19 : -4 - Math.sin(u * Math.PI) * 14; const a = i * 1.1; i ? ctx.lineTo(px + Math.cos(a) * 1.8, py + Math.sin(a) * 1.4) : ctx.moveTo(px, py); } ctx.stroke();
+  { const sx = st === 'B' ? -37 : 34, sy = -3, ex = hx0 + (st === 'B' ? -22 : 24) * Math.cos(hrot), ey = hy0 + hy + (st === 'B' ? -22 : 24) * Math.sin(hrot) + 3, bulge = st === 'B' ? -9 : 9;
+    ctx.lineWidth = 1.4; ctx.beginPath();
+    for (let i = 0; i <= 70; i++) { const u = i / 70, px = sx + (ex - sx) * u + Math.sin(u * Math.PI) * bulge, py = sy + (ey - sy) * u, a = i * 1.1; i ? ctx.lineTo(px + Math.cos(a) * 1.8, py + Math.sin(a) * 1.4) : ctx.moveTo(px, py); }
+    ctx.stroke(); }
   if (st === 'B') {
     // krem tuşlu masa telefonu: solda ahize yuvası, sağda eğik tuş takımı
     const g = ctx.createLinearGradient(0, -30, 0, 2); g.addColorStop(0, '#f4eedd'); g.addColorStop(1, '#d4cab2');
@@ -2350,7 +2357,7 @@ function drawDeskPhone(ctx, x, y, t, ringing, st = window.__phoneStyle || 'B') {
     // ahize yuvası
     ctx.fillStyle = '#d9cfb8'; roundRect(ctx, -36, -24, 34, 9, 4); ctx.fill();
     // ahize
-    ctx.save(); ctx.translate(-19, -26 - lift);
+    ctx.save(); ctx.translate(hx0, hy0 + hy); ctx.rotate(hrot);
     const hg = ctx.createLinearGradient(0, -6, 0, 6); hg.addColorStop(0, '#fbf6ea'); hg.addColorStop(1, '#d9cfb8');
     const hs = () => { ctx.beginPath(); ctx.moveTo(-24, 5); ctx.lineTo(-24, -1); ctx.quadraticCurveTo(-23, -5, -16, -5); ctx.quadraticCurveTo(0, -8, 16, -5); ctx.quadraticCurveTo(23, -5, 24, -1); ctx.lineTo(24, 5); ctx.quadraticCurveTo(24, 7, 21, 7); ctx.lineTo(13, 7); ctx.quadraticCurveTo(11, 7, 11, 4); ctx.quadraticCurveTo(0, 1, -11, 4); ctx.quadraticCurveTo(-11, 7, -13, 7); ctx.lineTo(-21, 7); ctx.quadraticCurveTo(-24, 7, -24, 5); ctx.closePath(); };
     ctx.fillStyle = 'rgba(0,0,0,.15)'; ctx.save(); ctx.translate(1, 1.5); hs(); ctx.fill(); ctx.restore();
@@ -2370,7 +2377,7 @@ function drawDeskPhone(ctx, x, y, t, ringing, st = window.__phoneStyle || 'B') {
     for (let i = 0; i < 10; i++) { const a = -Math.PI * .35 + i / 10 * Math.PI * 1.6; ctx.fillStyle = '#fffaf0'; circle(ctx, Math.cos(a) * 10.2, -11 + Math.sin(a) * 8.2, 2.3); ctx.fill(); ctx.strokeStyle = '#a99d84'; ctx.lineWidth = .8; ctx.stroke(); }
     ctx.strokeStyle = '#c9ccd1'; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(12, -4); ctx.lineTo(15, -1); ctx.stroke();
     // ahize
-    ctx.save(); ctx.translate(0, -30 - lift);
+    ctx.save(); ctx.translate(hx0, hy0 + hy); ctx.rotate(hrot);
     ctx.fillStyle = '#c9302a'; ctx.beginPath(); ctx.moveTo(-26, 0); ctx.quadraticCurveTo(0, -9, 26, 0); ctx.lineTo(26, 4); ctx.quadraticCurveTo(0, -4, -26, 4); ctx.closePath(); ctx.fill();
     ctx.fillStyle = '#d93a32'; ellipse(ctx, -30, 3, 9, 6.5, -.2); ctx.fill(); ellipse(ctx, 30, 3, 9, 6.5, .2); ctx.fill();
     ctx.fillStyle = 'rgba(255,255,255,.3)'; ellipse(ctx, -31, 1, 5, 2, -.2); ctx.fill(); ellipse(ctx, 29, 1, 5, 2, .2); ctx.fill();
@@ -5602,10 +5609,11 @@ function phoneCall(ph) {
   S.phone = { day: S.day, n: (S.phone && S.phone.day === S.day ? S.phone.n : 0) + 1 };
   cust = { name: ph.place, phoneCall: true, mood: 'idle', seed: 6 }; order = o;
   result = null; plate = null; custX = 330; bubble.hidden = true;
-  phase = 'order'; show('shop'); hud(); sfx.ring();
+  phase = 'order'; show('shop'); hud(); sfx.ring(); setTimeout(() => { if (cust && cust.phoneCall && !cust.answered) sfx.ring(); }, 900);
   setTimeout(() => {
+    if (cust && cust.phoneCall && !cust.taken) cust.answered = true;
     if (cust && cust.phoneCall && !cust.taken) say(`📞 ${ph.place}`, `Alo usta, ${ph.place} burası! ${ph.n} tane ${orderPhrase(o).replace(/ ?bir /, ' ').trim()} istiyoruz, paket olsun.${orderExtras(o)} Kuryeniz saat ${clockText(o.job.eta)} gibi gelip alsın.`);
-  }, 700);
+  }, 1800);
   renderPanel();
 }
 // her hazırlanan yemek tezgahta kutuya girer, kutular üst üste dizilir
