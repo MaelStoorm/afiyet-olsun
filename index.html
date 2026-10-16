@@ -1050,7 +1050,7 @@ DISH.humus = { kind: 'bowl', name: 'Humus', base: 'Humus kasesi', price: 50, cos
     { id: 'pulbiberli', label: 'pul biberli', req: ['nohut', 'tahin', 'limon', 'sarimsak', 'zeytinyagi', 'pulbiber'], day: 1 },
   ], optional: ['kimyon', 'maydanoz', 'pulbiber'],
   pool: ['nohut', 'mercimek', 'tahin', 'yogurt', 'limon', 'sarimsak', 'sogan', 'zeytinyagi', 'tereyagi', 'maydanoz', 'nane', 'pulbiber', 'kimyon', 'karabiber'] };
-DISH.mercimekkoftesi = { kind: 'bowl', name: 'Mercimek köftesi', base: 'Köfte harcı kasesi', price: 55, cost: 2, day: 4,
+DISH.mercimekkoftesi = { kind: 'bowl', squeeze: true, name: 'Mercimek köftesi', base: 'Köfte harcı kasesi', price: 55, cost: 2, day: 4,
   phrase: (o, V) => V.label ? `bir porsiyon ${V.label} mercimek köftesi` : 'bir porsiyon mercimek köftesi', unit: '1 porsiyon',
   how: 'Haşlanmış kırmızı mercimeği bulgurla karıştır; soğan, salça, zeytinyağı ve kimyonu ekle, taze soğan ve maydanozla yoğur. İçinde et yok!',
   variants: [
@@ -1630,13 +1630,7 @@ function drawPiece(ctx, type, x, y, rot, seed, b = 0) {
       break;
     }
     case 'marul': {
-      const leaf = (rx, ry, col) => { ctx.beginPath(); const n = 14; for (let i = 0; i <= n; i++) { const a = i / n * Math.PI * 2, a2 = (i + .5) / n * Math.PI * 2, k = .86 + r() * .1;
-        if (!i) ctx.moveTo(Math.cos(a) * rx, Math.sin(a) * ry); else ctx.quadraticCurveTo(Math.cos(a2 - Math.PI / n) * rx * 1.12, Math.sin(a2 - Math.PI / n) * ry * 1.12, Math.cos(a) * rx * k, Math.sin(a) * ry * k); }
-        ctx.closePath(); ctx.fillStyle = col; ctx.fill(); };
-      leaf(31, 20, '#6db235'); ctx.strokeStyle = '#4f8f24'; ctx.lineWidth = 1.2; ctx.stroke();
-      leaf(20, 12, '#b6df72');
-      ctx.strokeStyle = '#eef8d2'; ctx.lineWidth = 2.6; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(-27, 2); ctx.quadraticCurveTo(0, -2, 26, 1); ctx.stroke();
-      ctx.lineWidth = 1.2; for (const vx of [-15, -3, 9]) { ctx.beginPath(); ctx.moveTo(vx, 0); ctx.lineTo(vx + 7, -14); ctx.moveTo(vx, 1); ctx.lineTo(vx + 7, 15); ctx.stroke(); }
+      FD.kiv(ctx, 0, 0, 0, .9, r() < .4);
       break;
     }
     case 'sogan': {
@@ -2238,7 +2232,10 @@ function drawShop(ctx, t) {
     ctx.strokeStyle = '#16807f'; ctx.lineWidth = 3; ellipse(ctx, 520, 298, 84, 17); ctx.stroke();
     if (plate.prep) drawPrepDish(ctx, plate.prep.dish, plate.prep.variant, 520, 288, .62, false);
     else {
-    ctx.save(); ctx.translate(520, 292); ctx.scale(.36, .16); ctx.translate(-250, -250); renderPlate(ctx, plate); ctx.restore();
+    const has = {}; for (const p of plate.toppings.concat(plate.portions)) has[p.type] = true;
+    if (plate.dough === 'balikekmek') { ctx.save(); ctx.translate(522, 280); ctx.scale(.9, .9); FD.balikB(ctx, has); ctx.restore(); }
+    else if (plate.dough === 'mercimekkoftesi') { ctx.save(); ctx.translate(520, 284); ctx.scale(1, .85); FD.koftePlateA(ctx, has.pulbiber, rolledCount(plate) || 6); ctx.restore(); }
+    else { ctx.save(); ctx.translate(520, 292); ctx.scale(.36, .16); ctx.translate(-250, -250); renderPlate(ctx, plate); ctx.restore(); }
     if (plate.dough === 'recel') drawJar(ctx, 520, 252, plate.bake, .42);
     if (plate.dough === 'mercimek') drawSoupBowl(ctx, 520, 280, plate.bake, .6);
     if (plate.dough === 'sutlac') drawSutlacBowl(ctx, 520, 282, plate.bake, .5);
@@ -3664,6 +3661,9 @@ function drawJar(ctx, x, y, b, s = 1) {
 }
 const LEAVES = Array.from({ length: 12 }, (_, i) => ({ x: 95 + (i % 4) * 103, y: 100 + Math.floor(i / 4) * 125 }));
 const rolledCount = d => (d.rolls || []).filter(Boolean).length;
+// mercimek köftesi: tabakta marul yapraklarının üstünde 6 köfte yeri
+const SQZ = FD_SQZ();
+function FD_SQZ() { return [[150, 190, -.4], [250, 170, -.12], [350, 192, .3], [168, 292, -.25], [262, 304, .08], [352, 286, .35]].map(([x, y, r]) => ({ x, y, r })); }
 function renderAny(ctx, d, noShadow) {
   const k = kindOf(d.dough);
   if (k === 'flat') renderDish(ctx, d, noShadow);
@@ -3939,6 +3939,149 @@ function renderPlate(ctx, d) {
 }
 
 // sabah hazırlanan yemeklerin bir porsiyonu (dükkanda tabakta, mutfakta düğmede)
+// tabak çizimleri: tepsi böreği, elde sıkılmış mercimek köftesi, kıvırcık marul, kâğıda sarılı balık ekmek
+const FD = {};
+FD.slab = (ctx, layers, top, opt = {}) => {
+  const W = 104, D = 22, dx = 16, x0 = -W / 2 - dx / 2;
+  const H = layers.reduce((a, l) => a + l[0], 0), y0 = H / 2 + 4;
+  // ön yüz: katlar, dalgalı ayrımlar
+  let y = y0; const r = mulberry(7);
+  for (const [th, col, wav] of layers) {
+    const yt = y - th;
+    ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(x0, y);
+    ctx.lineTo(x0 + W, y); ctx.lineTo(x0 + W, yt);
+    for (let i = 10; i >= 0; i--) ctx.lineTo(x0 + i * W / 10, yt + (wav ? Math.sin(i * 1.7 + yt) * wav : 0));
+    ctx.closePath(); ctx.fill();
+    y = yt;
+  }
+  ctx.strokeStyle = 'rgba(120,70,20,.25)'; ctx.lineWidth = .8; ctx.strokeRect(x0, y, W, y0 - y);
+  // yan yüz
+  ctx.fillStyle = opt.side || '#c6873a';
+  ctx.beginPath(); ctx.moveTo(x0 + W, y0); ctx.lineTo(x0 + W + dx, y0 - D); ctx.lineTo(x0 + W + dx, y - D); ctx.lineTo(x0 + W, y); ctx.closePath(); ctx.fill();
+  let yy = y0; ctx.strokeStyle = 'rgba(90,50,15,.25)'; ctx.lineWidth = .8;
+  for (const [th] of layers) { yy -= th; ctx.beginPath(); ctx.moveTo(x0 + W, yy); ctx.lineTo(x0 + W + dx, yy - D); ctx.stroke(); }
+  // üst yüz
+  const g = ctx.createLinearGradient(0, y - D, 0, y); g.addColorStop(0, top[0]); g.addColorStop(1, top[1]);
+  ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(x0, y);
+  for (let i = 0; i <= 12; i++) ctx.lineTo(x0 + i * W / 12, y + (opt.bumpy ? Math.sin(i * 2.3) * 1.2 : 0));
+  ctx.lineTo(x0 + W + dx, y - D); ctx.lineTo(x0 + dx, y - D); ctx.closePath(); ctx.fill();
+  return { x0, y, W, D, dx };
+};
+FD.borekC = (ctx, fill) => { // tepsi böreği: kalın katlar, üstü yumurtalı parlak, susam ve çörek otu
+  const L = [[4, '#e0ad5c'], [5, '#f3d79a'], [6, fill, 1.5], [5, '#f3d79a'], [6, fill, 1.5], [5, '#f1cf88', .6]];
+  const f = FD.slab(ctx, L, ['#c9741f', '#e7a442']);
+  const r = mulberry(11);
+  for (let i = 0; i < 34; i++) { const px = f.x0 + 6 + r() * (f.W - 6) + r() * f.dx * .9, py = f.y - 2 - r() * (f.D - 3);
+    if (i % 3) { ctx.fillStyle = '#fbf0d2'; ellipse(ctx, px, py, 1.8, .9, r() * 3); ctx.fill(); } else { ctx.fillStyle = '#1d1a18'; ellipse(ctx, px, py, 1.1, .7, r() * 3); ctx.fill(); } }
+  ctx.fillStyle = 'rgba(255,250,225,.4)'; ellipse(ctx, f.x0 + 46, f.y - 8, 30, 2.6, -.06); ctx.fill();
+};
+FD.kofte = (ctx, x, y, rot, s = 1, acili) => {
+  ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.scale(s, s);
+  ctx.fillStyle = 'rgba(80,30,10,.2)'; ellipse(ctx, 1, 4, 21, 6); ctx.fill();
+  const base = acili ? '#d8622c' : '#e08a45';
+  ctx.fillStyle = base; ctx.beginPath(); ctx.moveTo(-21, 1); ctx.bezierCurveTo(-21, -14, 21, -15, 21, 0); ctx.bezierCurveTo(21, 11, -21, 12, -21, 1); ctx.fill();
+  ctx.fillStyle = 'rgba(255,210,160,.35)'; ellipse(ctx, -2, -6, 15, 3.5, -.03); ctx.fill(); ctx.fillStyle = 'rgba(110,40,10,.22)'; ellipse(ctx, 0, 7, 18, 3); ctx.fill();
+  // parmak izleri: koyu oluk + açık kenar
+  for (let i = 0; i < 4; i++) { const fx = -12 + i * 8;
+    ctx.strokeStyle = 'rgba(120,45,15,.45)'; ctx.lineWidth = 2.6; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(fx - 1, -10); ctx.quadraticCurveTo(fx + 2, -1, fx, 8); ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,200,150,.45)'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(fx + 2.4, -10); ctx.quadraticCurveTo(fx + 5, -1, fx + 3, 8); ctx.stroke(); }
+  const r = mulberry(Math.round(x * 7 + y)); for (let i = 0; i < 26; i++) { ctx.fillStyle = r() < .5 ? 'rgba(255,220,170,.55)' : 'rgba(130,50,15,.35)'; circle(ctx, -18 + r() * 36, -6 + r() * 11, .9); ctx.fill(); }
+  ctx.fillStyle = '#3c9a35'; for (let i = 0; i < 4; i++) { circle(ctx, -15 + r() * 30, -4 + r() * 7, .9); ctx.fill(); }
+  ctx.restore();
+};
+FD.kiv = (ctx, x, y, rot, s, light) => { // kıvırcık marul yaprağı: kenarı fırfırlı
+  ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.scale(s, s);
+  const ruff = (n, rx, ry, amp) => { ctx.beginPath(); for (let i = 0; i <= n; i++) { const a = i / n * Math.PI * 2, rr = 1 + (i % 2 ? amp : -amp) * (1 + .4 * Math.sin(i * 1.7)); const px = Math.cos(a) * rx * rr, py = Math.sin(a) * ry * rr; if (!i) ctx.moveTo(px, py); else { const am = a - Math.PI / n; ctx.quadraticCurveTo(Math.cos(am) * rx * (1 + amp * 1.6), Math.sin(am) * ry * (1 + amp * 1.6), px, py); } } ctx.closePath(); };
+  ruff(40, 34, 21, .09); const g = ctx.createRadialGradient(-8, 0, 2, 0, 0, 36); g.addColorStop(0, light ? '#d9f09a' : '#a9d85c'); g.addColorStop(1, light ? '#8fcf45' : '#4f9c27');
+  ctx.fillStyle = g; ctx.fill(); ctx.strokeStyle = 'rgba(60,110,25,.6)'; ctx.lineWidth = 1; ctx.stroke();
+  ruff(30, 22, 12, .1); ctx.fillStyle = light ? 'rgba(240,250,200,.55)' : 'rgba(200,235,140,.55)'; ctx.fill();
+  ctx.strokeStyle = '#eef8d2'; ctx.lineWidth = 2.4; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(-30, 2); ctx.quadraticCurveTo(0, -1, 28, 0); ctx.stroke();
+  ctx.lineWidth = 1; for (const vx of [-18, -6, 6, 16]) { ctx.beginPath(); ctx.moveTo(vx, 0); ctx.quadraticCurveTo(vx + 4, -8, vx + 8, -15); ctx.moveTo(vx, 1); ctx.quadraticCurveTo(vx + 4, 9, vx + 8, 16); ctx.stroke(); }
+  ctx.restore();
+};
+FD.lemon = (ctx, x, y, s = 1) => { ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+  ctx.fillStyle = '#e9bd1a'; ctx.beginPath(); ctx.moveTo(-14, 4); ctx.quadraticCurveTo(0, -14, 14, 4); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#fbeb98'; ctx.beginPath(); ctx.moveTo(-11, 3); ctx.quadraticCurveTo(0, -9, 11, 3); ctx.closePath(); ctx.fill(); ctx.restore(); };
+FD.parsley = (ctx, x, y, w, n, seed) => { const r = mulberry(seed); for (let i = 0; i < n; i++) { ctx.fillStyle = i % 2 ? '#3c9a35' : '#5bb84a'; ellipse(ctx, x + (r() - .5) * w, y + (r() - .5) * w * .3, 2, 1.2, r() * 3); ctx.fill(); } };
+FD.KOFTE_AT = [[-44, -2, -.4], [-18, -8, -.15], [10, -9, .05], [38, -3, .35], [-28, 8, -.25], [24, 8, .2]];
+FD.koftePlateA = (ctx, ac, n = 6) => { // kıvırcık marul yapraklarının üstünde elde sıkılmış köfteler, limon
+  FD.kiv(ctx, -40, 0, -.2, .9); FD.kiv(ctx, 0, -6, .05, .95, true); FD.kiv(ctx, 40, 0, .2, .9);
+  FD.KOFTE_AT.slice(0, n).forEach(([x, y, r]) => FD.kofte(ctx, x, y, r, .8, ac));
+  FD.lemon(ctx, 74, 4, .9); FD.parsley(ctx, 0, 0, 90, 14, 4);
+};
+FD.fishSide = (ctx, x, y, L) => { // ızgara uskumru fileto, yandan: altın kahve, ızgara izli, kuyruk
+  ctx.save(); ctx.translate(x, y);
+  const body = () => { ctx.beginPath(); ctx.moveTo(-L, -1); ctx.bezierCurveTo(-L + 2, -12, L - 22, -13, L - 8, -3); ctx.lineTo(L - 8, 3); ctx.bezierCurveTo(L - 22, 11, -L + 2, 10, -L, -1); ctx.closePath(); };
+  body(); const g = ctx.createLinearGradient(0, -12, 0, 10); g.addColorStop(0, '#8a5524'); g.addColorStop(.35, '#c98a3e'); g.addColorStop(.6, '#e2b56c'); g.addColorStop(.8, '#a7b3b9'); g.addColorStop(1, '#7d8d96'); ctx.fillStyle = g; ctx.fill();
+  ctx.save(); body(); ctx.clip(); ctx.strokeStyle = 'rgba(55,28,8,.8)'; ctx.lineWidth = 2.6; ctx.lineCap = 'round'; for (let i = 0; i < 7; i++) { const gx = -L + 10 + i * (2 * L - 26) / 6; ctx.beginPath(); ctx.moveTo(gx - 4, -10); ctx.lineTo(gx + 4, 6); ctx.stroke(); } ctx.restore();
+  ctx.fillStyle = '#efe3cf'; ellipse(ctx, -L + 1, -1, 2.2, 6); ctx.fill();
+  ctx.fillStyle = '#6f7d86'; ctx.beginPath(); ctx.moveTo(L - 9, 0); ctx.lineTo(L + 8, -10); ctx.lineTo(L + 4, 0); ctx.lineTo(L + 8, 10); ctx.closePath(); ctx.fill(); ctx.strokeStyle = 'rgba(40,50,55,.5)'; ctx.lineWidth = .8; for (const a of [-6, -2, 2, 6]) { ctx.beginPath(); ctx.moveTo(L - 6, 0); ctx.lineTo(L + 6, a * 1.3); ctx.stroke(); }
+  ctx.restore();
+};
+FD.breadHalf = (ctx, x, y, w, h, flip) => { // yarım ekmek, kesik yüzü görünür
+  ctx.save(); ctx.translate(x, y); if (flip) ctx.scale(1, -1);
+  ctx.fillStyle = '#c98a3e'; ctx.beginPath(); ctx.moveTo(-w, 0); ctx.bezierCurveTo(-w, h * 1.1, w, h * 1.1, w, 0); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#e2a75a'; ctx.beginPath(); ctx.moveTo(-w + 3, 0); ctx.bezierCurveTo(-w + 3, h * .85, w - 3, h * .85, w - 3, 0); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#fbf0d6'; ctx.beginPath(); ctx.moveTo(-w + 3, 0); ctx.lineTo(w - 3, 0); ctx.lineTo(w - 6, flip ? 3 : 3); ctx.lineTo(-w + 6, 3); ctx.closePath(); ctx.fill();
+  if (flip) { ctx.strokeStyle = 'rgba(150,80,20,.45)'; ctx.lineWidth = 1.6; for (let i = 0; i < 4; i++) { const sx = -w * .55 + i * w * .37; ctx.beginPath(); ctx.moveTo(sx, h * .55); ctx.lineTo(sx + 9, h * .7); ctx.stroke(); } }
+  ctx.restore();
+};
+FD.onionRing = (ctx, x, y) => { ctx.strokeStyle = '#c98fb4'; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(x, y, 5, 2, 0, 0, Math.PI * 2); ctx.stroke(); };
+FD.frill = (ctx, x, y, w) => { // ekmeğin arasından taşan kıvırcık marul
+  ctx.beginPath(); ctx.moveTo(x - w, y + 3);
+  for (let i = 0; i <= 18; i++) { const px = x - w + i * 2 * w / 18; ctx.quadraticCurveTo(px - w / 18, y - 7 - (i % 3) * 2.2, px, y - 1 + (i % 2) * 1.5); }
+  ctx.lineTo(x + w, y + 3); ctx.closePath();
+  const g = ctx.createLinearGradient(0, y - 9, 0, y + 3); g.addColorStop(0, '#9fd35a'); g.addColorStop(1, '#4f9c27'); ctx.fillStyle = g; ctx.fill();
+  ctx.strokeStyle = 'rgba(50,100,20,.7)'; ctx.lineWidth = .8; ctx.stroke();
+};
+FD.balikA = (ctx, has = {}) => { // yarım ekmek arası, yandan; balık iki uçtan taşar
+  FD.breadHalf(ctx, 0, 6, 66, 20, false);
+  if (has.marul) FD.frill(ctx, 0, 2, 60);
+  FD.fishSide(ctx, -4, -4, 74);
+  if (has.sogan) for (const ox of [-36, -10, 16, 40]) FD.onionRing(ctx, ox, -10);
+  if (has.maydanoz) FD.parsley(ctx, 6, -11, 90, 12, 5);
+  if (has.marul) FD.frill(ctx, 6, -12, 50);
+  FD.breadHalf(ctx, 2, -14, 64, 24, true);
+  if (has.limon) FD.lemon(ctx, 58, 22, .8);
+};
+// yağlı kâğıda sarılı balık ekmek (Eminönü usulü): kâğıt ekmeğin yarısını sarar, kırışık, yağ lekeli
+FD.paperEdge = (ctx, pts, seed, jag) => { const r = mulberry(seed); ctx.moveTo(pts[0][0], pts[0][1]);
+  for (let i = 1; i < pts.length; i++) { const [x0, y0] = pts[i - 1], [x1, y1] = pts[i], n = Math.max(1, Math.round(Math.hypot(x1 - x0, y1 - y0) / 7));
+    for (let k = 1; k <= n; k++) { const t = k / n; ctx.lineTo(x0 + (x1 - x0) * t + (k < n ? (r() - .5) * jag : 0), y0 + (y1 - y0) * t + (k < n ? (r() - .5) * jag : 0)); } } };
+FD.balikB = (ctx, has) => {
+  ctx.save(); ctx.rotate(-.08);
+  // arka kanat: ekmeğin arkasında yukarı kalkan kâğıt
+  ctx.beginPath(); FD.paperEdge(ctx, [[-80, -6], [-77, -42], [-58, -47], [-40, -44], [-28, -38], [-26, -10]], 4, 3); ctx.closePath();
+  let g = ctx.createLinearGradient(-80, 0, -26, 0); g.addColorStop(0, '#d9d2c2'); g.addColorStop(.5, '#ebe6da'); g.addColorStop(1, '#cfc7b6'); ctx.fillStyle = g; ctx.fill();
+  ctx.strokeStyle = 'rgba(120,105,80,.35)'; ctx.lineWidth = .8; ctx.stroke();
+  FD.balikA(ctx, has);
+  // ön sargı
+  const front = () => { ctx.beginPath(); FD.paperEdge(ctx, [[-84, 30], [-82, -4], [-78, -24], [-62, -29], [-46, -27], [-34, -31], [-22, -26], [-25, 4], [-20, 32], [-52, 37]], 9, 2.6); ctx.closePath(); };
+  front(); ctx.save(); ctx.shadowColor = 'rgba(60,40,10,.25)'; ctx.shadowBlur = 5; ctx.shadowOffsetX = 2;
+  g = ctx.createLinearGradient(-84, 0, -20, 0); g.addColorStop(0, '#ddd6c6'); g.addColorStop(.25, '#f7f4ec'); g.addColorStop(.6, '#fdfbf6'); g.addColorStop(1, '#e4ddcd'); ctx.fillStyle = g; ctx.fill(); ctx.restore();
+  ctx.save(); front(); ctx.clip();
+  // kırışıklar: açık ve koyu yüzler
+  const r = mulberry(17);
+  for (let i = 0; i < 7; i++) { const x = -80 + r() * 56, y = -30 + r() * 62, a = -1.2 + r() * 2.4, L = 10 + r() * 22;
+    ctx.fillStyle = i % 2 ? 'rgba(150,135,105,.1)' : 'rgba(255,255,255,.4)';
+    ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + Math.cos(a) * L, y + Math.sin(a) * L); ctx.lineTo(x + Math.cos(a + .5) * L * .6, y + Math.sin(a + .5) * L * .6); ctx.closePath(); ctx.fill(); }
+  ctx.lineWidth = .9; ctx.lineCap = 'round';
+  for (let i = 0; i < 3; i++) { const x = -74 + i * 16 + r() * 5, y = -28 + r() * 8, x2 = x + (r() - .5) * 12, y2 = y + 30 + r() * 24;
+    ctx.strokeStyle = 'rgba(130,115,90,.2)'; ctx.beginPath(); ctx.moveTo(x, y); ctx.quadraticCurveTo((x + x2) / 2 + (r() - .5) * 10, (y + y2) / 2, x2, y2); ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,255,255,.6)'; ctx.beginPath(); ctx.moveTo(x + 1.5, y); ctx.quadraticCurveTo((x + x2) / 2 + 1.5, (y + y2) / 2, x2 + 1.5, y2); ctx.stroke(); }
+  // yağ lekeleri: yarı saydam, kenarı koyu
+  for (const [x, y, rx, ry] of [[-44, -10, 10, 7], [-68, 10, 7, 5], [-34, 16, 5, 4], [-60, -20, 4, 3]]) {
+    const gg = ctx.createRadialGradient(x, y, 0, x, y, rx); gg.addColorStop(0, 'rgba(225,190,110,.38)'); gg.addColorStop(.75, 'rgba(215,175,90,.3)'); gg.addColorStop(1, 'rgba(190,150,70,.1)');
+    ctx.fillStyle = gg; ellipse(ctx, x, y, rx, ry, r() * 3); ctx.fill(); }
+  // alttan sıkıca bükülen kâğıt: sarmal kıvrımlar
+  ctx.strokeStyle = 'rgba(120,105,80,.3)'; ctx.lineWidth = 1.1; for (const dy of [22, 28]) { ctx.beginPath(); ctx.moveTo(-84, dy); ctx.quadraticCurveTo(-52, dy + 5, -20, dy - 1); ctx.stroke(); }
+  ctx.restore();
+  // üst kenar dışa kıvrılmış: arka yüzü biraz koyu
+  ctx.fillStyle = '#e2dccd'; ctx.beginPath(); ctx.moveTo(-34, -31); ctx.lineTo(-22, -26); ctx.lineTo(-29, -21); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = 'rgba(110,95,70,.4)'; ctx.lineWidth = .8; ctx.stroke();
+  ctx.restore();
+};
+
 function drawPrepDish(ctx, dish, variant, x, y, s = 1, withPlate = true) {
   ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
   if (DISH[dish].soup) { drawSoupBowl(ctx, 0, -4, .6, 1, dish); ctx.restore(); return; }
@@ -3958,13 +4101,7 @@ function drawPrepDish(ctx, dish, variant, x, y, s = 1, withPlate = true) {
     }
     ctx.save(); ctx.translate(66, -2); ctx.scale(.45, .45); drawPortion(ctx, 'limon', 0, 0, 3); ctx.restore();
   } else if (dish === 'borek') {
-    const fill = variant === 'ispanakli' ? '#3f7a32' : variant === 'peynirli' ? '#fbf8ee' : '#f1d08a';
-    ctx.fillStyle = rgb(doughRGB(.5)); ctx.fillRect(-50, -14, 100, 28);
-    ctx.fillStyle = fill; for (const fy of [-7, 3]) ctx.fillRect(-50, fy, 100, 4);
-    ctx.strokeStyle = 'rgba(150,100,40,.55)'; ctx.lineWidth = 1.5; for (const fy of [-10, 0, 10]) { ctx.beginPath(); ctx.moveTo(-50, fy); ctx.lineTo(50, fy); ctx.stroke(); }
-    ctx.fillStyle = rgb(doughRGB(.64)); ctx.beginPath(); ctx.moveTo(-50, -14); ctx.lineTo(50, -14); ctx.lineTo(64, -32); ctx.lineTo(-36, -32); ctx.closePath(); ctx.fill();
-    ctx.fillStyle = rgb(doughRGB(.58), -.12); ctx.beginPath(); ctx.moveTo(50, -14); ctx.lineTo(64, -32); ctx.lineTo(64, -4); ctx.lineTo(50, 14); ctx.closePath(); ctx.fill();
-    ctx.fillStyle = 'rgba(120,60,20,.3)'; for (let i = 0; i < 9; i++) { ellipse(ctx, -36 + i * 10, -22 + (i % 2) * 4, 4, 1.6, .2); ctx.fill(); }
+    FD.borekC(ctx, variant === 'ispanakli' ? '#3f7a32' : variant === 'peynirli' ? '#fbf8ee' : '#f1d08a');
   } else if (dish === 'karniyarik' || dish === 'imambayildi') {
     const kar = dish === 'karniyarik';
     for (const [ox, rot] of [[-32, -.15], [32, .12]]) {
@@ -4463,6 +4600,21 @@ function drawBoard(canvas, mode) {
       ctx.save(); ctx.setLineDash([6, 6]); ctx.strokeStyle = 'rgba(150,110,60,.5)'; ctx.lineWidth = 2; ctx.strokeRect(L.x - 40, L.y - 40, 80, 80); ctx.restore();
       ctx.fillStyle = '#9a4a28'; circle(ctx, L.x, L.y, 9); ctx.fill();
     });
+    return;
+  }
+  if (mode === 'squeeze') {
+    ctx.fillStyle = 'rgba(0,0,0,.18)'; ellipse(ctx, 252, 252, 222, 168); ctx.fill();
+    ctx.fillStyle = '#fbfaf5'; ellipse(ctx, 250, 244, 220, 166); ctx.fill();
+    ctx.strokeStyle = '#16807f'; ctx.lineWidth = 6; ellipse(ctx, 250, 244, 196, 146); ctx.stroke();
+    FD.kiv(ctx, 160, 244, -.35, 2.5); FD.kiv(ctx, 340, 244, .35, 2.5); FD.kiv(ctx, 250, 226, .05, 2.6, true);
+    const ac = K.portions.some(p => p.type === 'pulbiber');
+    // yoğrulmuş harç kasesi köşede
+    ctx.fillStyle = '#e9e2d2'; ellipse(ctx, 420, 412, 56, 26); ctx.fill(); ctx.fillStyle = ac ? '#d8622c' : '#e08a45'; ellipse(ctx, 420, 404, 44, 16); ctx.fill();
+    SQZ.forEach((P, i) => {
+      if (K.rolls[i]) { FD.kofte(ctx, P.x, P.y, P.r, 2.1, ac); return; }
+      ctx.save(); ctx.setLineDash([7, 7]); ctx.strokeStyle = 'rgba(40,90,20,.55)'; ctx.lineWidth = 3; ellipse(ctx, P.x, P.y, 46, 26, P.r); ctx.stroke(); ctx.restore();
+    });
+    FD.lemon(ctx, 420, 250, 2.2);
     return;
   }
   if (mode === 'wrap') { LEAVES.forEach((L, i) => drawLeaf(ctx, L.x, L.y, K.rolls[i])); return; }
@@ -6114,7 +6266,7 @@ function updateActions() {
   if (!kind || kind === 'flat' || kind === 'tray') { btn.textContent = cookOf(K && K.dough)[0]; return; }
   if (kind === 'jam') { btn.textContent = 'Ocağa koy'; return; }
   if (K.stage === 'build') { btn.textContent = kind === 'cookie' ? 'Yoğur' : 'Karıştır'; return; }
-  btn.textContent = kind === 'bowl' ? 'Servis et' : kind === 'cookie' ? 'Şekil ver' : kind === 'manti' ? 'Hamura koy' : 'Yaprağa sar';
+  btn.textContent = kind === 'bowl' ? (DISH[K.dough].squeeze ? 'Köfteleri sık' : 'Servis et') : kind === 'cookie' ? 'Şekil ver' : kind === 'manti' ? 'Hamura koy' : 'Yaprağa sar';
   btn.disabled = K.stir < 1;
 }
 function kitchenNext() {
@@ -6136,7 +6288,8 @@ function kitchenNext() {
     updateActions(); return;
   }
   if (K.stir < 1) return;
-  if (kind === 'bowl') serve();
+  if (kind === 'bowl' && DISH[K.dough].squeeze) { cutMode = 'squeeze'; K.rolls = Array(SQZ.length).fill(false); K.rollOrder = []; setupCutScreen(); }
+  else if (kind === 'bowl') serve();
   else { cutMode = kind === 'cookie' ? 'shape' : kind === 'manti' ? 'fold' : 'wrap'; K.rolls = Array(12).fill(false); K.rollOrder = []; setupCutScreen(); }
 }
 
@@ -6150,6 +6303,7 @@ const CUT_UI = {
   wrap: ['3. Yaprağa sar', 'Son sarmayı aç', 'Tencereye koy'],
   shape: ['3. Şekil ver', 'Son kurabiyeyi geri al', 'Fırına ver'],
   fold: ['3. Mantıları kapat', 'Son mantıyı aç', 'Tencereye at'],
+  squeeze: ['3. Köfteleri sık', 'Son köfteyi geri al', 'Servis et'],
 };
 function setupCutScreen() {
   const [title, undo, next] = CUT_UI[cutMode];
@@ -6211,6 +6365,11 @@ function updateCutInfo() {
   if (cutMode === 'shape') {
     $('#cutInfo').innerHTML = `<b>${rolledCount(K)} kurabiye</b>İstenen: ${order.count || '?'} tane`;
     $('#cutHint').textContent = 'Tepside boş bir yere dokun, kurabiye şekillensin.';
+    return;
+  }
+  if (cutMode === 'squeeze') {
+    $('#cutInfo').innerHTML = `<b>${rolledCount(K)} / ${SQZ.length} köfte</b>Bir porsiyon: ${SQZ.length} köfte`;
+    $('#cutHint').textContent = 'Marulun üstündeki boş yere dokun: harçtan alıp avucunda sık, parmak izi kalsın.';
     return;
   }
   if (cutMode === 'wrap') {
@@ -6647,7 +6806,7 @@ cutC.addEventListener('pointerdown', e => {
   e.preventDefault();
   const p = canvasPt(cutC, e);
   if (cutMode !== 'cut') {
-    const i = LEAVES.findIndex(L => Math.hypot(L.x - p.x, L.y - p.y) < 52);
+    const i = (cutMode === 'squeeze' ? SQZ : LEAVES).findIndex(L => Math.hypot(L.x - p.x, L.y - p.y) < 52);
     if (i >= 0 && !K.rolls[i]) { K.rolls[i] = true; K.rollOrder.push(i); sfx.plop(); updateCutInfo(); }
     return;
   }
@@ -6685,7 +6844,8 @@ $('#undoCutBtn').onclick = () => {
   updateCutInfo();
 };
 $('#serveBtn').onclick = () => {
-  if (cutMode !== 'cut') { if (!rolledCount(K)) { $('#cutHint').textContent = cutMode === 'wrap' ? 'Önce birkaç yaprak sar.' : cutMode === 'fold' ? 'Önce birkaç mantı kapat.' : 'Önce birkaç kurabiye şekillendir.'; return; } startBake(); }
+  if (cutMode === 'squeeze') { if (rolledCount(K) < SQZ.length) { $('#cutHint').textContent = `Bir porsiyon ${SQZ.length} köfte. ${SQZ.length - rolledCount(K)} tane daha sık.`; sfx.bad(); return; } serve(); }
+  else if (cutMode !== 'cut') { if (!rolledCount(K)) { $('#cutHint').textContent = cutMode === 'wrap' ? 'Önce birkaç yaprak sar.' : cutMode === 'fold' ? 'Önce birkaç mantı kapat.' : 'Önce birkaç kurabiye şekillendir.'; return; } startBake(); }
   else serve();
 };
 // tarif defteri kapatıldığı sayfadan açılır
