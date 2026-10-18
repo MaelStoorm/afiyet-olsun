@@ -664,7 +664,7 @@ button:focus-visible{outline:3px solid var(--cini);outline-offset:2px}
       <div><button class="btn" id="newNo" type="button">Vazgeç</button><button class="btn primary" id="newYes" type="button">Evet, sıfırla</button></div>
     </div>
     <div class="title-row"><button class="btn" id="badgeBtn" type="button">🏅 Rozetler</button><button class="btn" id="storeBtn" type="button">🎁 Hediyeler</button></div>
-    <div class="title-row"><button class="btn" id="profBtn" type="button">🧑‍🍳 Profilim</button></div>
+    <div class="title-row"><button class="btn" id="profBtn" type="button">🧑‍🍳 Profilim</button><button class="btn" id="introBtn" type="button">🎬 Açılışı izle</button></div>
     <div class="title-row"><button class="btn" id="setBtn" type="button">⚙️ Ayarlar</button><button class="btn" id="helpBtn" type="button">❓ Nasıl oynanır?</button></div>
     <div id="helpBox" hidden>
       <ol class="help">
@@ -701,7 +701,7 @@ button:focus-visible{outline:3px solid var(--cini);outline-offset:2px}
     <div class="set-row" id="sAdPrivRow" hidden><span><b>📺 Reklam izinleri</b><small>Reklamlar için verdiğin izni değiştir</small></span><button class="btn" id="sAdPriv" type="button">Değiştir</button></div>
     <div class="set-row col" id="sOriRow"><span><b>📱 Ekran yönü</b><small>Telefonu çevirince ne olsun?</small></span><div class="seg" id="sOri"><button type="button" data-v="auto">Otomatik</button><button type="button" data-v="portrait">Dikey</button><button type="button" data-v="landscape">Yatay</button></div></div>
   </div>
-  <div class="title-row"><button class="btn" id="sTut" type="button">🎓 Öğreticiyi tekrar oyna</button><button class="btn" id="sReset" type="button">🗑️ Kaydı sil</button></div>
+  <div class="title-row"><button class="btn" id="sTut" type="button">🎓 Öğreticiyi tekrar oyna</button><button class="btn" id="sIntro" type="button">🎬 Açılışı izle</button><button class="btn" id="sReset" type="button">🗑️ Kaydı sil</button></div>
   <div class="confirm" id="sResetConfirm" hidden>Bütün ilerlemen silinecek ve oyun 1. günden başlayacak. Emin misin?<div><button class="btn" id="sResetNo" type="button">Vazgeç</button><button class="btn primary" id="sResetYes" type="button">Evet, sil</button></div></div>
   <p class="set-ver">🔒 <span id="sPrivTxt">Oyun kişisel veri toplamaz; ilerlemen yalnızca bu cihazda saklanır.</span> <a href="https://maelstoorm.github.io/afiyet-olsun/gizlilik.html" target="_blank" rel="noopener">Gizlilik politikası</a></p>
   <p class="set-ver">Afiyet Olsun · sürüm 1.5.1<br>© 2026 Egemen (MaelStoorm) · Tüm hakları saklıdır.<br>İzinsiz kopyalanamaz ve yayınlanamaz.</p>
@@ -7199,6 +7199,8 @@ function playIntro(done) {
 }
 $('#introNext').onclick = () => { if (introState) introGo(introState.i + 1); };
 $('#introSkip').onclick = () => introEnd();
+// açılış sahnesi istenince yeniden izlenebilir (başlık ekranı ve ayarlar)
+for (const id of ['#introBtn', '#sIntro']) $(id).onclick = () => { if (!introState) playIntro(() => {}); };
 // ---------- loop ----------
 let lastT = performance.now(), lastHud = 0, lastAmb = 0, lastAutoSave = 0;
 function frame(now) {
