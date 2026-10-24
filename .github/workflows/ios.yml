@@ -53,6 +53,13 @@ jobs:
           brew install xcodegen >/dev/null
           cd ios && xcodegen generate
 
+      - name: iPhone sitesini denetle (Android'e ait özellik kalmamalı)
+        run: |
+          python3 ios/denetle.py ios/gen/AfiyetOlsun/site
+          if grep -rIl -i -E 'AndroidAds|onAndroidAd|AfiyetAndroid|admob|Reklam izle|showRewarded|privacyOptions|android:(start|end)' ios/gen/AfiyetOlsun/site; then
+            echo "::error::iPhone sitesinde Android'e ait kod kalmış"; exit 1
+          fi
+
       - name: Apple gizli değerleri var mı?
         id: keys
         run: |

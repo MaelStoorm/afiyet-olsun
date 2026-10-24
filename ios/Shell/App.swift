@@ -65,7 +65,7 @@ struct ShellConfig {
     /// Uygulamaya özel ek CSS (ör. uygulamada anlamı olmayan bir kutuyu gizlemek için)
     let extraCSS: String
     /// "pati": Pati oyunlarının ihtiyaç bildirimleri (izin sorulur, oyun kapanınca hatırlatma kurulur)
-    /// "afiyet": Afiyet Olsun'un window.AfiyetAndroid köprüsü (akşam hatırlatması, titreşim, ekran yönü)
+    /// "afiyet": Afiyet Olsun'un window.AfiyetApp köprüsü (akşam hatırlatması, titreşim, ekran yönü)
     let reminders: String
 
     init() {

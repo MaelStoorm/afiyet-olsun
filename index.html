@@ -670,7 +670,7 @@ button:focus-visible{outline:3px solid var(--cini);outline-offset:2px}
     <div class="set-row" id="sVibRow"><span><b>📳 Titreşim</b><small>Kasa, hata ve kesme anlarında</small></span><button class="tog" id="sVib" type="button" role="switch" aria-label="Titreşim"></button></div>
     <div class="set-row" id="sNotifRow"><span><b>⏰ Hatırlatmalar</b><small>Oynamadığında akşam bildirim gelsin</small></span><button class="tog" id="sNotif" type="button" role="switch" aria-label="Hatırlatmalar"></button></div>
     <div class="set-row col"><span><b>🎯 Zorluk</b><small id="sDiffNote"></small></span><div class="seg" id="sDiff"><button type="button" data-v="easy">Rahat</button><button type="button" data-v="normal">Normal</button><button type="button" data-v="hard">Usta</button></div></div>
-    <div class="set-row" id="sAdPrivRow" hidden><span><b>📺 Reklam izinleri</b><small>Reklamlar için verdiğin izni değiştir</small></span><button class="btn" id="sAdPriv" type="button">Değiştir</button></div>
+    <!--android:start--><div class="set-row" id="sAdPrivRow" hidden><span><b>📺 Reklam izinleri</b><small>Reklamlar için verdiğin izni değiştir</small></span><button class="btn" id="sAdPriv" type="button">Değiştir</button></div><!--android:end-->
     <div class="set-row col" id="sOriRow"><span><b>📱 Ekran yönü</b><small>Telefonu çevirince ne olsun?</small></span><div class="seg" id="sOri"><button type="button" data-v="auto">Otomatik</button><button type="button" data-v="portrait">Dikey</button><button type="button" data-v="landscape">Yatay</button></div></div>
   </div>
   <div class="title-row"><button class="btn" id="sTut" type="button">🎓 Öğreticiyi tekrar oyna</button><button class="btn" id="sReset" type="button">🗑️ Kaydı sil</button></div>
@@ -1087,7 +1087,8 @@ const SET = { sfx: 1, mus: 1, vib: true, diff: 'normal', notif: true, orient: 'l
 try { Object.assign(SET, JSON.parse(localStorage.getItem(SETKEY) || '{}')); } catch (e) {}
 if (!SET.v13) { SET.v13 = 1; if (SET.orient === 'auto') SET.orient = 'landscape'; }
 const saveSet = () => { try { localStorage.setItem(SETKEY, JSON.stringify(SET)); } catch (e) {} };
-const AND = () => window.AfiyetAndroid || null;
+// Telefon uygulamasının köprüsü (hatırlatma, titreşim, ekran yönü); web sürümünde yoktur
+const APP = () => window.AfiyetApp /*android:start*/|| window.AfiyetAndroid /*android:end*/|| null;
 const DIFF = {
   easy: { pat: 1.4, tip: 1, note: 'Müşteriler çok daha sabırlı bekler.' },
   normal: { pat: 1, tip: 1, note: 'Oyunun asıl dengesi.' },
@@ -1095,7 +1096,7 @@ const DIFF = {
 };
 function buzz(ms) {
   if (!SET.vib) return;
-  try { const a = AND(); if (a && a.vibrate) a.vibrate(ms); else if (navigator.vibrate) navigator.vibrate(ms); } catch (e) {}
+  try { const a = APP(); if (a && a.vibrate) a.vibrate(ms); else if (navigator.vibrate) navigator.vibrate(ms); } catch (e) {}
 }
 
 // ---------- audio ----------
@@ -4182,7 +4183,7 @@ function setBg(h) {
     Music.start();
   }
 }
-window.__afiyetBg = setBg;   // Android uygulaması onPause/onResume'da çağırır
+window.__afiyetBg = setBg;   // uygulama arka plana geçerken ve dönünce çağırır
 document.addEventListener('visibilitychange', () => setBg(document.hidden));
 window.addEventListener('pagehide', () => setBg(true));
 window.addEventListener('pageshow', () => setBg(!!document.hidden));
@@ -4345,54 +4346,60 @@ function openBadges() {
 $('#badgeBtn').onclick = openBadges;
 $('#bgClose').onclick = () => { $('#badgeScr').hidden = true; };
 
-// ---------- ödüllü reklam ----------
-// Android uygulamasında (window.AndroidAds) hediye kısa bir ödüllü reklamla (Google AdMob) verilir.
-// Uygulama sonucu window.onAndroidAd('rewarded' | 'dismissed' | 'failed') ile bildirir.
-// Web sürümünde ya da reklam yüklenemezse eski davranış sürer: oyuncu 5 saniye bekleyip hediyesini alır.
-let adCb = null, adTimer = null, adNativeWait = false;
-const adNative = () => !!(window.AndroidAds && window.AndroidAds.showRewarded);
-function adBox(native) {
-  $('#adMsg').textContent = native ? 'Reklam yükleniyor' : 'Hayriye Teyze hediyeni hazırlıyor';
-  $('#adSub').textContent = native ? 'Reklamı sonuna kadar izle, hediyen hemen gelsin.' : 'Birkaç saniye bekle, hemen geliyor…';
-  $('#adCount').textContent = native ? '⏳' : 5;
-  $('#adDone').hidden = native;
-  $('#adSkip').textContent = native ? 'Vazgeç' : 'Kapat (ödül yok)';
-}
-function adWait(onReward) {
+// ---------- hediye ----------
+// Hediye için oyuncu 5 saniye bekler, sonra ödülünü alır.
+let adCb = null, adTimer = null;
+function giftWait(onReward) {
   adCb = onReward;
-  adBox(false);
+  $('#adMsg').textContent = 'Hayriye Teyze hediyeni hazırlıyor';
+  $('#adSub').textContent = 'Birkaç saniye bekle, hemen geliyor…';
+  $('#adDone').hidden = false;
+  $('#adSkip').textContent = 'Kapat (ödül yok)';
   let n = 5; const btn = $('#adDone'); btn.disabled = true; $('#adCount').textContent = n;
   $('#adScr').hidden = false;
   clearInterval(adTimer);
   adTimer = setInterval(() => { n--; $('#adCount').textContent = n > 0 ? n : '✓'; if (n <= 0) { clearInterval(adTimer); btn.disabled = false; btn.focus(); } }, 1000);
 }
-function watchAd(onReward) {
-  if (!adNative()) return adWait(onReward);
+let takeGift = giftWait;
+/*android:start*/
+// Android uygulamasında (window.AndroidAds) hediye kısa bir ödüllü reklamla (Google AdMob) verilir.
+// Uygulama sonucu window.onAndroidAd('rewarded' | 'dismissed' | 'failed') ile bildirir.
+// Web sürümünde ya da reklam yüklenemezse eski davranış sürer: oyuncu 5 saniye bekleyip hediyesini alır.
+let adNativeWait = false;
+const adNative = () => !!(window.AndroidAds && window.AndroidAds.showRewarded);
+takeGift = onReward => {
+  if (!adNative()) return giftWait(onReward);
   if (adNativeWait) return;
   adNativeWait = true; adCb = onReward;
-  clearInterval(adTimer); adBox(true);
+  clearInterval(adTimer);
+  $('#adMsg').textContent = 'Reklam yükleniyor';
+  $('#adSub').textContent = 'Reklamı sonuna kadar izle, hediyen hemen gelsin.';
+  $('#adCount').textContent = '⏳';
+  $('#adDone').hidden = true;
+  $('#adSkip').textContent = 'Vazgeç';
   $('#adScr').hidden = false; $('#adSkip').focus();
   try { window.AndroidAds.showRewarded(); } catch (e) { window.onAndroidAd('failed'); }
-}
+};
 window.onAndroidAd = status => {
   if (!adNativeWait) return;
   adNativeWait = false;
   const cb = adCb;
-  if (status === 'failed') { adWait(cb); return; } // reklam yoksa oyuncu eli boş dönmesin
+  if (status === 'failed') { giftWait(cb); return; } // reklam yoksa oyuncu eli boş dönmesin
   $('#adScr').hidden = true; adCb = null;
   if (status === 'rewarded') { if (cb) cb(); }
   else toast('Reklam bitmeden kapandı, hediye verilmedi.');
-};
-$('#adDone').onclick = () => { $('#adScr').hidden = true; const cb = adCb; adCb = null; if (cb) cb(); };
-$('#adSkip').onclick = () => {
-  clearInterval(adTimer);
-  if (adNativeWait) { adNativeWait = false; try { window.AndroidAds.cancelRewarded(); } catch (e) {} }
-  $('#adScr').hidden = true; adCb = null;
 };
 if (adNative()) {
   $('#rwAd').textContent = '📺 Reklam izle, 2 katını al';
   $('#deAdBtn').textContent = '📺 Reklam izle: bugünkü kârı 2 katına çıkar';
 }
+/*android:end*/
+$('#adDone').onclick = () => { $('#adScr').hidden = true; const cb = adCb; adCb = null; if (cb) cb(); };
+$('#adSkip').onclick = () => {
+  clearInterval(adTimer);
+  /*android:start*/if (adNativeWait) { adNativeWait = false; try { window.AndroidAds.cancelRewarded(); } catch (e) {} }/*android:end*/
+  $('#adScr').hidden = true; adCb = null;
+};
 const todayStr = (off = 0) => { const d = new Date(Date.now() + off * 864e5); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); };
 const adsLeft = () => S.ads.day === todayStr() ? Math.max(0, 3 - S.ads.n) : 3;
 const useAd = () => { if (S.ads.day !== todayStr()) S.ads = { day: todayStr(), n: 0 }; S.ads.n++; };
@@ -4402,16 +4409,17 @@ function openStore() {
   $('#stMoney').textContent = S.money + '₺';
   const left = adsLeft();
   const item = (icon, name, desc, btn, id, disabled) => `<div class="store-item"><i>${icon}</i><div><b>${name}</b><span>${desc}</span></div><button class="btn ${disabled ? '' : 'go'}" type="button" data-id="${id}" ${disabled ? 'disabled' : ''}>${btn}</button></div>`;
-  const take = adNative() ? '📺 İzle, al' : '🎁 Al';
-  $('#stBody').innerHTML = `<div class="store-sec"><h3>Hayriye Teyze'nin hediyeleri</h3><p>${left ? `${adNative() ? 'Kısa bir reklam izle, hediyeni al. ' : ''}Bugün ${left} hediye hakkın kaldı.` : 'Bugünlük hediyeler bitti, yarın yine gel.'}</p>
+  let take = '🎁 Al', note = '';
+  /*android:start*/if (adNative()) { take = '📺 İzle, al'; note = 'Kısa bir reklam izle, hediyeni al. '; }/*android:end*/
+  $('#stBody').innerHTML = `<div class="store-sec"><h3>Hayriye Teyze'nin hediyeleri</h3><p>${left ? `${note}Bugün ${left} hediye hakkın kaldı.` : 'Bugünlük hediyeler bitti, yarın yine gel.'}</p>
     ${item('💰', '+75₺', 'Kasana 75₺ girsin.', take, 'cash', !left)}
     ${item('⏳', 'Sabır şerbeti', `Sıradaki 3 müşteri %50 daha sabırlı olur.${S.boost.patience ? ` (Kalan: ${S.boost.patience})` : ''}`, take, 'pat', !left)}
     </div>`;
   $('#stBody').querySelectorAll('button[data-id]').forEach(b => {
     b.onclick = () => {
       const id = b.dataset.id;
-      if (id === 'cash') watchAd(() => { useAd(); S.money += 75; save(); hud(); toast('+75₺ kasaya girdi!'); sfx.coin(); openStore(); renderUpgrades(); });
-      if (id === 'pat') watchAd(() => { useAd(); S.boost.patience = (S.boost.patience || 0) + 3; save(); toast('⏳ Sıradaki 3 müşteri daha sabırlı!'); sfx.coin(); openStore(); });
+      if (id === 'cash') takeGift(() => { useAd(); S.money += 75; save(); hud(); toast('+75₺ kasaya girdi!'); sfx.coin(); openStore(); renderUpgrades(); });
+      if (id === 'pat') takeGift(() => { useAd(); S.boost.patience = (S.boost.patience || 0) + 3; save(); toast('⏳ Sıradaki 3 müşteri daha sabırlı!'); sfx.coin(); openStore(); });
     };
   });
   $('#storeScr').hidden = false; $('#stClose').focus();
@@ -4420,7 +4428,7 @@ $('#storeBtn').onclick = openStore;
 $('#stClose').onclick = () => { $('#storeScr').hidden = true; };
 $('#deAdBtn').onclick = () => {
   const profit = S.dayEarn - S.dayCost;
-  watchAd(() => { S.money += profit; S.ev['x2_' + S.day] = true; save(); hud(); $('#deAdBtn').hidden = true; toast(`Kâr ikiye katlandı! +${profit}₺`); sfx.coin(); renderUpgrades(); renderDecor(); });
+  takeGift(() => { S.money += profit; S.ev['x2_' + S.day] = true; save(); hud(); $('#deAdBtn').hidden = true; toast(`Kâr ikiye katlandı! +${profit}₺`); sfx.coin(); renderUpgrades(); renderDecor(); });
 };
 
 // ---------- günlük giriş ödülü ----------
@@ -4440,19 +4448,20 @@ function maybeDailyReward() {
     $('#rewardScr').hidden = true; toast(`+${amount * mult}₺ günlük ödül!`); sfx.coin();
   };
   $('#rwTake').onclick = () => give(1);
-  $('#rwAd').onclick = () => watchAd(() => give(2));
+  $('#rwAd').onclick = () => takeGift(() => give(2));
   $('#rewardScr').hidden = false; $('#rwTake').focus();
 }
 
-// ---------- Android bildirimleri ----------
+// ---------- akşam hatırlatması (telefon uygulamasında) ----------
 function syncReminder() {
   try {
-    if (!window.AfiyetAndroid || !window.AfiyetAndroid.setReminder) return;
-    if (window.AfiyetAndroid.setReminderOn) window.AfiyetAndroid.setReminderOn(!!SET.notif);
+    const a = APP();
+    if (!a || !a.setReminder) return;
+    if (a.setReminderOn) a.setReminderOn(!!SET.notif);
     const msgs = ['Müşteriler kapıda bekliyor, dükkanı aç usta! 🍽️', 'Günlük ödülün hazır, serini bozma! 🔥', 'Hayriye Teyze uğradı mı acaba? 👵'];
     if (S.ev.rival1 && !S.ev.rivalWin) msgs.push('Kebapçı Kâmil senin müşterilerini kapıyor! 😠');
     if (S.regulars.length) msgs.push(`${S.regulars[S.regulars.length - 1].look.name} yine geldi, seni soruyor! 😊`);
-    window.AfiyetAndroid.setReminder('Afiyet Olsun', msgs.join('|'));
+    a.setReminder('Afiyet Olsun', msgs.join('|'));
   } catch (e) {}
 }
 
@@ -4510,7 +4519,7 @@ const togUI = (sel, on) => $(sel).setAttribute('aria-checked', on ? 'true' : 'fa
 const segUI = (sel, v) => document.querySelectorAll(sel + ' button').forEach(b => b.setAttribute('aria-pressed', b.dataset.v === v ? 'true' : 'false'));
 const pct = v => v ? `%${Math.round(v * 100)}` : 'Kapalı';
 function applyOrient() {
-  const a = AND();
+  const a = APP();
   document.documentElement.classList.toggle('want-land', !(a && a.setOrientation) && SET.orient === 'landscape');
   try { if (a && a.setOrientation) a.setOrientation(SET.orient); } catch (e) {}
 }
@@ -4522,14 +4531,16 @@ function setUI() {
   $('#sDiffNote').textContent = (DIFF[SET.diff] || DIFF.normal).note;
 }
 function openSettings() {
-  const a = AND();
+  const a = APP();
   $('#sNotifRow').hidden = !(a && a.setReminderOn);
   $('#sOriRow').hidden = false;
   $('#sVibRow').hidden = !(a && a.vibrate) && !navigator.vibrate;
+  /*android:start*/
   let adPriv = false;
   try { adPriv = !!(window.AndroidAds && window.AndroidAds.privacyOptionsRequired && window.AndroidAds.privacyOptionsRequired()); } catch (e) {}
   $('#sAdPrivRow').hidden = !adPriv;
   $('#sPrivTxt').textContent = adNative() ? 'İlerlemen yalnızca bu cihazda saklanır. Hediye reklamlarını Google AdMob gösterir.' : 'Oyun kişisel veri toplamaz; ilerlemen yalnızca bu cihazda saklanır.';
+  /*android:end*/
   $('#sResetConfirm').hidden = true;
   setUI(); $('#setScr').hidden = false; $('#setClose').focus();
 }
@@ -4549,7 +4560,7 @@ $('#sVib').onclick = () => { SET.vib = !SET.vib; saveSet(); setUI(); buzz(40); }
 $('#sNotif').onclick = () => { SET.notif = !SET.notif; saveSet(); setUI(); syncReminder(); };
 document.querySelectorAll('#sDiff button').forEach(b => b.onclick = () => { SET.diff = b.dataset.v; saveSet(); setUI(); });
 document.querySelectorAll('#sOri button').forEach(b => b.onclick = () => { SET.orient = b.dataset.v; saveSet(); setUI(); applyOrient(); });
-$('#sAdPriv').onclick = () => { try { window.AndroidAds.showPrivacyOptions(); } catch (e) {} };
+/*android:start*/$('#sAdPriv').onclick = () => { try { window.AndroidAds.showPrivacyOptions(); } catch (e) {} };/*android:end*/
 $('#sTut').onclick = () => { $('#setScr').hidden = true; $('#tutAgainBtn').onclick(); };
 $('#sReset').onclick = () => { $('#sResetConfirm').hidden = false; $('#sResetYes').focus(); };
 $('#sResetNo').onclick = () => { $('#sResetConfirm').hidden = true; };

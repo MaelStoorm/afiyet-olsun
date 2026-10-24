@@ -1,6 +1,6 @@
 /*
- * Afiyet Olsun'un Android köprüsü (window.AfiyetAndroid) iOS'ta: akşam hatırlatması, titreşim ve ekran yönü.
- * Hatırlatma Android'deki ReminderReceiver ile aynı kurallarla kurulur: oyun arka plana geçince saat 18:30'a
+ * Afiyet Olsun'un uygulama köprüsü (window.AfiyetApp): akşam hatırlatması, titreşim ve ekran yönü.
+ * Hatırlatma şu kurallarla kurulur: oyun arka plana geçince saat 18:30'a
  * (en az 3 saat sonrasına) bir bildirim, oyuncu dönmezse en fazla 3 gün üst üste; oyun açılınca hepsi iptal edilir.
  * Oyun arka plana geçerken sesi kesilir ve oyun bekler (window.__afiyetBg). Hiçbir veri cihazdan çıkmaz.
  * Yalnızca Info.plist'te Shell > Reminders = "afiyet" olan uygulamada çalışır.
@@ -13,9 +13,9 @@ import WebKit
 final class ShellAfiyet {
     static let maxInARow = 3
 
-    /// Oyunun Android'de kullandığı köprü; çağrılar "shell" iletisiyle uygulamaya gelir
+    /// Oyunun kullandığı köprü; çağrılar "shell" iletisiyle uygulamaya gelir
     static let script = """
-    window.AfiyetAndroid = {
+    window.AfiyetApp = {
       setReminder: function (t, m) { webkit.messageHandlers.shell.postMessage({ op: 'remSet', title: String(t), messages: String(m) }); },
       setReminderOn: function (on) { webkit.messageHandlers.shell.postMessage({ op: 'remOn', on: !!on }); },
       vibrate: function (ms) { webkit.messageHandlers.shell.postMessage({ op: 'vib', ms: Number(ms) || 0 }); },
@@ -62,7 +62,7 @@ final class ShellAfiyet {
         return true
     }
 
-    /// Android'deki titreşim süresine göre telefonun dokunsal geri bildirimi
+    /// Oyunun istediği titreşim süresine göre telefonun dokunsal geri bildirimi
     private func vibrate(_ ms: Int) {
         if ms < 20 { light.impactOccurred() }
         else if ms < 35 { medium.impactOccurred() }
