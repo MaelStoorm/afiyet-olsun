@@ -1,5 +1,5 @@
 # AfiyetOlsun iOS projesi. Xcode projesi bu dosyadan XcodeGen ile üretilir (GitHub Actions'ta).
-# Ortak kabuk: ios/Shell. Uygulamanın kendisi Android'deki ile aynı sayfa; ios/hazirla.sh site klasörünü hazırlar.
+# Kabuk: ios/Shell. Oyunun kendisi kökteki index.html; ios/hazirla.sh iPhone kopyasını hazırlar.
 name: AfiyetOlsun
 options:
   deploymentTarget:
@@ -26,8 +26,7 @@ targets:
         TARGETED_DEVICE_FAMILY: "1"
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         GENERATE_INFOPLIST_FILE: NO
-        SWIFT_ACTIVE_COMPILATION_CONDITIONS: $(inherited) SHELL_NO_LOCATION
         INFOPLIST_FILE: AfiyetOlsun/Info.plist
     info:
       path: AfiyetOlsun/Info.plist
-      properties: {"CFBundleDisplayName": "Afiyet Olsun", "CFBundleShortVersionString": "$(MARKETING_VERSION)", "CFBundleVersion": "$(CURRENT_PROJECT_VERSION)", "CFBundleDevelopmentRegion": "tr", "LSRequiresIPhoneOS": true, "ITSAppUsesNonExemptEncryption": false, "UIRequiresFullScreen": true, "UIStatusBarStyle": "UIStatusBarStyleLightContent", "UIViewControllerBasedStatusBarAppearance": true, "UISupportedInterfaceOrientations": ["UIInterfaceOrientationLandscapeLeft", "UIInterfaceOrientationLandscapeRight", "UIInterfaceOrientationPortrait"], "UILaunchScreen": {"UIColorName": "LaunchBg"}, "UIApplicationSceneManifest": {"UIApplicationSupportsMultipleScenes": false, "UISceneConfigurations": {"UIWindowSceneSessionRoleApplication": [{"UISceneConfigurationName": "Default", "UISceneDelegateClassName": "$(PRODUCT_MODULE_NAME).SceneDelegate"}]}}, "Shell": {"Background": "#D6442A", "LightStatusBar": true, "Orientation": "landscape", "FitHeight": 430, "Reminders": "afiyet"}}
+      properties: {"CFBundleDisplayName": "Afiyet Olsun", "CFBundleShortVersionString": "$(MARKETING_VERSION)", "CFBundleVersion": "$(CURRENT_PROJECT_VERSION)", "CFBundleDevelopmentRegion": "tr", "LSRequiresIPhoneOS": true, "ITSAppUsesNonExemptEncryption": false, "UIRequiresFullScreen": true, "UIStatusBarStyle": "UIStatusBarStyleLightContent", "UIViewControllerBasedStatusBarAppearance": true, "UISupportedInterfaceOrientations": ["UIInterfaceOrientationLandscapeLeft", "UIInterfaceOrientationLandscapeRight", "UIInterfaceOrientationPortrait"], "UILaunchScreen": {"UIColorName": "LaunchBg"}, "UIApplicationSceneManifest": {"UIApplicationSupportsMultipleScenes": false, "UISceneConfigurations": {"UIWindowSceneSessionRoleApplication": [{"UISceneConfigurationName": "Default", "UISceneDelegateClassName": "$(PRODUCT_MODULE_NAME).SceneDelegate"}]}}, "Shell": {"Background": "#D6442A", "LightStatusBar": true, "Orientation": "landscape", "FitHeight": 430}}

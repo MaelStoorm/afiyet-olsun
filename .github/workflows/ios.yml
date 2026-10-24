@@ -55,7 +55,7 @@ jobs:
 
       - name: iPhone sitesini denetle (Android'e ait özellik kalmamalı)
         run: |
-          python3 ios/denetle.py ios/gen/AfiyetOlsun/site
+          python3 ios/denetle.py ios/gen/AfiyetOlsun/site ios/Shell ios/project.yml
           if grep -rIl -i -E 'AndroidAds|onAndroidAd|AfiyetAndroid|admob|Reklam izle|showRewarded|privacyOptions|android:(start|end)' ios/gen/AfiyetOlsun/site; then
             echo "::error::iPhone sitesinde Android'e ait kod kalmış"; exit 1
           fi

@@ -3,7 +3,6 @@
  * Hatırlatma şu kurallarla kurulur: oyun arka plana geçince saat 18:30'a
  * (en az 3 saat sonrasına) bir bildirim, oyuncu dönmezse en fazla 3 gün üst üste; oyun açılınca hepsi iptal edilir.
  * Oyun arka plana geçerken sesi kesilir ve oyun bekler (window.__afiyetBg). Hiçbir veri cihazdan çıkmaz.
- * Yalnızca Info.plist'te Shell > Reminders = "afiyet" olan uygulamada çalışır.
  * Telif Hakkı (c) 2026 Egemen Çalıkoğlu. Tüm hakları saklıdır.
  */
 import UIKit
